@@ -22,7 +22,6 @@ m5::unit::UnitNCIR unit;
 void setup()
 {
     M5.begin();
-
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
         lcd.setRotation(1);
@@ -45,6 +44,7 @@ void setup()
 
     lcd.setFont(&fonts::AsciiFont8x16);
     lcd.clear(TFT_DARKGREEN);
+    lcd.fillRect(8, 8, 8 * 10, 16 * 3, TFT_BLACK);
 }
 
 void loop()
@@ -58,12 +58,12 @@ void loop()
         M5_LOGI("\n>Amb:%f\n>Obj1:%f\n>Obj2:%f", unit.ambientTemperature(), unit.objectTemperature1(),
                 unit.objectTemperature2());
 
-        lcd.fillRect(0, 16, lcd.width(), 16 * 3, TFT_DARKGREEN);
-        lcd.setCursor(8, 16 * 1);
+        lcd.fillRect(8, 8, 8 * 10, 16 * 3, TFT_BLACK);
+        lcd.setCursor(8, 8 + 16 * 0);
         lcd.printf("A:%.2f", unit.ambientTemperature());
-        lcd.setCursor(8, 16 * 2);
+        lcd.setCursor(8, 8 + 16 * 1);
         lcd.printf("1:%.2f", unit.objectTemperature1());
-        lcd.setCursor(8, 16 * 3);
+        lcd.setCursor(8, 8 + 16 * 2);
         lcd.printf("2:%.2f", unit.objectTemperature2());
     }
 

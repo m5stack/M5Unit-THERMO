@@ -88,7 +88,7 @@ TEST_P(TestMLX90614, Config)
     SCOPED_TRACE(ustr);
 
     EXPECT_TRUE(unit->inPeriodic());
-    
+
     EXPECT_FALSE(unit->writeOutput(Output::TA_TO2));
     EXPECT_FALSE(unit->writeIIR(IIR::Filter100));
     EXPECT_FALSE(unit->writeFIR(FIR::Filter512));
@@ -96,10 +96,10 @@ TEST_P(TestMLX90614, Config)
     EXPECT_FALSE(unit->writeIRSensor(IRSensor::Single));
     EXPECT_FALSE(unit->writePositiveKs(false));
     EXPECT_FALSE(unit->writePositiveKf2(false));
-    
+
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
-    
+
     /// Output
     for (auto&& o : out_table) {
         EXPECT_TRUE(unit->writeOutput(o));
@@ -170,7 +170,7 @@ TEST_P(TestMLX90614, SettingTemperature)
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
-    
+
     float tminF{}, tmaxF{};
     uint16_t tmin{}, tmax{};
 
@@ -231,15 +231,59 @@ TEST_P(TestMLX90614, SettingTemperature)
         EXPECT_NEAR(tminF, toMin, 0.005f);
         EXPECT_NEAR(tmaxF, toMax, 0.005f);
 
-        //M5_LOGI("%f %f", tminF, toMin);
-        //M5_LOGI("%f %f", tmaxF, toMax);
+        // M5_LOGI("%f %f", tminF, toMin);
+        // M5_LOGI("%f %f", tmaxF, toMax);
     }
 
     //
     restore_setting();
 }
 
-TEST_P(TestMLX90614, Reset)
+TEST_P(TestMLX90614, ChangeAddress)
 {
     SCOPED_TRACE(ustr);
+
+    uint8_t addr{};
+    uint16_t emiss_org{}, emiss{};
+
+    EXPECT_TRUE(unit->readEmissivity(emiss_org));
+
+    EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
+    EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
+
+    // Change to 0x08
+    EXPECT_TRUE(unit->changeI2CAddress(0x08));
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, 0x08);
+    EXPECT_EQ(unit->address(), 0x08);
+
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_EQ(emiss, emiss_org);
+
+    // Change to 0x77
+    EXPECT_TRUE(unit->changeI2CAddress(0x77));
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, 0x77);
+    EXPECT_EQ(unit->address(), 0x77);
+
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_EQ(emiss, emiss_org);
+
+    // Change to 0x52
+    EXPECT_TRUE(unit->changeI2CAddress(0x52));
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, 0x52);
+    EXPECT_EQ(unit->address(), 0x52);
+
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_EQ(emiss, emiss_org);
+
+    // Change to default
+    EXPECT_TRUE(unit->changeI2CAddress(UnitMLX90614::DEFAULT_ADDRESS));
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, +UnitMLX90614::DEFAULT_ADDRESS);
+    EXPECT_EQ(unit->address(), +UnitMLX90614::DEFAULT_ADDRESS);
+
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_EQ(emiss, emiss_org);
 }

@@ -600,9 +600,23 @@ bool UnitMLX90614::writeEmissivity(const float emiss, const bool apply)
     return write_emissivity(emissivity_to_raw(emiss), apply);
 }
 
+bool UnitMLX90614::readI2CAddress(uint8_t& i2c_address)
+{
+    uint16_t a{};
+    if (read_register16(EEPROM_ADDR, a)) {
+        i2c_address = a & 0xFF;
+        return true;
+    }
+    return false;
+}
+
 bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
 {
-    return false;
+    if (!m5::utility::isValidI2CAddress(i2c_address)) {
+        M5_LIB_LOGE("Invalid address : %02X", i2c_address);
+        return false;
+    }
+    return write_eeprom(EEPROM_ADDR, i2c_address) && changeAddress(i2c_address);
 }
 
 bool UnitMLX90614::sleep()
@@ -717,24 +731,6 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
 
 bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
 {
-#if 0
-    static uint16_t prev[3]{};
-    static auto at = m5::utility::millis();
-    uint16_t r[3]{};
-    read_register16(READ_RAW_AMBIENT, r[0]);
-    read_register16(READ_RAW_IR1, r[1]);
-    read_register16(READ_RAW_IR2, r[2]);
-
-    if (r[0] != prev[0] || r[1] != prev[1] || r[2] != prev[2]) {
-        auto now = m5::utility::millis();
-        auto dur = now - at;
-        at       = now;
-        M5_LIB_LOGW(">>> CHANGE: %ld", dur);
-        prev[0] = r[0];
-        prev[1] = r[1];
-        prev[2] = r[2];
-    }
-#endif
     return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&
            read_register16(READ_TOBJECT_2, d.raw[2]);
 }

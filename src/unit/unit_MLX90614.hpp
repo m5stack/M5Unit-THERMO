@@ -536,15 +536,23 @@ public:
     bool writeEmissivity(const float emiss, const bool apply = true);
     ///@}
 
+
+    ///@warning Handling warning
+    ///@name I2C Address
+    ///@{
     /*!
       @brief Change device I2C address
       @param i2c_address I2C address
       @return True if successful
-      @warning Handling warning
     */
     bool changeI2CAddress(const uint8_t i2c_address);
-
-    /////////
+    /*!
+      @brief Read device I2C address
+      @param[out] i2c_address I2C address
+      @return True if successful
+    */
+    bool readI2CAddress(uint8_t& i2c_address);
+    ///@}
 
     /*!
       @brief Sleep

@@ -616,7 +616,8 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
         M5_LIB_LOGE("Invalid address : %02X", i2c_address);
         return false;
     }
-    return write_eeprom(EEPROM_ADDR, i2c_address) && changeAddress(i2c_address);
+    return write_eeprom(EEPROM_ADDR, i2c_address) && changeAddress(i2c_address) &&
+           read_register16(EEPROM_ADDR, _eeprom.addr);
 }
 
 bool UnitMLX90614::sleep()

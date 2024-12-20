@@ -502,6 +502,7 @@ public:
 
     ///@note If apply is false, a POR or call applySetting() is required to enable the setting
     ///@name Settings (Emissivity)
+    ///@{
     /*!
       @brief Read the emissivity
       @param[out] emiss Raw emissivity value
@@ -535,7 +536,6 @@ public:
      */
     bool writeEmissivity(const float emiss, const bool apply = true);
     ///@}
-
 
     ///@warning Handling warning
     ///@name I2C Address
@@ -574,18 +574,14 @@ public:
         return sleep() && wakeup();
     }
 
-    // bool changeAddress(const uint8_t addr);
-
 protected:
     bool read_eeprom(mlx90614::EEPROM& e);
     bool read_register16(const uint8_t reg, uint16_t& v, const bool stopbit = false);
     bool write_register16(const uint8_t reg, const uint16_t val);
     bool write_eeprom(const uint8_t reg, const uint16_t val, const bool apply = true);
-
     bool write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool apply = true);
     bool write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool apply = true);
     bool write_emissivity(const uint16_t emiss, const bool apply = true);
-
     bool read_measurement(mlx90614::Data& d, const uint16_t config);
 
     bool start_periodic_measurement(const mlx90614::Output out, const mlx90614::IIR iir, const mlx90614::FIR fir,

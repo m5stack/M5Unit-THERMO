@@ -51,9 +51,10 @@ protected:
     void restore_setting()
     {
         M5_LOGW("Restore setting");
-        EXPECT_TRUE(unit->writeObjectMinMax(25315, 39315));
-        EXPECT_TRUE(unit->writeAmbientMinMax(0x1C, 0xF7));
-        EXPECT_TRUE(unit->writeEmissivity(0xFFFF));
+        EXPECT_TRUE(unit->writeObjectMinMax(25315, 39315, false));
+        EXPECT_TRUE(unit->writeAmbientMinMax(0x1C, 0xF7, false));
+        EXPECT_TRUE(unit->writeEmissivity(0xFFFF, false));
+        EXPECT_TRUE(unit->applySettings());
     }
 };
 
@@ -86,6 +87,19 @@ TEST_P(TestMLX90614, Config)
 {
     SCOPED_TRACE(ustr);
 
+    EXPECT_TRUE(unit->inPeriodic());
+    
+    EXPECT_FALSE(unit->writeOutput(Output::TA_TO2));
+    EXPECT_FALSE(unit->writeIIR(IIR::Filter100));
+    EXPECT_FALSE(unit->writeFIR(FIR::Filter512));
+    EXPECT_FALSE(unit->writeGain(Gain::Coeff1));
+    EXPECT_FALSE(unit->writeIRSensor(IRSensor::Single));
+    EXPECT_FALSE(unit->writePositiveKs(false));
+    EXPECT_FALSE(unit->writePositiveKf2(false));
+    
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+    
     /// Output
     for (auto&& o : out_table) {
         EXPECT_TRUE(unit->writeOutput(o));
@@ -146,11 +160,17 @@ TEST_P(TestMLX90614, Config)
     restore_config();
 }
 
-#if 0
 TEST_P(TestMLX90614, SettingTemperature)
 {
     SCOPED_TRACE(ustr);
 
+    EXPECT_TRUE(unit->inPeriodic());
+
+    EXPECT_FALSE(unit->writeObjectMinMax(-273.15f, -273.15f));
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+    
     float tminF{}, tmaxF{};
     uint16_t tmin{}, tmax{};
 
@@ -218,7 +238,6 @@ TEST_P(TestMLX90614, SettingTemperature)
     //
     restore_setting();
 }
-#endif
 
 TEST_P(TestMLX90614, Reset)
 {

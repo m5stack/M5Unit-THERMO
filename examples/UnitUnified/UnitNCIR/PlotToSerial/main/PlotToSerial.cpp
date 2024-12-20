@@ -17,16 +17,6 @@ namespace {
 auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 m5::unit::UnitNCIR unit;
-
-uint32_t idx{};
-constexpr Output out_table[] = {
-    Output::TA_TO1,
-    Output::TA_TO2,
-    Output::TO2_Undefined,
-    Output::TO1_TO2,
-};
-const char* os_table[] = {"TA_TO1", "TA_To2", "TO2", "TO1/2"};
-
 }  // namespace
 
 void setup()
@@ -53,15 +43,6 @@ void setup()
     M5_LOGI("M5UnitUnified has been begun");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
-    {
-        unit.stopPeriodicMeasurement();
-
-        unit.writeIRSensor(IRSensor::Dual);  // To enable measuring To2
-        unit.writeOutput(out_table[idx]);
-
-        unit.startPeriodicMeasurement();
-    }
-
     lcd.setFont(&fonts::AsciiFont8x16);
     lcd.clear(TFT_DARKGREEN);
 }
@@ -77,23 +58,32 @@ void loop()
         M5_LOGI("\n>Amb:%f\n>Obj1:%f\n>Obj2:%f", unit.ambientTemperature(), unit.objectTemperature1(),
                 unit.objectTemperature2());
 
-        lcd.fillRect(0, 16, lcd.width(), 16 * 4, TFT_DARKGREEN);
+        lcd.fillRect(0, 16, lcd.width(), 16 * 3, TFT_DARKGREEN);
         lcd.setCursor(8, 16 * 1);
-        lcd.printf("%s:", os_table[idx]);
-        lcd.setCursor(8, 16 * 2);
         lcd.printf("A:%.2f", unit.ambientTemperature());
-        lcd.setCursor(8, 16 * 3);
+        lcd.setCursor(8, 16 * 2);
         lcd.printf("1:%.2f", unit.objectTemperature1());
-        lcd.setCursor(8, 16 * 4);
+        lcd.setCursor(8, 16 * 3);
         lcd.printf("2:%.2f", unit.objectTemperature2());
     }
 
     // Change measure target
     if (M5.BtnA.wasClicked() || touch.wasClicked()) {
-        ++idx;
-        idx &= 0x03;
         unit.stopPeriodicMeasurement();
-        unit.writeOutput(out_table[idx]);
+
+        static bool b{};
+        b = !b;
+        if (b) {
+            M5_LOGI("Seeting A");
+            unit.writeIRSensor(IRSensor::Dual, false);  // Enable object 2 measuring
+            unit.writeEmissivity(0.2f, false);
+            unit.applySettings();
+        } else {
+            M5_LOGI("Seeting B");
+            unit.writeIRSensor(IRSensor::Single, false);  // Disable object 2 measuring
+            unit.writeEmissivity(1.0f, false);
+            unit.applySettings();
+        }
         unit.startPeriodicMeasurement();
     }
 

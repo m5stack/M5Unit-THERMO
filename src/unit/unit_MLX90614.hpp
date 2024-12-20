@@ -94,7 +94,7 @@ enum class IRSensor : uint8_t {
   @brief Measurement data group
  */
 struct Data {
-    std::array<uint16_t, 3> raw{};  // raw data [0...2]:Ta [3...5]:To1 [6...8]:To2
+    std::array<uint16_t, 3> raw{};  // linearized raw [0]:Ambient [1]:Object1 [2]:Object2
 
     inline float ambientKelvin() const
     {
@@ -154,7 +154,7 @@ struct Data {
  */
 struct EEPROM {
     uint16_t toMax{}, toMin{},  //!< Max,Min of the Object Temperature
-        pwmCtrl{},              //!< Pulse With Modulation
+        pwmCtrl{},              //!< Pulse With Modulation control
         taRange{},              //!< Range of the Ambient Temperature
         emissivity{},           //!< Emissivity
         config{},               //!< Configuration
@@ -167,7 +167,9 @@ struct EEPROM {
 /*!
   @class UnitMLX90614
   @brief It can be used to measure the surface temperature of a human body or other object
- */
+  @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
+  @todo In the future, PMW mode will be supported to allow various configurations
+*/
 class UnitMLX90614 : public Component, public PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614, 0x5A);
 
@@ -221,52 +223,62 @@ public:
 
     ///@name Measurement data by periodic
     ///@{
+    //! @brief Oldest ambient kelvin
     inline float ambientKelvin() const
     {
         return !empty() ? oldest().ambientKelvin() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest ambient temperature (Celsius)
     inline float ambientTemperature() const
     {
         return !empty() ? oldest().ambientTemperature() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest ambient temperature (Celsius)
     inline float ambientCelsius() const
     {
         return !empty() ? oldest().ambientCelsius() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest ambient temperature (Fahrenheit)
     inline float ambientFahrenheit() const
     {
         return !empty() ? oldest().ambientFahrenheit() : std::numeric_limits<float>::quiet_NaN();
     }
-
+    //! @brief Oldest object 1 kelvin
     inline float objectKelvin1() const
     {
         return !empty() ? oldest().objectKelvin1() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 1 temperature (Celsius)
     inline float objectTemperature1() const
     {
         return !empty() ? oldest().objectTemperature1() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 1 temperature (Celsius)
     inline float objectCelsius1() const
     {
         return !empty() ? oldest().objectCelsius1() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 1 temperature (Fahrenheit)
     inline float objectFahrenheit1() const
     {
         return !empty() ? oldest().objectFahrenheit1() : std::numeric_limits<float>::quiet_NaN();
     }
-
+    //! @brief Oldest object 2 kelvin
     inline float objectKelvin2() const
     {
         return !empty() ? oldest().objectKelvin2() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 2 temperature (Celsius)
     inline float objectTemperature2() const
     {
         return !empty() ? oldest().objectTemperature2() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 2 temperature (Celsius)
     inline float objectCelsius2() const
     {
         return !empty() ? oldest().objectCelsius2() : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Oldest object 2 temperature (Fahrenheit)
     inline float objectFahrenheit2() const
     {
         return !empty() ? oldest().objectFahrenheit2() : std::numeric_limits<float>::quiet_NaN();
@@ -291,7 +303,8 @@ public:
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::stopPeriodicMeasurement();
     }
 
-    ////@note After writing, a reset is required for the settings to take effect
+    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@warning Some settings are writable in SMBus mode, but not reflected in operation
     ///@name Settings(Config)
     ///@{
     /*!
@@ -303,11 +316,11 @@ public:
     /*!
       @brief Write the configuration
       @param v Configuration value
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeConfig(const uint16_t v, const bool blocking = true);
+    bool writeConfig(const uint16_t v, const bool apply = true);
     /*!
       @brief Read the Output
       @param[out] o Output
@@ -317,13 +330,13 @@ public:
     /*!
       @brief Write the Output
       @param o Output
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning IRSensor must be set to Dual mode to obtain TO2 output
       @warning If only one sensor is installed, the output setting to TO2 is ignored
       @warning During periodic detection runs, an error is returned
      */
-    bool writeOutput(const mlx90614::Output o, const bool blocking = true);
+    bool writeOutput(const mlx90614::Output o, const bool apply = true);
     /*!
       @brief Read the IIR
       @param[out] iir IIR
@@ -333,11 +346,11 @@ public:
     /*!
       @brief Write the IIR
       @param iir IIR
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeIIR(const mlx90614::IIR iir, const bool blocking = true);
+    bool writeIIR(const mlx90614::IIR iir, const bool apply = true);
     /*!
       @brief Read the FIR
       @param[out] dir FIR
@@ -347,11 +360,11 @@ public:
     /*!
       @brief Write the FIR
       @param fir FIR
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeFIR(const mlx90614::FIR fir, const bool blocking = true);
+    bool writeFIR(const mlx90614::FIR fir, const bool apply = true);
     /*!
       @brief Read the Gain
       @param[out] gain Gain
@@ -361,11 +374,11 @@ public:
     /*!
       @brief Write the Gain
       @param gain Gain
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeGain(const mlx90614::Gain gain, const bool blocking = true);
+    bool writeGain(const mlx90614::Gain gain, const bool apply = true);
     /*!
       @brief Read the IRSensor mode
       @param[out] irs IRSensor
@@ -375,12 +388,12 @@ public:
     /*!
       @brief Write the IRSensor mode
       @param irs IRSensor
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning If only one sensor is installed, the IRSensor setting to Dual is ignored
       @warning During periodic detection runs, an error is returned
      */
-    bool writeIRSensor(const mlx90614::IRSensor irs, const bool blocking = true);
+    bool writeIRSensor(const mlx90614::IRSensor irs, const bool apply = true);
     /*!
       @brief Read the positiveKs
       @param[out] pos Positive if true
@@ -390,11 +403,11 @@ public:
     /*!
       @brief Write the positiveKs
       @param pos Positive if true
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writePositiveKs(const bool pos, const bool blocking = true);
+    bool writePositiveKs(const bool pos, const bool apply = true);
     /*!
       @brief Read the positiveKf2
       @param[out] pos Positive if true
@@ -404,16 +417,15 @@ public:
     /*!
       @brief Write the positiveKf2
       @param pos Positive if true
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writePositiveKf2(const bool pos, const bool blocking = true);
+    bool writePositiveKf2(const bool pos, const bool apply = true);
     ///@}
 
-#if 0
-    ////@note After writing, a reset is required for the settings to take effect
-    ///@warning In SMBus mode, the written temperature range is ignored
+    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@warning Some settings are writable in SMBus mode, but not reflected in operation
     ///@name Settings(Temperature range)
     ///@{
     /*!
@@ -434,23 +446,23 @@ public:
       @brief Write the minimum and maximum temperatures of the measurement for the object
       @param toMin Minimum raw value
       @param toMax Maximum raw value
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value, std::nullptr_t>::type = nullptr>
-    inline bool writeObjectMinMax(const T toMin, const T toMax, const bool blocking = true)
+    inline bool writeObjectMinMax(const T toMin, const T toMax, const bool apply = true)
     {
-        return write_object_minmax((uint16_t)toMin, (uint16_t)toMax, blocking);
+        return write_object_minmax((uint16_t)toMin, (uint16_t)toMax, apply);
     }
     /*!
       @brief Write the minimum and maximum temperatures of the measurement for the object
       @param toMin Minimum celsius
       @param toMax Maximum celsius
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @note Valid range between -273.15f and 382.2f
      */
-    bool writeObjectMinMax(const float toMin, const float toMax, const bool blocking = true);
+    bool writeObjectMinMax(const float toMin, const float toMax, const bool apply = true);
     /*!
       @brief Read the minimum and maximum temperatures of the measurement for the ambient
       @param[out] taMin Minimum raw value
@@ -469,27 +481,26 @@ public:
       @brief Write the minimum and maximum temperatures of the measurement for the ambient
       @param taMin Minimum raw value
       @param taMax Maximum raw value
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value, std::nullptr_t>::type = nullptr>
-    inline bool writeAmbientMinMax(const T taMin, const T taMax, const bool blocking = true)
+    inline bool writeAmbientMinMax(const T taMin, const T taMax, const bool apply = true)
     {
-        return write_ambient_minmax((uint8_t)taMin, (uint8_t)taMax, blocking);
+        return write_ambient_minmax((uint8_t)taMin, (uint8_t)taMax, apply);
     }
     /*!
       @brief Write the minimum and maximum temperatures of the measurement for the ambient
       @param taMin Minimum celsius
       @param taMax Maximum celsius
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @note Valid range between -38.2f and 124.8f
      */
-    bool writeAmbientMinMax(const float taMin, const float taMax, const bool blocking = true);
+    bool writeAmbientMinMax(const float taMin, const float taMax, const bool apply = true);
     ///@}
-#endif
 
-    ////@note After writing, a reset is required for the settings to take effect
+    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
     ///@name Settings (Emissivity)
     /*!
       @brief Read the emissivity
@@ -506,23 +517,23 @@ public:
     /*!
       @brief Write the emissivity
       @param emiss Raw emissivity value
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value, std::nullptr_t>::type = nullptr>
-    inline bool writeEmissivity(const T emiss, const bool blocking = true)
+    inline bool writeEmissivity(const T emiss, const bool apply = true)
     {
-        return write_emissivity((uint16_t)emiss, blocking);
+        return write_emissivity((uint16_t)emiss, apply);
     }
     /*!
       @brief Write the emissivity
       @param emiss emissivity (0.1f - 1.0f)
-      @param blocking Block until the process is complete if true
+      @param apply Settings take effect immediately if true
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeEmissivity(const float emiss, const bool blocking = true);
+    bool writeEmissivity(const float emiss, const bool apply = true);
     ///@}
 
     /*!
@@ -534,8 +545,26 @@ public:
     bool changeI2CAddress(const uint8_t i2c_address);
 
     /////////
+
+    /*!
+      @brief Sleep
+      @return True if successful
+     */
     bool sleep();
+    /*!
+      @brief Wakeup
+      @return True if successful
+     */
     bool wakeup();
+    /*!
+      @brief Apply EEPROM settings
+      @return True if successful
+      @note After writing to EEPROM , a reset or sleep.wakeup is required for the settings to take effect
+     */
+    inline bool applySettings()
+    {
+        return sleep() && wakeup();
+    }
 
     // bool changeAddress(const uint8_t addr);
 
@@ -543,11 +572,11 @@ protected:
     bool read_eeprom(mlx90614::EEPROM& e);
     bool read_register16(const uint8_t reg, uint16_t& v, const bool stopbit = false);
     bool write_register16(const uint8_t reg, const uint16_t val);
-    bool write_eeprom(const uint8_t reg, const uint16_t val, const bool blocking = true);
+    bool write_eeprom(const uint8_t reg, const uint16_t val, const bool apply = true);
 
-    // bool write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool blocking = true);
-    // bool write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool blocking = true);
-    bool write_emissivity(const uint16_t emiss, const bool blocking = true);
+    bool write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool apply = true);
+    bool write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool apply = true);
+    bool write_emissivity(const uint16_t emiss, const bool apply = true);
 
     bool read_measurement(mlx90614::Data& d, const uint16_t config);
 
@@ -576,9 +605,9 @@ constexpr uint8_t COMMAND_ENTER_SLEEP{0xFF};  // 11111111 This mode is not avail
 constexpr uint8_t READ_RAW_AMBIENT{0x03};
 constexpr uint8_t READ_RAW_IR1{0x04};
 constexpr uint8_t READ_RAW_IR2{0x05};
-constexpr uint8_t READ_TA{0x06};
-constexpr uint8_t READ_TOBJ1{0x07};
-constexpr uint8_t READ_TOBJ2{0x08};
+constexpr uint8_t READ_TAMBIENT{0x06};
+constexpr uint8_t READ_TOBJECT_1{0x07};
+constexpr uint8_t READ_TOBJECT_2{0x08};
 // EEPROM
 constexpr uint8_t EEPROM_TO_MAX{0x20};
 constexpr uint8_t EEPROM_TO_MIN{0x21};

@@ -206,20 +206,10 @@ bool UnitMLX90614::begin()
     }
 
 #if 0
-    Flag f{};
-    if (!read_register16(COMMAND_READ_FLAGS, f.value, false)) {
-        M5_LIB_LOGE("Cannot detect MLX90614");
-        //        return false;
-    }
-    M5_LIB_LOGE("%d/%d/%d", f.EEBusy(), f.EEDead(), f.initialized());
-#endif
-
-#if 0
     uint8_t v[3]{0x11, 0x22, 0x33};
     readRegister(COMMAND_READ_FLAGS, v, 3, 0, false);  // error
     M5_DUMPI(v, 3);
 
-    uint8_t v2[3]{0x11, 0x22, 0x33};
     readRegister(COMMAND_READ_FLAGS, v2, 3, 0, true);
     M5_DUMPI(v2, 3);
 #endif
@@ -314,6 +304,7 @@ bool UnitMLX90614::start_periodic_measurement()
     auto iir  = m5::stl::to_underlying(c.iir());
     auto fir  = m5::stl::to_underlying(c.fir());
     _interval = fir < 4 ? 0 : interval_tableBD[iir][fir - 4];
+
     _periodic = true;
     _latest   = 0;
 
@@ -334,14 +325,14 @@ bool UnitMLX90614::readConfig(uint16_t& v)
     return read_register16(EEPROM_CONFIG, v);
 }
 
-bool UnitMLX90614::writeConfig(const uint16_t v, const bool blocking)
+bool UnitMLX90614::writeConfig(const uint16_t v, const bool apply)
 {
     if (inPeriodic()) {
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
 
-    if (write_eeprom(EEPROM_CONFIG, v, blocking)) {
+    if (write_eeprom(EEPROM_CONFIG, v, apply)) {
         _eeprom.config = v;
         return true;
     }
@@ -358,12 +349,12 @@ bool UnitMLX90614::readOutput(mlx90614::Output& o)
     return false;
 }
 
-bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool blocking)
+bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.output(o);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -378,12 +369,12 @@ bool UnitMLX90614::readIIR(mlx90614::IIR& iir)
     return false;
 }
 
-bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool blocking)
+bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.iir(iir);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -398,12 +389,12 @@ bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
     return false;
 }
 
-bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool blocking)
+bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.fir(fir);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -418,12 +409,12 @@ bool UnitMLX90614::readGain(mlx90614::Gain& gain)
     return false;
 }
 
-bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool blocking)
+bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.gain(gain);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -438,12 +429,12 @@ bool UnitMLX90614::readIRSensor(mlx90614::IRSensor& irs)
     return false;
 }
 
-bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool blocking)
+bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.irSensor(irs);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -458,12 +449,12 @@ bool UnitMLX90614::readPositiveKs(bool& pos)
     return false;
 }
 
-bool UnitMLX90614::writePositiveKs(const bool pos, const bool blocking)
+bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.positiveKs(pos);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
@@ -478,17 +469,16 @@ bool UnitMLX90614::readPositiveKf2(bool& pos)
     return false;
 }
 
-bool UnitMLX90614::writePositiveKf2(const bool pos, const bool blocking)
+bool UnitMLX90614::writePositiveKf2(const bool pos, const bool apply)
 {
     Config c{};
     if (readConfig(c.value)) {
         c.positiveKf2(pos);
-        return writeConfig(c.value, blocking);
+        return writeConfig(c.value, apply);
     }
     return false;
 }
 
-#if 0
 bool UnitMLX90614::readObjectMinMax(uint16_t& toMin, uint16_t& toMax)
 {
     return read_register16(EEPROM_TO_MIN, toMin) && read_register16(EEPROM_TO_MAX, toMax);
@@ -505,23 +495,28 @@ bool UnitMLX90614::readObjectMinMax(float& toMin, float& toMax)
     return false;
 }
 
-bool UnitMLX90614::write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool blocking)
+bool UnitMLX90614::write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool apply)
 {
+    if (inPeriodic()) {
+        M5_LIB_LOGD("Periodic measurements are running");
+        return false;
+    }
+
     if (toMin > toMax) {
         M5_LIB_LOGE("Need %u <= %u", toMin, toMax);
         return false;
     }
-    if (write_eeprom(EEPROM_TO_MIN, toMin, blocking) && write_eeprom(EEPROM_TO_MAX, toMax, blocking)) {
+    if (write_eeprom(EEPROM_TO_MIN, toMin, apply) && write_eeprom(EEPROM_TO_MAX, toMax, apply)) {
         _eeprom.toMax = toMax;
         _eeprom.toMin = toMin;
-        return true;
+        return apply ? applySettings() : true;
     }
     return false;
 }
 
-bool UnitMLX90614::writeObjectMinMax(const float toMin, const float toMax, const bool blocking)
+bool UnitMLX90614::writeObjectMinMax(const float toMin, const float toMax, const bool apply)
 {
-    return write_object_minmax(celsius_to_toRaw(toMin), celsius_to_toRaw(toMax), blocking);
+    return write_object_minmax(celsius_to_toRaw(toMin), celsius_to_toRaw(toMax), apply);
 }
 
 bool UnitMLX90614::readAmbientMinMax(uint8_t& taMin, uint8_t& taMax)
@@ -546,26 +541,30 @@ bool UnitMLX90614::readAmbientMinMax(float& taMin, float& taMax)
     return false;
 }
 
-bool UnitMLX90614::write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool blocking)
+bool UnitMLX90614::write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool apply)
 {
+    if (inPeriodic()) {
+        M5_LIB_LOGD("Periodic measurements are running");
+        return false;
+    }
+
     if (taMin > taMax) {
         M5_LIB_LOGE("Need %u <= %u", taMin, taMax);
         return false;
     }
     uint16_t v{};
     v = (uint16_t)taMax << 8 | taMin;
-    if (write_eeprom(EEPROM_TARANGE, v, blocking)) {
+    if (write_eeprom(EEPROM_TARANGE, v, apply)) {
         _eeprom.taRange = v;
-        return true;
+        return apply ? applySettings() : true;
     }
     return false;
 }
 
-bool UnitMLX90614::writeAmbientMinMax(const float taMin, const float taMax, const bool blocking)
+bool UnitMLX90614::writeAmbientMinMax(const float taMin, const float taMax, const bool apply)
 {
-    return write_ambient_minmax(celsius_to_taRaw(taMin), celsius_to_taRaw(taMax), blocking);
+    return write_ambient_minmax(celsius_to_taRaw(taMin), celsius_to_taRaw(taMax), apply);
 }
-#endif
 
 bool UnitMLX90614::readEmissivity(uint16_t& emiss)
 {
@@ -582,23 +581,23 @@ bool UnitMLX90614::readEmissivity(float& emiss)
     return false;
 }
 
-bool UnitMLX90614::write_emissivity(const uint16_t emiss, const bool blocking)
+bool UnitMLX90614::write_emissivity(const uint16_t emiss, const bool apply)
 {
     if (inPeriodic()) {
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
 
-    if (write_eeprom(EEPROM_EMISSIVITY, emiss, blocking)) {
+    if (write_eeprom(EEPROM_EMISSIVITY, emiss, apply)) {
         _eeprom.emissivity = emiss;
-        return true;
+        return apply ? applySettings() : true;
     }
     return false;
 }
 
-bool UnitMLX90614::writeEmissivity(const float emiss, const bool blocking)
+bool UnitMLX90614::writeEmissivity(const float emiss, const bool apply)
 {
-    return write_emissivity(emissivity_to_raw(emiss), blocking);
+    return write_emissivity(emissivity_to_raw(emiss), apply);
 }
 
 bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
@@ -608,6 +607,7 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
 
 bool UnitMLX90614::sleep()
 {
+#if defined(ARDUINO)
     // Slave W, reg, PEC
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
@@ -618,23 +618,40 @@ bool UnitMLX90614::sleep()
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
           disabled inorder to keep the overall power drain in sleep mode really small.
          */
-#if 0
-        auto ad = adatper();
-        if (ad) {
-            ad->sclLow();
-            return true;
-        }
-#else
-
+        auto scl = adapter()->scl();
+        pinMode(scl, OUTPUT);
+        digitalWrite(scl, LOW);
+        pinMode(scl, INPUT);
         return true;
-#endif
     }
     return false;
+#else
+#pragma message "Implement for M5HAL not yet"
+    return false;
+#endif
 }
 
 bool UnitMLX90614::wakeup()
 {
+#if defined(ARDUINO)
+    auto scl = adapter()->scl();
+    auto sda = adapter()->sda();
+
+    // Wakeup request (SDA low) 33ms min
+    // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
+    pinMode(scl, INPUT);
+    pinMode(sda, OUTPUT);
+    digitalWrite(sda, LOW);
+    m5::utility::delay(33 * 1.5f);
+    // After wake up the first data is available after 0.25 seconds (typ).
+    pinMode(sda, INPUT);
+    delay(250 * 1.5f);
+
+    return true;
+#else
+#pragma message "Implement for M5HAL not yet"
     return false;
+#endif
 }
 
 //
@@ -679,22 +696,20 @@ bool UnitMLX90614::write_register16(const uint8_t reg, const uint16_t val)
     return writeRegister(reg, buf + 2, 3);
 }
 
-bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const bool blocking)
+bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const bool apply)
 {
     if ((reg & COMMAND_EEPROM) == 0) {
         M5_LIB_LOGE("Wrong register %02X", reg);
         return false;
     }
 
-    // Write 0x0000 first (erase)
+    // Write 0x0000 first (as erase)
     if (write_register16(reg, 0)) {
         m5::utility::delay(10);  // Delay here is required (Typ:5, Max:10)
         // Write value
         if (write_register16(reg, val)) {
-            if (blocking) {
-                m5::utility::delay(10);
-            }
-            return true;
+            m5::utility::delay(10);
+            return apply ? applySettings() : true;
         }
     }
     return false;
@@ -702,34 +717,26 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
 
 bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
 {
-    // Even if Config.output() is Dual, if the hardware does not support it, no measurement can be made
-    // MLX90614Axx/Bxxx has single IR
-    // MLX90614Dxx has dual IR
-    bool ret{};
-    Config c{cfg};
-    switch (c.output()) {
-        case Output::TA_TO2:
-            ret = read_register16(READ_TA, d.raw[0]) &&
-                  (c.irSensor() == IRSensor::Dual ? read_register16(READ_TOBJ2, d.raw[2]) : (d.raw[2] = 0x8000));
-            d.raw[1] = 0x8000;
-            break;
-        case Output::TO2_Undefined:
-            ret      = (c.irSensor() == IRSensor::Dual ? read_register16(READ_TOBJ2, d.raw[2]) : (d.raw[2] = 0x8000));
-            d.raw[0] = d.raw[1] = 0x8000;
-            break;
-        case Output::TO1_TO2:
-            ret = read_register16(READ_TOBJ1, d.raw[1]) &&
-                  (c.irSensor() == IRSensor::Dual ? read_register16(READ_TOBJ2, d.raw[2]) : (d.raw[2] = 0x8000));
-            d.raw[0] = 0x8000;
-            break;
-        case Output::TA_TO1:
-            // [FALLTHROUGH]
-        default:
-            ret      = read_register16(READ_TA, d.raw[0]) && read_register16(READ_TOBJ1, d.raw[1]);
-            d.raw[2] = 0x8000;
-            break;
+#if 0
+    static uint16_t prev[3]{};
+    static auto at = m5::utility::millis();
+    uint16_t r[3]{};
+    read_register16(READ_RAW_AMBIENT, r[0]);
+    read_register16(READ_RAW_IR1, r[1]);
+    read_register16(READ_RAW_IR2, r[2]);
+
+    if (r[0] != prev[0] || r[1] != prev[1] || r[2] != prev[2]) {
+        auto now = m5::utility::millis();
+        auto dur = now - at;
+        at       = now;
+        M5_LIB_LOGW(">>> CHANGE: %ld", dur);
+        prev[0] = r[0];
+        prev[1] = r[1];
+        prev[2] = r[2];
     }
-    return ret;
+#endif
+    return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&
+           read_register16(READ_TOBJECT_2, d.raw[2]);
 }
 
 }  // namespace unit

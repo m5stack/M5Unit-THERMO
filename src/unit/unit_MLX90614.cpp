@@ -259,7 +259,9 @@ bool UnitMLX90614::begin()
     }
 #endif
 
-    return _cfg.start_periodic ? startPeriodicMeasurement() : true;
+    return _cfg.start_periodic ? writeEmissivity(_cfg.emissivity, false) &&
+                                     startPeriodicMeasurement(_cfg.iir, _cfg.fir, _cfg.gain, _cfg.irs)
+                               : true;
 }
 
 void UnitMLX90614::update(const bool force)
@@ -278,13 +280,11 @@ void UnitMLX90614::update(const bool force)
     }
 }
 
-bool UnitMLX90614::start_periodic_measurement(const mlx90614::Output out, const mlx90614::IIR iir,
-                                              const mlx90614::FIR fir, const mlx90614::Gain gain,
-                                              const mlx90614::IRSensor irs)
+bool UnitMLX90614::start_periodic_measurement(const mlx90614::IIR iir, const mlx90614::FIR fir,
+                                              const mlx90614::Gain gain, const mlx90614::IRSensor irs)
 {
     Config c{};
     if (readConfig(c.value)) {
-        c.output(out);
         c.iir(iir);
         c.fir(fir);
         c.gain(gain);
@@ -303,7 +303,7 @@ bool UnitMLX90614::start_periodic_measurement()
     Config c(_eeprom.config);
     auto iir  = m5::stl::to_underlying(c.iir());
     auto fir  = m5::stl::to_underlying(c.fir());
-    _interval = fir < 4 ? 0 : interval_tableBD[iir][fir - 4];
+    _interval = (fir < 4) ? 0 : interval_tableBD[iir][fir - 4];
 
     _periodic = true;
     _latest   = 0;
@@ -623,22 +623,30 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
 bool UnitMLX90614::sleep()
 {
 #if defined(ARDUINO)
+    auto ada = adapter();
+    auto scl = ada->scl();
+    if (scl < 0) {
+        M5_LIB_LOGE("SCL pin cannot be detcted");
+        return false;
+    }
+
     // Slave W, reg, PEC
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
     buf[2] = crc8.update(buf, 2);
-    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1)) {
+    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ada->end() /* Keep peripheral settings */) {
         /*
           datasheet says:
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
           disabled inorder to keep the overall power drain in sleep mode really small.
          */
-        auto scl = adapter()->scl();
-        pinMode(scl, OUTPUT);
-        digitalWrite(scl, LOW);
-        pinMode(scl, INPUT);
+        ada->pinMode(scl, OUTPUT);
+        ada->digitalWrite(scl, LOW);
+        ada->pinMode(scl, INPUT);
         return true;
     }
+    M5_LIB_LOGE(">>>error");
+
     return false;
 #else
 #pragma message "Implement for M5HAL not yet"
@@ -649,25 +657,38 @@ bool UnitMLX90614::sleep()
 bool UnitMLX90614::wakeup()
 {
 #if defined(ARDUINO)
-    auto scl = adapter()->scl();
-    auto sda = adapter()->sda();
-
+    auto ada = adapter();
+    auto scl = ada->scl();
+    auto sda = ada->sda();
+    if (scl < 0 || sda < 0) {
+        M5_LIB_LOGE("SCL or SDA pin cannot be detcted %d,%d", scl, sda);
+        return false;
+    }
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
-    pinMode(scl, INPUT);
-    pinMode(sda, OUTPUT);
-    digitalWrite(sda, LOW);
+    ada->pinMode(scl, INPUT);  // SCL H
+    ada->pinMode(sda, OUTPUT);
+    ada->digitalWrite(sda, LOW);  // SDA L
     m5::utility::delay(33 * 1.5f);
     // After wake up the first data is available after 0.25 seconds (typ).
-    pinMode(sda, INPUT);
-    delay(250 * 1.5f);
+    ada->pinMode(sda, INPUT);  // SDA H
+    delay(550);
 
-    return true;
+    return ada->begin();  // restart Wire
+
 #else
 #pragma message "Implement for M5HAL not yet"
     return false;
 #endif
 }
+
+#if 0
+	pinMode(scl, OUTPUT);
+	digitalWrite(scl, LOW); // SCL low
+	delay(10); // Delay at least 1.44ms
+	pinMode(scl, INPUT); // SCL high
+#endif
+//    writeWithTransaction(nullptr, 0, false);
 
 //
 bool UnitMLX90614::read_eeprom(mlx90614::EEPROM& e)
@@ -691,8 +712,8 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
         v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
         return true;
     }
-    // M5_LIB_LOGE("R:%02X SB:%u PEC:%02X", reg, stopbit, rbuf[5]);
-    // M5_DUMPE(rbuf, 6);
+    M5_LIB_LOGE("R:%02X SB:%u PEC:%02X", reg, stopbit, rbuf[5]);
+    M5_DUMPE(rbuf, 6);
     return false;
 }
 

@@ -181,10 +181,12 @@ public:
     struct config_t {
         //! Start periodic measurement on begin?
         bool start_periodic{true};
-        //! periodic interval(ms) if start on begin
-        // uint32_t interval{100};
-        //! //!< measurement unit if start on begin
-        //        MLX90614::MeasurementUnit measurement_unit{MLX90614::MeasurementUnit::Celsius};
+
+        mlx90614::IIR iir{mlx90614::IIR::Filter100};
+        mlx90614::FIR fir{mlx90614::FIR::Filter1024};
+        mlx90614::Gain gain{mlx90614::Gain::Coeff12_5};
+        mlx90614::IRSensor irs{mlx90614::IRSensor::Single};
+        float emissivity{1.0f};
     };
 
     explicit UnitMLX90614(const uint8_t addr = DEFAULT_ADDRESS)
@@ -287,11 +289,10 @@ public:
 
     ///@name Periodic measurement
     ///@{
-    inline bool startPeriodicMeasurement(const mlx90614::Output out, const mlx90614::IIR iir, const mlx90614::FIR fir,
-                                         const mlx90614::Gain gain, const mlx90614::IRSensor irs)
+    inline bool startPeriodicMeasurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain,
+                                         const mlx90614::IRSensor irs)
     {
-        return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement(out, iir, fir, gain,
-                                                                                                  irs);
+        return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement(iir, fir, gain, irs);
     }
     inline bool startPeriodicMeasurement()
     {
@@ -584,8 +585,8 @@ protected:
     bool write_emissivity(const uint16_t emiss, const bool apply = true);
     bool read_measurement(mlx90614::Data& d, const uint16_t config);
 
-    bool start_periodic_measurement(const mlx90614::Output out, const mlx90614::IIR iir, const mlx90614::FIR fir,
-                                    const mlx90614::Gain gain, const mlx90614::IRSensor irs);
+    bool start_periodic_measurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain,
+                                    const mlx90614::IRSensor irs);
     bool start_periodic_measurement();
     bool stop_periodic_measurement();
 

@@ -21,6 +21,9 @@ m5::unit::UnitNCIR unit;
 
 void setup()
 {
+    delay(2000);
+
+
     M5.begin();
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
@@ -76,7 +79,7 @@ void loop()
         if (b) {
             M5_LOGI("Seeting A");
             unit.writeIRSensor(IRSensor::Dual, false);  // Enable object 2 measuring
-            unit.writeEmissivity(0.2f, false);
+            unit.writeEmissivity(0.25f, false);
             unit.applySettings();
         } else {
             M5_LOGI("Seeting B");
@@ -86,17 +89,4 @@ void loop()
         }
         unit.startPeriodicMeasurement();
     }
-
-#if 0
-    // Single
-    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
-        unit.stopPeriodicMeasurement();
-        Data d{};
-        if (unit.measureSingleshot(d)) {
-            M5_LOGI("Single: %d/%f", d.differentialValue(), d.differentialVoltage());
-        }
-        unit.startPeriodicMeasurement();
-    }
-#endif
-    //    m5::utility::delay(1000);
 }

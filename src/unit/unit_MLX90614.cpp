@@ -142,11 +142,12 @@ struct Config {
 
 // [IIR][FIR]
 // FIR 000...011 are NOT RECOMMENDED
+// For MLX90614A Series
 constexpr uint32_t interval_tableA[8][4] = {
     {300, 370, 540, 860}, {700, 880, 1300, 2000}, {1100, 1400, 2000, 3300}, {1500, 1900, 2800, 4500},
     {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
 };
-
+// For MLX90614B,D Series
 constexpr uint32_t interval_tableBD[8][4] = {
     {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
     {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
@@ -170,7 +171,7 @@ inline float taRaw_to_celsius(const uint8_t t)
 
 inline uint8_t celsius_to_taRaw(const float c)
 {
-    float v = std::fmax(std::fmin(c, 124.8f), -38.2f);
+    float v = std::fmax(std::fmin(c, 125.f), -38.2f);
     return 100 * (v + 0.32f + 38.2f) / 64.0f;
 }
 
@@ -205,20 +206,15 @@ bool UnitMLX90614::begin()
         }
     }
 
-#if 0
-    uint8_t v[3]{0x11, 0x22, 0x33};
-    readRegister(COMMAND_READ_FLAGS, v, 3, 0, false);  // error
-    M5_DUMPI(v, 3);
+    // Sleep and wakeup
+    applySettings();
 
-    readRegister(COMMAND_READ_FLAGS, v2, 3, 0, true);
-    M5_DUMPI(v2, 3);
-#endif
-
+    //
     if (!read_eeprom(_eeprom)) {
         M5_LIB_LOGE("Failed to read EEPROM");
         return false;
     }
-    M5_LIB_LOGW(
+    M5_LIB_LOGV(
         "toMax:%u(%f) toMin:%u(%f) pwm:%04X TaRange:%X(%f,%f) emmiss:%04X config:%04X\n"
         "addr:%04X ID:%04X:%04X:%04X:%04X",
         _eeprom.toMax, toRaw_to_celsius(_eeprom.toMax), _eeprom.toMin, toRaw_to_celsius(_eeprom.toMin), _eeprom.pwmCtrl,
@@ -227,37 +223,11 @@ bool UnitMLX90614::begin()
 
     PWMCtrl pc;
     pc.value = _eeprom.pwmCtrl;
-    M5_LIB_LOGW("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
+    M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
     Config c{_eeprom.config};
-    M5_LIB_LOGW("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosK:%u PosKf2:%u", c.iir(), c.output(), c.fir(), c.gain(),
+    M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosK:%u PosKf2:%u", c.iir(), c.output(), c.fir(), c.gain(),
                 c.irSensor(), c.positiveKs(), c.positiveKf2());
-
-#if 0
-    for (uint32_t i = 0; i < 65536; ++i) {
-        float f = toRaw_to_celsius(i);
-        auto ii = celsius_to_toRaw(f);
-        if (i != ii) {
-            M5_LIB_LOGW("TO[%05u] %f <%u>", i, f, ii);
-        }
-    }
-
-    for (uint16_t i = 0; i < 256; ++i) {
-        float f = taRaw_to_celsius(i);
-        auto ii = celsius_to_taRaw(f);
-        if (i != ii) {
-            M5_LIB_LOGW("TA[%05u] %f <%u>", i, f, ii);
-        }
-    }
-
-    for (uint32_t i = 0; i < 65536; ++i) {
-        float f = raw_to_emissivity(i);
-        auto ii = emissivity_to_raw(f);
-        if (i != ii) {
-            M5_LIB_LOGW("EM[%05u] %f <%u>", i, f, ii);
-        }
-    }
-#endif
 
     return _cfg.start_periodic ? writeEmissivity(_cfg.emissivity, false) &&
                                      startPeriodicMeasurement(_cfg.iir, _cfg.fir, _cfg.gain, _cfg.irs)
@@ -301,14 +271,11 @@ bool UnitMLX90614::start_periodic_measurement()
     }
 
     Config c(_eeprom.config);
-    auto iir  = m5::stl::to_underlying(c.iir());
-    auto fir  = m5::stl::to_underlying(c.fir());
-    _interval = (fir < 4) ? 0 : interval_tableBD[iir][fir - 4];
-
+    _interval = get_interval(c.iir(), c.fir());
     _periodic = true;
     _latest   = 0;
 
-    M5_LIB_LOGW("IIR:%u FIR:%u IT:%u", iir, fir, _interval);
+    M5_LIB_LOGW("IIR:%u FIR:%u IT:%u", c.iir(), c.fir(), _interval);
 
     return true;
 }
@@ -316,7 +283,6 @@ bool UnitMLX90614::start_periodic_measurement()
 bool UnitMLX90614::stop_periodic_measurement()
 {
     _periodic = false;
-    // To sleep?
     return true;
 }
 
@@ -391,6 +357,12 @@ bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
 
 bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 {
+    // WARNING
+    // datasheet says...
+    if (m5::stl::to_underlying(fir) < 4) {
+        M5_LIB_LOGW("Settings below FIR::Filter64 are not recommended");
+    }
+
     Config c{};
     if (readConfig(c.value)) {
         c.fir(fir);
@@ -535,7 +507,7 @@ bool UnitMLX90614::readAmbientMinMax(float& taMin, float& taMax)
     uint8_t amin{}, amax{};
     if (readAmbientMinMax(amin, amax)) {
         taMin = taRaw_to_celsius(amin);
-        taMin = taRaw_to_celsius(amax);
+        taMax = taRaw_to_celsius(amax);
         return true;
     }
     return false;
@@ -645,8 +617,6 @@ bool UnitMLX90614::sleep()
         ada->pinMode(scl, INPUT);
         return true;
     }
-    M5_LIB_LOGE(">>>error");
-
     return false;
 #else
 #pragma message "Implement for M5HAL not yet"
@@ -682,14 +652,6 @@ bool UnitMLX90614::wakeup()
 #endif
 }
 
-#if 0
-	pinMode(scl, OUTPUT);
-	digitalWrite(scl, LOW); // SCL low
-	delay(10); // Delay at least 1.44ms
-	pinMode(scl, INPUT); // SCL high
-#endif
-//    writeWithTransaction(nullptr, 0, false);
-
 //
 bool UnitMLX90614::read_eeprom(mlx90614::EEPROM& e)
 {
@@ -708,11 +670,12 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
 
     // Read 3bytes (low,high,PEC) and check PEC
-    if (readRegister(reg, rbuf + 3, 3, 0, stopbit) && crc8.update(rbuf, 5) == rbuf[5]) {
+    uint8_t crc{};
+    if (readRegister(reg, rbuf + 3, 3, 0, stopbit) && (crc = crc8.update(rbuf, 5)) == rbuf[5]) {
         v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
         return true;
     }
-    M5_LIB_LOGE("R:%02X SB:%u PEC:%02X", reg, stopbit, rbuf[5]);
+    M5_LIB_LOGE("R:%02X SB:%u CRC8:%02X PEC:%02X", reg, stopbit, crc, rbuf[5]);
     M5_DUMPE(rbuf, 6);
     return false;
 }
@@ -753,8 +716,28 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
 
 bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
 {
+    d.raw[2] = 0x8000;
     return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&
-           read_register16(READ_TOBJECT_2, d.raw[2]);
+           (has_dual_sensors() ? read_register16(READ_TOBJECT_2, d.raw[2]) : true);
+}
+
+uint32_t UnitMLX90614::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
+{
+    auto i = m5::stl::to_underlying(iir);
+    auto f = m5::stl::to_underlying(fir);
+    return (f < 4) ? 0 : interval_tableA[i][f - 4];
+}
+
+// class UnitMLX90614BAA
+const char UnitMLX90614BAA::name[] = "UnitMLX90614BAA";
+const types::uid_t UnitMLX90614BAA::uid{"UnitMLX90614BAA"_mmh3};
+const types::uid_t UnitMLX90614BAA::attr{0};
+
+uint32_t UnitMLX90614BAA::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
+{
+    auto i = m5::stl::to_underlying(iir);
+    auto f = m5::stl::to_underlying(fir);
+    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
 }
 
 }  // namespace unit

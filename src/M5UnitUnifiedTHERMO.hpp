@@ -27,7 +27,7 @@ namespace m5 {
  */
 namespace unit {
 
-using UnitNCIR = m5::unit::UnitMLX90614;
+using UnitNCIR = m5::unit::UnitMLX90614BAA;
 
 }  // namespace unit
 }  // namespace m5

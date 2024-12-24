@@ -155,17 +155,18 @@ struct Data {
 struct EEPROM {
     uint16_t toMax{}, toMin{},  //!< Max,Min of the Object Temperature
         pwmCtrl{},              //!< Pulse With Modulation control
-        taRange{},              //!< Range of the Ambient Temperature
+        taRange{},              //!< Range of the Ambient Temperature (H/L)
         emissivity{},           //!< Emissivity
         config{},               //!< Configuration
-        addr{};                 //!< I2C address(Using low byte)
-    uint16_t id[4]{};           //!< Unique ID
+        addr{},                 //!< I2C address(Using low byte)
+        id[4]{};                //!< Unique ID
 };
 
 }  // namespace mlx90614
 
 /*!
   @class UnitMLX90614
+  @brief Base class of the UnitMLX90614 series
   @brief It can be used to measure the surface temperature of a human body or other object
   @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
   @todo In the future, PMW mode will be supported to allow various configurations
@@ -592,10 +593,36 @@ protected:
 
     M5_UNIT_COMPONENT_PERIODIC_MEASUREMENT_ADAPTER_HPP_BUILDER(UnitMLX90614, mlx90614::Data);
 
+    virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir);
+    virtual bool has_dual_sensors() const
+    {
+        return false;
+    }
+
 private:
     std::unique_ptr<m5::container::CircularBuffer<mlx90614::Data>> _data{};
     mlx90614::EEPROM _eeprom{};
     config_t _cfg{};
+};
+
+/*!
+  @class UnitMLX90614BAA
+  @brief For UnitMLX90614BAA (NCIR using it)
+ */
+class UnitMLX90614BAA : public UnitMLX90614 {
+    M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614BAA, 0x5A);
+
+public:
+    explicit UnitMLX90614BAA(const uint8_t addr = DEFAULT_ADDRESS) : UnitMLX90614(addr)
+    {
+    }
+
+protected:
+    virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir);
+    inline virtual bool has_dual_sensors() const
+    {
+        return true;
+    }
 };
 
 ///@cond 0

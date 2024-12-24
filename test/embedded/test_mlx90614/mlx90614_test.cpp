@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 /*
-  UnitTest for UnitMLX90614
+  UnitTest for UnitMLX90614BAA
 */
 #include <gtest/gtest.h>
 #include <Wire.h>
@@ -23,13 +23,13 @@ using m5::unit::types::elapsed_time_t;
 
 const ::testing::Environment* global_fixture = ::testing::AddGlobalTestEnvironment(new GlobalFixture<100000U>());
 
-constexpr uint32_t STORED_SIZE{8};
+constexpr uint32_t STORED_SIZE{4};
 
-class TestMLX90614 : public ComponentTestBase<UnitMLX90614, bool> {
+class TestMLX90614BAA : public ComponentTestBase<UnitMLX90614BAA, bool> {
 protected:
-    virtual UnitMLX90614* get_instance() override
+    virtual UnitMLX90614BAA* get_instance() override
     {
-        auto ptr         = new m5::unit::UnitMLX90614();
+        auto ptr         = new m5::unit::UnitMLX90614BAA();
         auto ccfg        = ptr->component_config();
         ccfg.stored_size = STORED_SIZE;
         ptr->component_config(ccfg);
@@ -44,13 +44,13 @@ protected:
 
     void restore_config()
     {
-        M5_LOGW("Restore config");
-        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4,FIR:7,Gain:3,IRS:0 PosK:1 PosKf2:0
+        // M5_LOGW("Restore config");
+        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4, OUT:TO12 FIR:7,Gain:3,IRS:0 PosK:1 PosKf2:0
         EXPECT_TRUE(unit->writeConfig(c));
     }
     void restore_setting()
     {
-        M5_LOGW("Restore setting");
+        // M5_LOGW("Restore setting");
         EXPECT_TRUE(unit->writeObjectMinMax(25315, 39315, false));
         EXPECT_TRUE(unit->writeAmbientMinMax(0x1C, 0xF7, false));
         EXPECT_TRUE(unit->writeEmissivity(0xFFFF, false));
@@ -58,9 +58,9 @@ protected:
     }
 };
 
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614, ::testing::Values(false, true));
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614, ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614, ::testing::Values(false));
+// INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614BAA, ::testing::Values(false, true));
+// INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614BAA, ::testing::Values(true));
+INSTANTIATE_TEST_SUITE_P(ParamValues, TestMLX90614BAA, ::testing::Values(false));
 
 namespace {
 constexpr Output out_table[] = {Output::TA_TO1, Output::TA_TO2, Output::TO2_Undefined, Output::TO1_TO2};
@@ -78,12 +78,135 @@ constexpr Gain gain_table[] = {
 constexpr IRSensor irs_table[] = {IRSensor::Single, IRSensor::Dual};
 constexpr bool pos_table[]     = {true, false};
 
+constexpr uint32_t interval_tableBD[8][4] = {
+    {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
+    {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
+};
+
+uint32_t get_interval(const IIR iir, const FIR fir)
+{
+    auto i = m5::stl::to_underlying(iir);
+    auto f = m5::stl::to_underlying(fir);
+    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
+}
+
+template <class U>
+elapsed_time_t test_periodic(U* unit, const uint32_t times, const uint32_t measure_duration = 0)
+{
+    auto tm         = unit->interval();
+    auto timeout_at = m5::utility::millis() + 10 * 1000;
+
+    do {
+        unit->update();
+        if (unit->updated()) {
+            break;
+        }
+        std::this_thread::yield();
+    } while (!unit->updated() && m5::utility::millis() <= timeout_at);
+    // timeout
+    if (!unit->updated()) {
+        return 0;
+    }
+
+    //
+    uint32_t measured{};
+    auto start_at = m5::utility::millis();
+    timeout_at    = start_at + (times * (tm + measure_duration) * 2);
+
+    do {
+        unit->update();
+        measured += unit->updated() ? 1 : 0;
+        if (measured >= times) {
+            break;
+        }
+        std::this_thread::yield();
+
+    } while (measured < times && m5::utility::millis() <= timeout_at);
+    return (measured == times) ? m5::utility::millis() - start_at : 0;
+    //   return (measured == times) ? unit->updatedMillis() - start_at : 0;
+}
+
 auto rng = std::default_random_engine{};
 std::uniform_real_distribution<> dist_to(-273.15f, 382.2f);
+std::uniform_real_distribution<> dist_ta(-38.2f, 125.f);
+
+// From UnitMLX90416.cpp
+inline float toRaw_to_celsius(const uint16_t t)
+{
+    return t * 0.01f - 273.15f;
+}
+
+inline uint16_t celsius_to_toRaw(const float c)
+{
+    float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
+    return 100 * (v + 0.005f + 273.15f);
+}
+
+inline float taRaw_to_celsius(const uint8_t t)
+{
+    return t * 64.0f / 100.f - 38.2f;
+}
+
+inline uint8_t celsius_to_taRaw(const float c)
+{
+    float v = std::fmax(std::fmin(c, 125.f), -38.2f);
+    return 100 * (v + 0.32f + 38.2f) / 64.0f;
+}
+
+inline float raw_to_emissivity(const uint16_t e)
+{
+    return e / 65535.f;
+}
+
+inline uint16_t emissivity_to_raw(const float e)
+{
+    return std::round(65535.f * e);
+}
 
 }  // namespace
 
-TEST_P(TestMLX90614, Config)
+TEST_P(TestMLX90614BAA, Conversion)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_FLOAT_EQ(toRaw_to_celsius(0), -273.15f);
+    EXPECT_FLOAT_EQ(toRaw_to_celsius(0xFFFF), 382.2f);
+
+    EXPECT_FLOAT_EQ(taRaw_to_celsius(0), -38.2f);
+    EXPECT_FLOAT_EQ(taRaw_to_celsius(0xFF), 125.f);
+
+    for (uint32_t i = 0; i < 65536; ++i) {
+        float c     = toRaw_to_celsius(i);
+        uint16_t to = celsius_to_toRaw(c);
+        EXPECT_EQ(to, i);
+    }
+
+    for (uint16_t i = 0; i < 256; ++i) {
+        float c    = taRaw_to_celsius(i);
+        uint8_t ta = celsius_to_taRaw(c);
+        EXPECT_EQ(ta, i);
+    }
+
+    // random
+    uint32_t cnt{32};
+    while (cnt--) {
+        float co     = dist_to(rng);
+        float ca     = dist_ta(rng);
+        uint16_t to  = celsius_to_toRaw(co);
+        uint8_t ta   = celsius_to_taRaw(ca);
+        float tof    = toRaw_to_celsius(to);
+        float taf    = taRaw_to_celsius(ta);
+        uint16_t to2 = celsius_to_toRaw(tof);
+        uint8_t ta2  = celsius_to_taRaw(taf);
+
+        EXPECT_NEAR(tof, co, 0.005f);
+        EXPECT_NEAR(taf, ca, 0.32f);
+        EXPECT_EQ(to2, to);
+        EXPECT_EQ(ta2, ta);
+    }
+}
+
+TEST_P(TestMLX90614BAA, Config)
 {
     SCOPED_TRACE(ustr);
 
@@ -160,7 +283,7 @@ TEST_P(TestMLX90614, Config)
     restore_config();
 }
 
-TEST_P(TestMLX90614, SettingTemperature)
+TEST_P(TestMLX90614BAA, SettingObjectTemperatureMinMax)
 {
     SCOPED_TRACE(ustr);
 
@@ -239,7 +362,85 @@ TEST_P(TestMLX90614, SettingTemperature)
     restore_setting();
 }
 
-TEST_P(TestMLX90614, ChangeAddress)
+TEST_P(TestMLX90614BAA, SettingAmbientTemperatureMinMax)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+
+    EXPECT_FALSE(unit->writeAmbientMinMax(-38.2f, 125.f));
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    float tminF{}, tmaxF{};
+    uint8_t tmin{}, tmax{};
+
+    // min
+    EXPECT_TRUE(unit->writeAmbientMinMax(-38.2f, -38.2f));
+
+    EXPECT_TRUE(unit->readAmbientMinMax(tmin, tmax));
+    EXPECT_TRUE(unit->readAmbientMinMax(tminF, tmaxF));
+    EXPECT_EQ(tmin, 0);
+    EXPECT_EQ(tmax, 0);
+    EXPECT_FLOAT_EQ(tminF, -38.2f);
+    EXPECT_FLOAT_EQ(tmaxF, -38.2f);
+
+    // under
+    EXPECT_TRUE(unit->writeAmbientMinMax(-1273.15f, -1273.15f));
+
+    EXPECT_TRUE(unit->readAmbientMinMax(tmin, tmax));
+    EXPECT_TRUE(unit->readAmbientMinMax(tminF, tmaxF));
+    EXPECT_EQ(tmin, 0);
+    EXPECT_EQ(tmax, 0);
+    EXPECT_FLOAT_EQ(tminF, -38.2f);
+    EXPECT_FLOAT_EQ(tmaxF, -38.2f);
+
+    // max
+    EXPECT_TRUE(unit->writeAmbientMinMax(125.f, 125.f));
+
+    EXPECT_TRUE(unit->readAmbientMinMax(tmin, tmax));
+    EXPECT_TRUE(unit->readAmbientMinMax(tminF, tmaxF));
+    EXPECT_EQ(tmin, 0xFF);
+    EXPECT_EQ(tmax, 0xFF);
+    EXPECT_FLOAT_EQ(tminF, 125.f);
+    EXPECT_FLOAT_EQ(tmaxF, 125.f);
+
+    // over
+    EXPECT_TRUE(unit->writeAmbientMinMax(1382.2f, 1382.2f));
+
+    EXPECT_TRUE(unit->readAmbientMinMax(tmin, tmax));
+    EXPECT_TRUE(unit->readAmbientMinMax(tminF, tmaxF));
+    EXPECT_EQ(tmin, 0xFF);
+    EXPECT_EQ(tmax, 0xFF);
+    EXPECT_FLOAT_EQ(tminF, 125.f);
+    EXPECT_FLOAT_EQ(tmaxF, 125.f);
+
+    // random
+    uint32_t cnt{32};
+    while (cnt--) {
+        float toMin = dist_ta(rng);
+        float toMax = dist_ta(rng);
+        if (toMin > toMax) {
+            std::swap(toMin, toMax);
+        }
+        auto s = m5::utility::formatString("%f/%f", toMin, toMax);
+        SCOPED_TRACE(s);
+
+        EXPECT_TRUE(unit->writeAmbientMinMax(toMin, toMax));
+
+        EXPECT_TRUE(unit->readAmbientMinMax(tminF, tmaxF));
+        EXPECT_NEAR(tminF, toMin, 0.32f);
+        EXPECT_NEAR(tmaxF, toMax, 0.32f);
+        // M5_LOGI("%f %f", tminF, toMin);
+        // M5_LOGI("%f %f", tmaxF, toMax);
+    }
+
+    //
+    restore_setting();
+}
+
+TEST_P(TestMLX90614BAA, ChangeAddress)
 {
     SCOPED_TRACE(ustr);
 
@@ -279,11 +480,80 @@ TEST_P(TestMLX90614, ChangeAddress)
     EXPECT_EQ(emiss, emiss_org);
 
     // Change to default
-    EXPECT_TRUE(unit->changeI2CAddress(UnitMLX90614::DEFAULT_ADDRESS));
+    EXPECT_TRUE(unit->changeI2CAddress(UnitMLX90614BAA::DEFAULT_ADDRESS));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, +UnitMLX90614::DEFAULT_ADDRESS);
-    EXPECT_EQ(unit->address(), +UnitMLX90614::DEFAULT_ADDRESS);
+    EXPECT_EQ(addr, +UnitMLX90614BAA::DEFAULT_ADDRESS);
+    EXPECT_EQ(unit->address(), +UnitMLX90614BAA::DEFAULT_ADDRESS);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
+}
+
+TEST_P(TestMLX90614BAA, Periodic)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+    EXPECT_FALSE(unit->startPeriodicMeasurement());
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    for (auto&& iir : iir_table) {
+        for (auto&& fir : fir_table) {
+            if (m5::stl::to_underlying(fir) < 4) {
+                continue;
+            }
+
+            auto s = m5::utility::formatString("IIR:%u FIR:%u", iir, fir);
+            SCOPED_TRACE(s);
+
+            //                EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, irs));
+            EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, IRSensor::Dual));
+            EXPECT_TRUE(unit->inPeriodic());
+
+            auto tm      = get_interval(iir, fir);
+            auto elapsed = test_periodic(unit.get(), STORED_SIZE, tm ? tm : 1);
+
+            EXPECT_TRUE(unit->stopPeriodicMeasurement());
+            EXPECT_FALSE(unit->inPeriodic());
+
+            EXPECT_NE(elapsed, 0);
+            EXPECT_GE(elapsed + 2, STORED_SIZE * (tm ? tm : 1));
+
+            M5_LOGI("TM:%u IT:%u e:%ld", tm, unit->interval(), elapsed);
+
+            //
+            EXPECT_EQ(unit->available(), STORED_SIZE);
+            EXPECT_FALSE(unit->empty());
+            EXPECT_TRUE(unit->full());
+
+            uint32_t cnt{STORED_SIZE / 2};
+            while (cnt-- && unit->available()) {
+                EXPECT_TRUE(std::isfinite(unit->ambientTemperature()));
+                EXPECT_FLOAT_EQ(unit->ambientTemperature(), unit->oldest().ambientTemperature());
+                EXPECT_TRUE(std::isfinite(unit->objectTemperature1()));
+                EXPECT_FLOAT_EQ(unit->objectTemperature1(), unit->oldest().objectTemperature1());
+                EXPECT_TRUE(std::isfinite(unit->objectTemperature2()));
+                EXPECT_FLOAT_EQ(unit->objectTemperature2(), unit->oldest().objectTemperature2());
+
+                EXPECT_FALSE(unit->empty());
+                unit->discard();
+            }
+            EXPECT_EQ(unit->available(), STORED_SIZE / 2);
+            EXPECT_FALSE(unit->empty());
+            EXPECT_FALSE(unit->full());
+
+            unit->flush();
+            EXPECT_EQ(unit->available(), 0);
+            EXPECT_TRUE(unit->empty());
+            EXPECT_FALSE(unit->full());
+
+            EXPECT_FALSE(std::isfinite(unit->ambientTemperature()));
+            EXPECT_FALSE(std::isfinite(unit->objectTemperature1()));
+            EXPECT_FALSE(std::isfinite(unit->objectTemperature2()));
+        }
+    }
+
+    restore_setting();
+    restore_config();
 }

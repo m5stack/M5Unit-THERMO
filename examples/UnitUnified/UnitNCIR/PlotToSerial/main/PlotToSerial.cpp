@@ -21,9 +21,6 @@ m5::unit::UnitNCIR unit;
 
 void setup()
 {
-    delay(2000);
-
-
     M5.begin();
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {

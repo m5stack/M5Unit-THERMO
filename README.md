@@ -19,7 +19,7 @@ See also examples using conventional methods here.
 - [Unit NCIR & Datasheet](https://docs.m5stack.com/en/unit/ncir)
 
 ### Required Libraries:
-- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
+- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified) 0.0.3 or later
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
 

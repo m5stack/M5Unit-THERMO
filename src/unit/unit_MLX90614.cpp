@@ -716,7 +716,7 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
 
 bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
 {
-    std::fill(d.raw.begin(), d.farw.end(), 0x8000 /* invalid value */);
+    std::fill(d.raw.begin(), d.raw.end(), 0x8000 /* invalid value */);
     return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&
            (has_dual_sensors() ? read_register16(READ_TOBJECT_2, d.raw[2]) : true);
 }

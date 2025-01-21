@@ -182,11 +182,15 @@ public:
     struct config_t {
         //! Start periodic measurement on begin?
         bool start_periodic{true};
-
+        //! IIR filter if start on begin
         mlx90614::IIR iir{mlx90614::IIR::Filter100};
+        //! FIR filter if start on begin
         mlx90614::FIR fir{mlx90614::FIR::Filter1024};
+        //! Gain if start on begin
         mlx90614::Gain gain{mlx90614::Gain::Coeff12_5};
+        //! IRSensor if start on begin
         mlx90614::IRSensor irs{mlx90614::IRSensor::Single};
+        //! Emissivity if start on begin
         float emissivity{1.0f};
     };
 

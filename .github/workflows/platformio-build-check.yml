@@ -17,7 +17,7 @@ on:
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '/platformio-build-check.yml'
+      - '**platformio-build-check.yml'
       - '**platformio.ini'
   pull_request:
     paths:
@@ -30,7 +30,7 @@ on:
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '**/platformio-build-check.yml'
+      - '**platformio-build-check.yml'
       - '**platformio.ini'
   workflow_dispatch:
 
@@ -55,9 +55,11 @@ jobs:
       matrix:
         example:
           - PlotToSerial
+          - SimpleDisplay
 
         unit:
           - UnitNCIR
+          - UnitNCIR2
 
         board:
           - Core
@@ -113,6 +115,15 @@ jobs:
 #          - board: Paper
 #            espressif32: '4_4_0'
 
+        exclude:
+          - board: StampS3
+            example: SimpleDisplay
+          - board: AtomMatrix
+            example: SimpleDisplay
+          - board: NanoC6
+            example: SimpleDisplay
+          - unit: UnitNCIR
+            example: SimpleDisplay
 
     steps:
       - name: Checkout

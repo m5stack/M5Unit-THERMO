@@ -59,9 +59,11 @@ jobs:
 
         sketch:
           - PlotToSerial
+          - SimpleDisplay
 
         unit:
           - UnitNCIR
+          - UnitNCIR2
 
         board:
           - m5stack_atom
@@ -99,6 +101,15 @@ jobs:
         archi:
           - esp32
 
+        exclude:
+          - board: m5stack_atom
+            sketch: SimpleDisplay
+          - board: m5stack_capsule
+            sketch: SimpleDisplay
+          - board: m5stack_stamp_s3
+            sketch: SimpleDisplay
+          - unit: UnitNCIR
+            sketch: SimpleDisplay
 
     steps:
       - name: Checkout

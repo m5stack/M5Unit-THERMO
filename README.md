@@ -22,7 +22,7 @@ See also examples using conventional methods here.
 
 
 ### Required Libraries:
-- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified) 0.0.3 or later
+- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
 

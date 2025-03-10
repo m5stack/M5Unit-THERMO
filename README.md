@@ -10,16 +10,19 @@ NCIR featured with built-in infrared MLX90614 sensor, It can be used to measure 
 
 Unlike most temperature sensors, this sensor measures infrared light bouncing off of remote objects so it can sense temperature without having to touch them physically.
 
-Simply point the sensor towards what you want to measure and it will detect the temperature by absorbing IR waves emitted. Because it doesn't have to touch the object it's measuring, it can sense a wider range of temperatures than most digital sensors! It takes the measurement over an 90-degree field of view so it can be handy for determining the average temperature of an area.
-The MLX90614 is factory calibrated in wide temperature ranges: -40 to 125 ˚C for the ambient temperature and -70 to 380 ˚C for the object temperature.
+### SKU:U150
+
+The NCIR 2 Thermometer Unit utilizes the MLX90614 temperature sensor, and take ambient and object temperature readings with No Contact. Great for socially-distant reality.
 
 ## Related Link
 See also examples using conventional methods here.
 
 - [Unit NCIR & Datasheet](https://docs.m5stack.com/en/unit/ncir)
+- [Unit NCIR2 & Datasheet](https://docs.m5stack.com/ja/unit/NCIR2)
+
 
 ### Required Libraries:
-- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified) 0.0.3 or later
+- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
 

@@ -10,7 +10,6 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
-#include <thread>
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -192,7 +191,7 @@ namespace unit {
 // class UnitMLX90614
 const char UnitMLX90614::name[] = "UnitMLX90614";
 const types::uid_t UnitMLX90614::uid{"UnitMLX90614"_mmh3};
-const types::uid_t UnitMLX90614::attr{0};
+const types::attr_t UnitMLX90614::attr{0};
 
 bool UnitMLX90614::begin()
 {
@@ -275,7 +274,7 @@ bool UnitMLX90614::start_periodic_measurement()
     _periodic = true;
     _latest   = 0;
 
-    M5_LIB_LOGW("IIR:%u FIR:%u IT:%u", c.iir(), c.fir(), _interval);
+    // M5_LIB_LOGW("IIR:%u FIR:%u IT:%u", c.iir(), c.fir(), _interval);
 
     return true;
 }
@@ -569,6 +568,10 @@ bool UnitMLX90614::write_emissivity(const uint16_t emiss, const bool apply)
 
 bool UnitMLX90614::writeEmissivity(const float emiss, const bool apply)
 {
+    if (emiss < 0.1f || emiss > 1.0f) {
+        M5_LIB_LOGE("Emissivity must be between 0.1 and 1.0 (%f)", emiss);
+        return false;
+    }
     return write_emissivity(emissivity_to_raw(emiss), apply);
 }
 
@@ -675,8 +678,8 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
         v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
         return true;
     }
-    M5_LIB_LOGE("R:%02X SB:%u CRC8:%02X PEC:%02X", reg, stopbit, crc, rbuf[5]);
-    M5_DUMPE(rbuf, 6);
+    //    M5_LIB_LOGD("R:%02X SB:%u CRC8:%02X PEC:%02X", reg, stopbit, crc, rbuf[5]);
+    //    M5_DUMPD(rbuf, 6);
     return false;
 }
 
@@ -731,7 +734,7 @@ uint32_t UnitMLX90614::get_interval(const mlx90614::IIR iir, const mlx90614::FIR
 // class UnitMLX90614BAA
 const char UnitMLX90614BAA::name[] = "UnitMLX90614BAA";
 const types::uid_t UnitMLX90614BAA::uid{"UnitMLX90614BAA"_mmh3};
-const types::uid_t UnitMLX90614BAA::attr{0};
+const types::attr_t UnitMLX90614BAA::attr{0};
 
 uint32_t UnitMLX90614BAA::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
 {

@@ -206,6 +206,58 @@ TEST_P(TestMLX90614BAA, Conversion)
     }
 }
 
+TEST_P(TestMLX90614BAA, Emissivity)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+    EXPECT_FALSE(unit->writeEmissivity(0.1f));
+    EXPECT_FALSE(unit->writeEmissivity(32768));
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    uint16_t raw{};
+    float e{};
+    constexpr float near{0.00001f};
+
+    EXPECT_TRUE(unit->writeEmissivity(0.1f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_TRUE(unit->readEmissivity(raw));
+    EXPECT_NEAR(e, 0.1f, near);
+    EXPECT_EQ(raw, 6554);
+
+    EXPECT_TRUE(unit->writeEmissivity(0.5f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_TRUE(unit->readEmissivity(raw));
+    EXPECT_NEAR(e, 0.5f, near);
+    EXPECT_EQ(raw, 32768);
+
+    EXPECT_TRUE(unit->writeEmissivity(1.0f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_TRUE(unit->readEmissivity(raw));
+    EXPECT_NEAR(e, 1.0f, near);
+    EXPECT_EQ(raw, 65535);
+
+    EXPECT_FALSE(unit->writeEmissivity(0.09f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_NEAR(e, 1.0f, near);
+
+    EXPECT_FALSE(unit->writeEmissivity(-1.f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_NEAR(e, 1.0f, near);
+
+    EXPECT_FALSE(unit->writeEmissivity(1.001f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_NEAR(e, 1.0f, near);
+
+    EXPECT_TRUE(unit->writeEmissivity(0.95f));
+    EXPECT_TRUE(unit->readEmissivity(e));
+    EXPECT_TRUE(unit->readEmissivity(raw));
+    EXPECT_NEAR(e, 0.95f, near);
+    EXPECT_EQ(raw, 62258);
+}
+
 TEST_P(TestMLX90614BAA, Config)
 {
     SCOPED_TRACE(ustr);
@@ -452,11 +504,11 @@ TEST_P(TestMLX90614BAA, ChangeAddress)
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
 
-    // Change to 0x08
-    EXPECT_TRUE(unit->changeI2CAddress(0x08));
+    // Change to 0x10
+    EXPECT_TRUE(unit->changeI2CAddress(0x10));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x08);
-    EXPECT_EQ(unit->address(), 0x08);
+    EXPECT_EQ(addr, 0x10);
+    EXPECT_EQ(unit->address(), 0x10);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);

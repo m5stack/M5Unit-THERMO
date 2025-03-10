@@ -55,8 +55,8 @@ void loop()
     // Periodic
     Units.update();
     if (unit.updated()) {
-        M5_LOGI("\n>Amb:%f\n>Obj1:%f\n>Obj2:%f", unit.ambientTemperature(), unit.objectTemperature1(),
-                unit.objectTemperature2());
+        M5.Log.printf(">Amb:%f\n>Obj1:%f\n>Obj2:%f\n", unit.ambientTemperature(), unit.objectTemperature1(),
+                      unit.objectTemperature2());
 
         lcd.fillRect(8, 8, 8 * 10, 16 * 3, TFT_BLACK);
         lcd.setCursor(8, 8 + 16 * 0);
@@ -74,12 +74,12 @@ void loop()
         static bool b{};
         b = !b;
         if (b) {
-            M5_LOGI("Seeting A");
+            M5_LOGI("Enable object2");
             unit.writeIRSensor(IRSensor::Dual, false);  // Enable object 2 measuring
             unit.writeEmissivity(0.25f, false);
             unit.applySettings();
         } else {
-            M5_LOGI("Seeting B");
+            M5_LOGI("Disable object2");
             unit.writeIRSensor(IRSensor::Single, false);  // Disable object 2 measuring
             unit.writeEmissivity(1.0f, false);
             unit.applySettings();

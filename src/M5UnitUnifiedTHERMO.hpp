@@ -14,6 +14,7 @@
 #define M5_UNIT_UNIFIED_THERMO_HPP
 
 #include "unit/unit_MLX90614.hpp"
+#include "unit/unit_NCIR2.hpp"
 
 /*!
   @namespace m5

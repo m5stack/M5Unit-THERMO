@@ -12,16 +12,12 @@ on:
       - 'src/unit/**.hpp'
       - 'src/unit/**.h'
       - 'src/unit/**.c'
-      - 'test/**.cpp'
-      - 'test/**.hpp'
-      - 'test/**.h'
-      - 'test/**.c'
       - 'examples/UnitUnified/**.ino'
       - 'examples/UnitUnified/**.cpp'
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '/platformio-build-check.yml'
+      - '**platformio-build-check.yml'
       - '**platformio.ini'
   pull_request:
     paths:
@@ -29,23 +25,28 @@ on:
       - 'src/unit/**.hpp'
       - 'src/unit/**.h'
       - 'src/unit/**.c'
-      - 'test/**.cpp'
-      - 'test/**.hpp'
-      - 'test/**.h'
-      - 'test/**.c'
       - 'examples/UnitUnified/**.ino'
       - 'examples/UnitUnified/**.cpp'
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '**/platformio-build-check.yml'
+      - '**platformio-build-check.yml'
       - '**platformio.ini'
   workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     name: ${{ matrix.unit }}:${{ matrix.example }}@${{ matrix.board }}:${{ matrix.framework }}:${{ matrix.espressif32 }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     strategy:
       fail-fast: false
@@ -54,9 +55,11 @@ jobs:
       matrix:
         example:
           - PlotToSerial
+          - SimpleDisplay
 
         unit:
           - UnitNCIR
+          - UnitNCIR2
 
         board:
           - Core
@@ -112,6 +115,15 @@ jobs:
 #          - board: Paper
 #            espressif32: '4_4_0'
 
+        exclude:
+          - board: StampS3
+            example: SimpleDisplay
+          - board: AtomMatrix
+            example: SimpleDisplay
+          - board: NanoC6
+            example: SimpleDisplay
+          - unit: UnitNCIR
+            example: SimpleDisplay
 
     steps:
       - name: Checkout

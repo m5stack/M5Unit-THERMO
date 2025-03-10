@@ -165,7 +165,7 @@ struct EEPROM {
 }  // namespace mlx90614
 
 /*!
-  @class UnitMLX90614
+  @class m5::unit::UnitMLX90614
   @brief Base class of the UnitMLX90614 series
   @brief It can be used to measure the surface temperature of a human body or other object
   @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
@@ -294,20 +294,33 @@ public:
 
     ///@name Periodic measurement
     ///@{
+    /*!
+      @brief Start periodic measurement
+      @param iir  Infinite Impulse Response
+      @param fir  Finite Impulse Response
+      @param gain Amplifier gain
+      @param irs  Infra-Red Sensor mode
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain,
                                          const mlx90614::IRSensor irs)
     {
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement(iir, fir, gain, irs);
     }
+    //! @brief Start periodic measurement in the current settings
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement();
     }
-
+    /*!
+      @brief Stop periodic measurement
+      @return True if successful
+    */
     inline bool stopPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::stopPeriodicMeasurement();
     }
+    ///@}
 
     ///@note If apply is false, a POR or call applySetting() is required to enable the setting
     ///@warning Some settings are writable in SMBus mode, but not reflected in operation

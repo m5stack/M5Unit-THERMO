@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pwmctrl_0',['pwmCtrl',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a2f0c540e42b2df1ccfd4f27946d98752',1,'m5::unit::mlx90614::EEPROM']]]
+  ['fir_0',['fir',['../structm5_1_1unit_1_1_unit_m_l_x90614_1_1config__t.html#a5e0ea8316cd0db8d4a5653126fa922d3',1,'m5::unit::UnitMLX90614::config_t']]]
 ];

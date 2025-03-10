@@ -1,11 +1,8 @@
 var searchData=
 [
-  ['ta_5fto1_0',['TA_TO1',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba3d91280357320e35b6a716130e06d7b2',1,'m5::unit::mlx90614']]],
-  ['ta_5fto2_1',['TA_TO2',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba45ff1c306cf6f92786578547dbf63dde',1,'m5::unit::mlx90614']]],
-  ['tarange_2',['taRange',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a73e989123857993f2814fb61b63bd6fd',1,'m5::unit::mlx90614::EEPROM']]],
-  ['thermo_3',['M5Unit-THERMO',['../index.html',1,'']]],
-  ['to1_5fto2_4',['TO1_TO2',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba23a2e437a01a3e8a75e54eae6915636a',1,'m5::unit::mlx90614']]],
-  ['to2_5fundefined_5',['TO2_Undefined',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cbac93a4211fde8c725b22d9a82aeda62b3',1,'m5::unit::mlx90614']]],
-  ['todo_20list_6',['Todo List',['../todo.html',1,'']]],
-  ['tomin_7',['toMin',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a69b70007767196b84dfe3d20fd1ec158',1,'m5::unit::mlx90614::EEPROM']]]
+  ['single_0',['Single',['../unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adeca66ba162102bbf6ae31b522aec561735e',1,'m5::unit::mlx90614']]],
+  ['sleep_1',['sleep',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ab3135fdd3d68f3595544e76b578907c1',1,'m5::unit::UnitMLX90614']]],
+  ['start_5fperiodic_2',['start_periodic',['../structm5_1_1unit_1_1_unit_m_l_x90614_1_1config__t.html#afd590585cc80fd9cb8a0cfd6affe0330',1,'m5::unit::UnitMLX90614::config_t::start_periodic'],['../structm5_1_1unit_1_1_unit_n_c_i_r2_1_1config__t.html#a0ae2a4420b6a4ff03f966fa4fd7e16d4',1,'m5::unit::UnitNCIR2::config_t::start_periodic']]],
+  ['startperiodicmeasurement_3',['startPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a3565dd00566d3498d16d0d0c68f09e15',1,'m5::unit::UnitMLX90614::startPeriodicMeasurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain, const mlx90614::IRSensor irs)'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a14e12c43f568ca8bb3429b6ac33c822b',1,'m5::unit::UnitMLX90614::startPeriodicMeasurement()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a9f3ced357a3d657822db276de72945c4',1,'m5::unit::UnitNCIR2::startPeriodicMeasurement(const uint32_t interval)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a0428d8ed0f0b95e7872dccd8fb1cd476',1,'m5::unit::UnitNCIR2::startPeriodicMeasurement()']]],
+  ['stopperiodicmeasurement_4',['stopPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a248d85c83af8f35825c5e28c20793fb8',1,'m5::unit::UnitMLX90614::stopPeriodicMeasurement()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a693a9ceefc641252e0ec92bfbc7367ec',1,'m5::unit::UnitNCIR2::stopPeriodicMeasurement()']]]
 ];

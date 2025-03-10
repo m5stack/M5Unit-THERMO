@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['config_0',['config',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a4f598e73102621461de93ed11250a97c',1,'m5::unit::mlx90614::EEPROM']]]
+  ['button_5finterval_0',['button_interval',['../structm5_1_1unit_1_1_unit_n_c_i_r2_1_1config__t.html#a0b72bf573b6c41ddfeb2418ce68b58d1',1,'m5::unit::UnitNCIR2::config_t']]]
 ];

@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.0.1 git rev:afceaae</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.1.0 git rev:9101bf1</span>
    </div>
   </td>
  </tr>
@@ -208,14 +208,15 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>objectFahrenheit2</b
 <tr class="memdesc:ac845832b08a103cfa6288bff0f66f895"><td class="mdescLeft">&#160;</td><td class="mdescRight">Oldest object 2 temperature (Fahrenheit) <br /></td></tr>
 <tr class="separator:ac845832b08a103cfa6288bff0f66f895"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Periodic measurement</div></td></tr>
-<tr class="memitem:a3565dd00566d3498d16d0d0c68f09e15" id="r_a3565dd00566d3498d16d0d0c68f09e15"><td class="memItemLeft" align="right" valign="top"><a id="a3565dd00566d3498d16d0d0c68f09e15" name="a3565dd00566d3498d16d0d0c68f09e15"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurement</b> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
+<tr class="memitem:a3565dd00566d3498d16d0d0c68f09e15" id="r_a3565dd00566d3498d16d0d0c68f09e15"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3565dd00566d3498d16d0d0c68f09e15">startPeriodicMeasurement</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
+<tr class="memdesc:a3565dd00566d3498d16d0d0c68f09e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement.  <br /></td></tr>
 <tr class="separator:a3565dd00566d3498d16d0d0c68f09e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14e12c43f568ca8bb3429b6ac33c822b" id="r_a14e12c43f568ca8bb3429b6ac33c822b"><td class="memItemLeft" align="right" valign="top"><a id="a14e12c43f568ca8bb3429b6ac33c822b" name="a14e12c43f568ca8bb3429b6ac33c822b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurement</b> ()</td></tr>
+<tr class="memdesc:a14e12c43f568ca8bb3429b6ac33c822b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings. <br /></td></tr>
 <tr class="separator:a14e12c43f568ca8bb3429b6ac33c822b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a248d85c83af8f35825c5e28c20793fb8" id="r_a248d85c83af8f35825c5e28c20793fb8"><td class="memItemLeft" align="right" valign="top"><a id="a248d85c83af8f35825c5e28c20793fb8" name="a248d85c83af8f35825c5e28c20793fb8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>stopPeriodicMeasurement</b> ()</td></tr>
+<tr class="memitem:a248d85c83af8f35825c5e28c20793fb8" id="r_a248d85c83af8f35825c5e28c20793fb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a248d85c83af8f35825c5e28c20793fb8">stopPeriodicMeasurement</a> ()</td></tr>
+<tr class="memdesc:a248d85c83af8f35825c5e28c20793fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop periodic measurement.  <br /></td></tr>
 <tr class="separator:a248d85c83af8f35825c5e28c20793fb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Settings(Config)</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><dl class="section note"><dt>Note</dt><dd>If apply is false, a POR or call applySetting() is required to enable the setting </dd></dl>
@@ -856,6 +857,85 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 </div><div class="memdoc">
 
 <p>Sleep. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
+<a id="a3565dd00566d3498d16d0d0c68f09e15" name="a3565dd00566d3498d16d0d0c68f09e15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3565dd00566d3498d16d0d0c68f09e15">&#9670;&#160;</a></span>startPeriodicMeasurement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMLX90614::startPeriodicMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a></td>          <td class="paramname"><span class="paramname"><em>iir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a></td>          <td class="paramname"><span class="paramname"><em>fir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a></td>          <td class="paramname"><span class="paramname"><em>gain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a></td>          <td class="paramname"><span class="paramname"><em>irs</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start periodic measurement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iir</td><td>Infinite Impulse Response </td></tr>
+    <tr><td class="paramname">fir</td><td>Finite Impulse Response </td></tr>
+    <tr><td class="paramname">gain</td><td>Amplifier gain </td></tr>
+    <tr><td class="paramname">irs</td><td>Infra-Red Sensor mode </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
+<a id="a248d85c83af8f35825c5e28c20793fb8" name="a248d85c83af8f35825c5e28c20793fb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a248d85c83af8f35825c5e28c20793fb8">&#9670;&#160;</a></span>stopPeriodicMeasurement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMLX90614::stopPeriodicMeasurement </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stop periodic measurement. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
 
 </div>

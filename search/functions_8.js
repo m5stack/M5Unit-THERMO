@@ -1,0 +1,6 @@
+var searchData=
+[
+  ['sleep_0',['sleep',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ab3135fdd3d68f3595544e76b578907c1',1,'m5::unit::UnitMLX90614']]],
+  ['startperiodicmeasurement_1',['startPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a3565dd00566d3498d16d0d0c68f09e15',1,'m5::unit::UnitMLX90614::startPeriodicMeasurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain, const mlx90614::IRSensor irs)'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a14e12c43f568ca8bb3429b6ac33c822b',1,'m5::unit::UnitMLX90614::startPeriodicMeasurement()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a9f3ced357a3d657822db276de72945c4',1,'m5::unit::UnitNCIR2::startPeriodicMeasurement(const uint32_t interval)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a0428d8ed0f0b95e7872dccd8fb1cd476',1,'m5::unit::UnitNCIR2::startPeriodicMeasurement()']]],
+  ['stopperiodicmeasurement_2',['stopPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a248d85c83af8f35825c5e28c20793fb8',1,'m5::unit::UnitMLX90614::stopPeriodicMeasurement()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a693a9ceefc641252e0ec92bfbc7367ec',1,'m5::unit::UnitNCIR2::stopPeriodicMeasurement()']]]
+];

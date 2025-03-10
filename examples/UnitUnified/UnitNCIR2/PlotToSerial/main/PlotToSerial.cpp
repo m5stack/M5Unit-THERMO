@@ -98,9 +98,9 @@ void loop()
     // Periodic
     if (unit.updated()) {
         temp = unit.temperature();
-        float ctemp{};
+        Data ctemp{};
         unit.readChipTemperature(ctemp);
-        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, ctemp);
+        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, ctemp.temperature());
     }
 
     // Button

@@ -118,7 +118,7 @@ TEST_P(TestNCIR2, Emissivity)
         EXPECT_EQ(raw, 65535);
 
         // false
-        EXPECT_FALSE(unit->writeEmissivity(-0.09f));
+        EXPECT_FALSE(unit->writeEmissivity(0.09f));
         EXPECT_TRUE(unit->readEmissivity(e));
         EXPECT_NEAR(e, 1.0f, near);
 

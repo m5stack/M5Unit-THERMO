@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.1.0 git rev:9101bf1</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.2.0 git rev:e387a6b</span>
    </div>
   </td>
  </tr>
@@ -186,17 +186,17 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="separator:a82d14e0395dfc4356ef4924f89182369"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Alarm</div></td></tr>
 <tr class="memitem:a5905ca6a3457c1610a892257941b4150" id="r_a5905ca6a3457c1610a892257941b4150"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5905ca6a3457c1610a892257941b4150">readAlarmTemperature</a> (const bool highlow, int16_t &amp;raw)</td></tr>
-<tr class="memdesc:a5905ca6a3457c1610a892257941b4150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm temperature.  <br /></td></tr>
+<tr class="memdesc:a5905ca6a3457c1610a892257941b4150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm temperature threshold.  <br /></td></tr>
 <tr class="separator:a5905ca6a3457c1610a892257941b4150"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a374267ec90c1d497eb2e49fab248beae" id="r_a374267ec90c1d497eb2e49fab248beae"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a374267ec90c1d497eb2e49fab248beae">readAlarmTemperature</a> (const bool highlow, float &amp;<a class="el" href="#a776ee8b510978a355b7c847cda380135">celsius</a>)</td></tr>
-<tr class="memdesc:a374267ec90c1d497eb2e49fab248beae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm temperature.  <br /></td></tr>
+<tr class="memdesc:a374267ec90c1d497eb2e49fab248beae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm temperature threshold.  <br /></td></tr>
 <tr class="separator:a374267ec90c1d497eb2e49fab248beae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b545cfcd5adce1244adf2a265c00862" id="r_a4b545cfcd5adce1244adf2a265c00862"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b545cfcd5adce1244adf2a265c00862">writeAlarmTemperature</a> (const bool highlow, const int16_t raw)</td></tr>
-<tr class="memdesc:a4b545cfcd5adce1244adf2a265c00862"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the alarm temperature.  <br /></td></tr>
+<tr class="memdesc:a4b545cfcd5adce1244adf2a265c00862"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the alarm temperature threshold.  <br /></td></tr>
 <tr class="separator:a4b545cfcd5adce1244adf2a265c00862"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7e62cb3658278ad00ace604fff968ed" id="r_ac7e62cb3658278ad00ace604fff968ed"><td class="memTemplParams" colspan="2">template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; T &gt;::value, std::nullptr_t &gt;::type  = nullptr&gt; </td></tr>
 <tr class="memitem:ac7e62cb3658278ad00ace604fff968ed"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ac7e62cb3658278ad00ace604fff968ed">writeAlarmTemperature</a> (const bool highlow, const T <a class="el" href="#a776ee8b510978a355b7c847cda380135">celsius</a>)</td></tr>
-<tr class="memdesc:ac7e62cb3658278ad00ace604fff968ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the alarm temperature.  <br /></td></tr>
+<tr class="memdesc:ac7e62cb3658278ad00ace604fff968ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the alarm temperature threshold.  <br /></td></tr>
 <tr class="separator:ac7e62cb3658278ad00ace604fff968ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8887ee5ec03d83ffe2e4095415e0c76b" id="r_a8887ee5ec03d83ffe2e4095415e0c76b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8887ee5ec03d83ffe2e4095415e0c76b">readAlarmLED</a> (const bool highlow, uint32_t &amp;rgb)</td></tr>
 <tr class="memdesc:a8887ee5ec03d83ffe2e4095415e0c76b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm LED color.  <br /></td></tr>
@@ -269,7 +269,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="memdesc:a23eacb5d269ea2b0ef190e81fac9c73e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button pressed?  <br /></td></tr>
 <tr class="separator:a23eacb5d269ea2b0ef190e81fac9c73e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33fd84534b1ea9397190fb9554525c60" id="r_a33fd84534b1ea9397190fb9554525c60"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33fd84534b1ea9397190fb9554525c60">wasReleased</a> ()</td></tr>
-<tr class="memdesc:a33fd84534b1ea9397190fb9554525c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is button released?  <br /></td></tr>
+<tr class="memdesc:a33fd84534b1ea9397190fb9554525c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button released?  <br /></td></tr>
 <tr class="separator:a33fd84534b1ea9397190fb9554525c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">I2C Address</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><dl class="section warning"><dt>Warning</dt><dd>Handling warning </dd></dl>
@@ -589,7 +589,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
       </table>
 </div><div class="memdoc">
 
-<p>Read the alarm temperature. </p>
+<p>Read the alarm temperature threshold. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
@@ -621,7 +621,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
       </table>
 </div><div class="memdoc">
 
-<p>Read the alarm temperature. </p>
+<p>Read the alarm temperature threshold. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
@@ -1046,7 +1046,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 </table>
 </div><div class="memdoc">
 
-<p>Is button released? </p>
+<p>Was button released? </p>
 <dl class="section return"><dt>Returns</dt><dd>True if released </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The state is managed by update </dd></dl>
 
@@ -1249,7 +1249,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
       </table>
 </div><div class="memdoc">
 
-<p>Write the alarm temperature. </p>
+<p>Write the alarm temperature threshold. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
@@ -1290,7 +1290,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 </table>
 </div><div class="memdoc">
 
-<p>Write the alarm temperature. </p>
+<p>Write the alarm temperature threshold. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>

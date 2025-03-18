@@ -18,5 +18,6 @@ var searchData=
   ['filter8_15',['Filter8',['../unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccda31034dca0cad987ff621119edbab1b66',1,'m5::unit::mlx90614']]],
   ['filter80_16',['Filter80',['../unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4cea38a8be6ca151eb01dded45eb60d4d17e',1,'m5::unit::mlx90614']]],
   ['fir_17',['FIR',['../unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd',1,'m5::unit::mlx90614']]],
-  ['fir_18',['fir',['../structm5_1_1unit_1_1_unit_m_l_x90614_1_1config__t.html#a5e0ea8316cd0db8d4a5653126fa922d3',1,'m5::unit::UnitMLX90614::config_t']]]
+  ['fir_18',['fir',['../structm5_1_1unit_1_1_unit_m_l_x90614_1_1config__t.html#a5e0ea8316cd0db8d4a5653126fa922d3',1,'m5::unit::UnitMLX90614::config_t']]],
+  ['function_5fcontrol_19',['function_control',['../structm5_1_1unit_1_1_unit_thermal2_1_1config__t.html#a2285202ca5a92a77112d8100d5c21a04',1,'m5::unit::UnitThermal2::config_t']]]
 ];

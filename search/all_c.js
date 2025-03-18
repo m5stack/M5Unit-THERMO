@@ -1,24 +1,4 @@
 var searchData=
 [
-  ['readalarmbuzzer_0',['readAlarmBuzzer',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#ad8abeea46ee167683c30f6b62d05f4e8',1,'m5::unit::UnitNCIR2::readAlarmBuzzer(const bool highlow, uint16_t &amp;freq, uint16_t &amp;interval, uint8_t &amp;rawDuty)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a0b021bfcf0dc37bf6a997661898d81d6',1,'m5::unit::UnitNCIR2::readAlarmBuzzer(const bool highlow, uint16_t &amp;freq, uint16_t &amp;interval, float &amp;duty)']]],
-  ['readalarmled_1',['readAlarmLED',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a8887ee5ec03d83ffe2e4095415e0c76b',1,'m5::unit::UnitNCIR2']]],
-  ['readalarmtemperature_2',['readAlarmTemperature',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a5905ca6a3457c1610a892257941b4150',1,'m5::unit::UnitNCIR2::readAlarmTemperature(const bool highlow, int16_t &amp;raw)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a374267ec90c1d497eb2e49fab248beae',1,'m5::unit::UnitNCIR2::readAlarmTemperature(const bool highlow, float &amp;celsius)']]],
-  ['readambientminmax_3',['readAmbientMinMax',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ae7f8d8c83350bdd20c8d82ef53c0fbc9',1,'m5::unit::UnitMLX90614::readAmbientMinMax(uint8_t &amp;taMin, uint8_t &amp;taMax)'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a004fb58a2034c5907fd8aeb3f7b736a9',1,'m5::unit::UnitMLX90614::readAmbientMinMax(float &amp;taMin, float &amp;taMax)']]],
-  ['readbuttonstatus_4',['readButtonStatus',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a82c5f151768e8490e0dec56e32e74e43',1,'m5::unit::UnitNCIR2']]],
-  ['readbuzzer_5',['readBuzzer',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a61695c356320d41b43c85d53a0577edb',1,'m5::unit::UnitNCIR2::readBuzzer(uint16_t &amp;freq, uint8_t &amp;rawDuty)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a644dde2458ae4c933cca4043450d16d3',1,'m5::unit::UnitNCIR2::readBuzzer(uint16_t &amp;freq, float &amp;duty)']]],
-  ['readbuzzercontrol_6',['readBuzzerControl',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a9eebaee8f2cba250bc5e7a5d18a9d6de',1,'m5::unit::UnitNCIR2']]],
-  ['readchiptemperature_7',['readChipTemperature',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a3530049398cd6577abdbb96a2c0546c8',1,'m5::unit::UnitNCIR2']]],
-  ['readconfig_8',['readConfig',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a59b27a2cfeb26cdf8d027e841498701a',1,'m5::unit::UnitMLX90614']]],
-  ['reademissivity_9',['readEmissivity',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a3bc97e6bee567fd2698b055abc8bf92a',1,'m5::unit::UnitMLX90614::readEmissivity(uint16_t &amp;emiss)'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#aceeaa0757dd23076da39eb652c3d3f75',1,'m5::unit::UnitMLX90614::readEmissivity(float &amp;emiss)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a0949e88269d163c84462640dd0451cbf',1,'m5::unit::UnitNCIR2::readEmissivity(uint16_t &amp;raw)'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a166f78eeba56da88f8216e8233400440',1,'m5::unit::UnitNCIR2::readEmissivity(float &amp;e)']]],
-  ['readfir_10',['readFIR',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#af94a64fb6b183c85489c36cf2eba15a0',1,'m5::unit::UnitMLX90614']]],
-  ['readfirmwareversion_11',['readFirmwareVersion',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a7c5f2bc3faf0babd534eaff8e0fab9af',1,'m5::unit::UnitNCIR2']]],
-  ['readgain_12',['readGain',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a4bdc2446fad7a5432df52888dbe38b5a',1,'m5::unit::UnitMLX90614']]],
-  ['readi2caddress_13',['readI2CAddress',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ac13a2e84b3395b47985c978717bdc54e',1,'m5::unit::UnitMLX90614::readI2CAddress()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#a69ba91e7a9402616ded11ff2160546a3',1,'m5::unit::UnitNCIR2::readI2CAddress()']]],
-  ['readiir_14',['readIIR',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a9964878b50b166c850ff5071cc2c77d1',1,'m5::unit::UnitMLX90614']]],
-  ['readirsensor_15',['readIRSensor',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e',1,'m5::unit::UnitMLX90614']]],
-  ['readled_16',['readLED',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#aa0599d5326008255e9502b12f82a974b',1,'m5::unit::UnitNCIR2']]],
-  ['readobjectminmax_17',['readObjectMinMax',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ac195aa77082da86bd84a14366ae5a52e',1,'m5::unit::UnitMLX90614::readObjectMinMax(uint16_t &amp;toMin, uint16_t &amp;toMax)'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#acec07a9b092cb34b01c21899f67d4c0e',1,'m5::unit::UnitMLX90614::readObjectMinMax(float &amp;toMin, float &amp;toMax)']]],
-  ['readoutput_18',['readOutput',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a6a2e5a6297767bf12563418e14e7892d',1,'m5::unit::UnitMLX90614']]],
-  ['readpositivekf2_19',['readPositiveKf2',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#abf789a956664d5eeae40083606fb7d34',1,'m5::unit::UnitMLX90614']]],
-  ['readpositiveks_20',['readPositiveKs',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a2923572311a4a8cda92f5c6e7dbd0de0',1,'m5::unit::UnitMLX90614']]]
+  ['pwmctrl_0',['pwmCtrl',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a2f0c540e42b2df1ccfd4f27946d98752',1,'m5::unit::mlx90614::EEPROM']]]
 ];

@@ -403,7 +403,7 @@ TEST_P(TestThermal2, LED)
 {
     SCOPED_TRACE(ustr);
     EXPECT_TRUE(unit->writeAlarmEnabled(0));
-    
+
     uint32_t count{8};
     while (count--) {
         uint8_t r = rng() & 0xFF;
@@ -411,23 +411,19 @@ TEST_P(TestThermal2, LED)
         uint8_t b = rng() & 0xFF;
         uint32_t rgb{};
         EXPECT_TRUE(unit->writeLED(r, g, b));
-
-                         delay(5);
-
         EXPECT_TRUE(unit->readLED(rgb));
         EXPECT_EQ((rgb >> 16) & 0xFF, r);
         EXPECT_EQ((rgb >> 8) & 0xFF, g);
         EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
+        delay(100);
+
         uint32_t rgb24 = rng() & 0x00FFFFFF;
         EXPECT_TRUE(unit->writeLED(rgb24));
-
-                        delay(5);
-        
-
         EXPECT_TRUE(unit->readLED(rgb));
-
         EXPECT_EQ(rgb, rgb24);
+
+        delay(100);
     }
 }
 

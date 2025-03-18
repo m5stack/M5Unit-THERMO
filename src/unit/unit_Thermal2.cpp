@@ -34,6 +34,25 @@ constexpr uint16_t interval_table[] = {
     2000, 1000, 1000 / 2, 1000 / 4, 1000 / 8, 1000 / 16, 1000 / 32, 1000 / 64,
 };
 
+#if 0
+// From firmware
+// Registers without this bit set will not be reflected immediately
+constexpr uint8_t REGISTER_DIRECT_WRITE_MAP[] = {
+    0x00, 0xD8,  // 0x00 - 0x0F
+    0xC0, 0x00,  // 0x10 - 0x1F
+    0xFF, 0x00,  // 0x20 - 0x2F
+    0xFF, 0x00,  // 0x30 - 0x3F
+    0x00, 0x00,  // 0x40 - 0x4F
+    0x00, 0x00,  // 0x50 - 0x5F
+    0x00, 0x02,  // 0x60 - 0x6E
+};
+bool is_immediately(const uint8_t reg)
+{
+    return ((reg >> 3) < m5::stl::size(REGISTER_DIRECT_WRITE_MAP))
+               ? REGISTER_DIRECT_WRITE_MAP[reg >> 3] & (0x80 >> (reg & 0x07))
+               : false;
+}
+#endif
 }  // namespace
 
 namespace m5 {
@@ -170,13 +189,23 @@ bool UnitThermal2::readFunctionControl(uint8_t& value)
     return read_register8(FUNCTION_CONTROL_REG, value);
 }
 
-bool UnitThermal2::writeFunctionControl(uint8_t value)
+bool UnitThermal2::writeFunctionControl(const uint8_t value, const bool verify)
 {
     if (inPeriodic()) {
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
-    return writeRegister8(FUNCTION_CONTROL_REG, value & 0x07);
+    if (writeRegister8(FUNCTION_CONTROL_REG, value & 0x07)) {
+        auto timeout_at = m5::utility::millis() + 100;
+        do {
+            uint8_t fc{};
+            if (!verify || (readFunctionControl(fc) && (fc == (value & 0x07)))) {
+                return true;
+            }
+            m5::utility::delay(1);
+        } while (m5::utility::millis() <= timeout_at);
+    }
+    return false;
 }
 
 bool UnitThermal2::read_function_control_bit(const uint8_t bit, bool& enabled)
@@ -353,13 +382,24 @@ bool UnitThermal2::readBuzzer(uint16_t& freq, uint8_t& duty)
     return false;
 }
 
-bool UnitThermal2::writeBuzzer(const uint16_t freq, const uint8_t duty)
+bool UnitThermal2::writeBuzzer(const uint16_t freq, const uint8_t duty, const bool verify)
 {
     uint8_t v[3]{};
     v[0] = freq & 0xFF;
     v[1] = freq >> 8;
     v[2] = duty;
-    return writeRegister(BUZZER_FREQ_REG, v, 3);
+    if (writeRegister(BUZZER_FREQ_REG, v, 3)) {
+        auto timeout_at = m5::utility::millis() + 100;
+        do {
+            uint16_t f{};
+            uint8_t d{};
+            if (!verify || (readBuzzer(f, d) && f == freq && d == duty)) {
+                return true;
+            }
+            m5::utility::delay(1);
+        } while (m5::utility::millis() <= timeout_at);
+    }
+    return false;
 }
 
 bool UnitThermal2::writeBuzzerDuty(const uint8_t duty)
@@ -373,18 +413,28 @@ bool UnitThermal2::readLED(uint32_t& rgb)
     uint8_t v[3]{};
     if (read_register(LED_REG, v, 3)) {
         rgb = (v[0] << 16) | (v[1] << 8) | v[2];
-        M5_LIB_LOGE("R>>>>:%X (%02x,%02x,%02x)", rgb, v[0], v[1], v[2]);
         return true;
     }
     return false;
 }
 
-bool UnitThermal2::writeLED(const uint8_t r, const uint8_t g, const uint8_t b)
+bool UnitThermal2::writeLED(const uint8_t r, const uint8_t g, const uint8_t b, const bool verify)
 {
-    M5_LIB_LOGE(">>>> %02X,%02X,%02X", r, g, b);
-
     uint8_t v[3]{r, g, b};
-    return writeRegister(LED_REG, v, 3);
+    if (writeRegister(LED_REG, v, 3)) {
+        auto timeout_at = m5::utility::millis() + 100;
+
+        auto at = m5::utility::millis();
+
+        do {
+            uint8_t v[3]{};
+            if (!verify || (read_register(LED_REG, v, 3) && v[0] == r && v[1] == g && v[2] == b)) {
+                return true;
+            }
+            m5::utility::delay(1);
+        } while (m5::utility::millis() <= timeout_at);
+    }
+    return false;
 }
 
 bool UnitThermal2::readButtonStatus(uint8_t& bs)

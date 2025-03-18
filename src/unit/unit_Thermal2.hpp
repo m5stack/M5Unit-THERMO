@@ -257,10 +257,11 @@ public:
     /*!
       @brief Write the function control
       @param value Function control value
+      @param verify Verify the value is written if true z(it is not reflected immediately)
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
-    bool writeFunctionControl(uint8_t value);
+    bool writeFunctionControl(const uint8_t value, const bool verify = true);
     //! @brief Write the buzzer enable status
     inline bool writeBuzzerEnabled(const bool enabled)
     {
@@ -430,11 +431,12 @@ public:
       @brief Write the buzzer settings
       @param freq Frequency
       @param duty Duty 0 - 255
+      @param verify Verify the value is written if true z(it is not reflected immediately)
       @return True if successful
       @note buzzer duty. 0~255 (default:128 : The loudest sound setting; the further away from 128, the quieter the
       sound)
      */
-    bool writeBuzzer(const uint16_t freq, const uint8_t duty);
+    bool writeBuzzer(const uint16_t freq, const uint8_t duty, const bool verify = true);
     /*!
       @brief Write the buzzer duty settings
       @param duty Duty 0 - 255
@@ -476,11 +478,11 @@ public:
     /*!
       @brief Write the LED color
       @param rgb RGB24 color
+      @param verify Verify the value is written if true z(it is not reflected immediately)
       @return True if successful
      */
-    inline bool writeLED(const uint32_t rgb)
+    inline bool writeLED(const uint32_t rgb, const bool verify = true)
     {
-        M5_LIB_LOGE(">>>> %X", rgb);
         return writeLED(rgb >> 16, rgb >> 8, rgb & 0xFF);
     }
     /*!
@@ -488,9 +490,10 @@ public:
       @param r Red
       @param g Green
       @param b Blue
+      @param verify Verify the value is written if true z(it is not reflected immediately)
       @return True if successful
      */
-    bool writeLED(const uint8_t r, const uint8_t g, const uint8_t b);
+    bool writeLED(const uint8_t r, const uint8_t g, const uint8_t b, const bool verify = true);
     ///@}
 
     ///@name Button
@@ -633,28 +636,28 @@ constexpr uint8_t TEMPERATURE_ALARM_STATUS_REG{0x01};  // R
 // constexpr uint8_t DEVICE_STATUS_REG{0x02};             // R 2
 constexpr uint8_t DEVICE_ID_REG{0x04};            // R 2
 constexpr uint8_t FIRMWARE_VERSION_REG{0x06};     // R 2
-constexpr uint8_t I2C_ADDRESS_REG{0x08};          // R/W 2 (0x09:bit inverted)
+constexpr uint8_t I2C_ADDRESS_REG{0x08};          // R/W 2 (0x09:bit inverted) I
 constexpr uint8_t FUNCTION_CONTROL_REG{0x0A};     // R/W
-constexpr uint8_t REFRESH_RATE_CONFIG_REG{0x0B};  // R/W
-constexpr uint8_t NOISE_FILTER_CONFIG_REG{0x0C};  // R/W
+constexpr uint8_t REFRESH_RATE_CONFIG_REG{0x0B};  // R/W I
+constexpr uint8_t NOISE_FILTER_CONFIG_REG{0x0C};  // R/W I
 
-constexpr uint8_t TEMPERATURE_MONITOR_SIZE_REG{0x10};  // R/W
-constexpr uint8_t ENABLE_TEMPERATURE_ALARM_REG{0x11};  // R/W
+constexpr uint8_t TEMPERATURE_MONITOR_SIZE_REG{0x10};  // R/W I
+constexpr uint8_t ENABLE_TEMPERATURE_ALARM_REG{0x11};  // R/W I
 constexpr uint8_t BUZZER_FREQ_REG{0x12};               // R/W 2
 constexpr uint8_t BUZZER_DUTY_REG{0x14};               // R/W
 constexpr uint8_t LED_REG{0x15};                       // R/W 3(R,G,B)
 
-constexpr uint8_t LOW_ALARM_THERSHOLD_REG{0x20};    // R/W 2
-constexpr uint8_t LOW_ALARM_BUZZER_FREQ_REG{0x22};  // R/W 2
-constexpr uint8_t LOW_ALARM_INTERVAL_REG{0x24};     // R/W
-constexpr uint8_t LOW_ALARM_LED_REG{0x25};          // R/W 3
+constexpr uint8_t LOW_ALARM_THERSHOLD_REG{0x20};    // R/W 2 I
+constexpr uint8_t LOW_ALARM_BUZZER_FREQ_REG{0x22};  // R/W 2 I
+constexpr uint8_t LOW_ALARM_INTERVAL_REG{0x24};     // R/W I
+constexpr uint8_t LOW_ALARM_LED_REG{0x25};          // R/W 3 I
 
-constexpr uint8_t HIGH_ALARM_THERSHOLD_REG{0x30};    // R/W 2
-constexpr uint8_t HIGH_ALARM_BUZZER_FREQ_REG{0x32};  // R/W 2
-constexpr uint8_t HIGH_ALARM_INTERVAL_REG{0x34};     // R/W
-constexpr uint8_t HIGH_ALARM_LED_REG{0x35};          // R/W 3
+constexpr uint8_t HIGH_ALARM_THERSHOLD_REG{0x30};    // R/W 2 I
+constexpr uint8_t HIGH_ALARM_BUZZER_FREQ_REG{0x32};  // R/W 2 I
+constexpr uint8_t HIGH_ALARM_INTERVAL_REG{0x34};     // R/W I
+constexpr uint8_t HIGH_ALARM_LED_REG{0x35};          // R/W 3 I
 
-constexpr uint8_t DATA_REFRESH_CONTROL_REG{0x6E};  // R/W
+constexpr uint8_t DATA_REFRESH_CONTROL_REG{0x6E};  // R/W I
 constexpr uint8_t SUB_PAGE_INFORMATION_REG{0x6F};  // R
 
 constexpr uint8_t MEDIAN_TEPERATURE_REG{0x70};     // R 2

@@ -717,7 +717,7 @@ public:
                 img->setTextColor(graph_color_table[i], 0);
                 img->setTextPadding(img->width());
                 img->setTextDatum(textdatum_t::top_left);
-                auto tw = img->textWidth(graph_text_table[i]);
+                // auto tw = img->textWidth(graph_text_table[i]);
                 img->drawString(graph_text_table[i], 1, 0);
                 img->pushSprite(param->gfx, _client_rect.x, _client_rect.y + (_client_rect.h * i / _text_count));
             }
@@ -730,7 +730,7 @@ public:
             img->setTextColor(graph_color_table[i], 0);
             img->setTextPadding(img->width());
             img->setTextDatum(textdatum_t::top_right);
-            auto tw = img->textWidth(_value_text[i]);
+            // auto tw = img->textWidth(_value_text[i]);
             img->drawString(_value_text[i], img->width(), 0);
             if (_two_line) y0 = (y1 + y0) / 2;
             img->pushSprite(param->gfx, _client_rect.right() - img->width(), _client_rect.y + y0);

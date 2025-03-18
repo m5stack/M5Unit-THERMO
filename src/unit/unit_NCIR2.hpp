@@ -18,6 +18,10 @@
 namespace m5 {
 namespace unit {
 
+/*!
+  @namespace ncir2
+  @brief For UnitNCIR2
+ */
 namespace ncir2 {
 /*!
   @struct Data
@@ -199,14 +203,14 @@ public:
     ///@name Alarm
     ///@{
     /*!
-      @brief Read the alarm temperature
+      @brief Read the alarm temperature threshold
       @param highlow Target False:low True:high
       @param[out] raw Temperature (raw)
       @return True if successful
      */
     bool readAlarmTemperature(const bool highlow, int16_t& raw);
     /*!
-      @brief Read the alarm temperature
+      @brief Read the alarm temperature threshold
       @param highlow Target False:low True:high
       @param[out] celsius Temperature
       @return True if successful
@@ -214,14 +218,14 @@ public:
      */
     bool readAlarmTemperature(const bool highlow, float& celsius);
     /*!
-      @brief Write the alarm temperature
+      @brief Write the alarm temperature threshold
       @param highlow Target False:low True:high
       @param raw Temperature (raw)
       @return True if successful
      */
     bool writeAlarmTemperature(const bool highlow, const int16_t raw);
     /*!
-      @brief Write the alarm temperature
+      @brief Write the alarm temperature threshold
       @param highlow Target False:low True:high
       @param celsius Temperature
       @return True if successful
@@ -427,7 +431,7 @@ public:
         return _button && (_button != _prev_button);
     }
     /*!
-      @brief Is button released?
+      @brief Was button released?
       @return True if released
       @note The state is managed by update
      */

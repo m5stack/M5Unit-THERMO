@@ -15,6 +15,7 @@
 
 #include "unit/unit_MLX90614.hpp"
 #include "unit/unit_NCIR2.hpp"
+#include "unit/unit_Thermal2.hpp"
 
 /*!
   @namespace m5

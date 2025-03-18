@@ -472,8 +472,6 @@ TEST_P(TestNCIR2, Periodic)
 {
     SCOPED_TRACE(ustr);
 
-    SCOPED_TRACE(ustr);
-
     EXPECT_TRUE(unit->inPeriodic());
     EXPECT_FALSE(unit->startPeriodicMeasurement());
     EXPECT_TRUE(unit->stopPeriodicMeasurement());

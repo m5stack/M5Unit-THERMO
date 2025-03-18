@@ -77,7 +77,9 @@ void UnitNCIR2::update(const bool force)
 
     if (force || !_latest_button || at >= _latest_button + _button_interval) {
         _prev_button = _button;
-        readButtonStatus(_button);
+        if (readButtonStatus(_button)) {
+            _latest_button = at;
+        }
     }
 }
 

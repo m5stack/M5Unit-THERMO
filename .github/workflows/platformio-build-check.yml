@@ -136,6 +136,14 @@ jobs:
             example: SmoothDraw
           - board: NanoC6
             example: SmoothDraw
+          - board: Paper
+            example: SimpleDisplay
+          - board: CoreINK
+            example: SimpleDisplay
+          - board: Paper
+            example: SmoothDraw
+          - board: CoreINK
+            example: SmoothDraw
 
     steps:
       - name: Checkout

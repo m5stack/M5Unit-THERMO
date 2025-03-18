@@ -56,10 +56,12 @@ jobs:
         example:
           - PlotToSerial
           - SimpleDisplay
+          - SmoothDraw
 
         unit:
           - UnitNCIR
           - UnitNCIR2
+          - UnitThermal2
 
         board:
           - Core
@@ -116,14 +118,24 @@ jobs:
 #            espressif32: '4_4_0'
 
         exclude:
+          - unit: UnitNCIR
+            example: SimpleDisplay
+          - unit: UnitNCIR
+            example: SmoothDraw
+          - unit: UnitNCIR2
+            example: SmoothDraw
           - board: StampS3
             example: SimpleDisplay
           - board: AtomMatrix
             example: SimpleDisplay
           - board: NanoC6
             example: SimpleDisplay
-          - unit: UnitNCIR
-            example: SimpleDisplay
+          - board: StampS3
+            example: SmoothDraw
+          - board: AtomMatrix
+            example: SmoothDraw
+          - board: NanoC6
+            example: SmoothDraw
 
     steps:
       - name: Checkout

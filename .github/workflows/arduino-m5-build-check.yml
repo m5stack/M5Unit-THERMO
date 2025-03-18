@@ -60,10 +60,12 @@ jobs:
         sketch:
           - PlotToSerial
           - SimpleDisplay
+          - SmoothDraw
 
         unit:
           - UnitNCIR
           - UnitNCIR2
+          - UnitThermal2
 
         board:
           - m5stack_atom
@@ -102,6 +104,12 @@ jobs:
           - esp32
 
         exclude:
+          - unit: UnitNCIR
+            sketch: SimpleDisplay
+          - unit: UnitNCIR
+            sketch: SmoothDraw
+          - unit: UnitNCIR2
+            sketch: SmoothDraw
           - board: m5stack_atom
             sketch: SimpleDisplay
           - board: m5stack_capsule
@@ -110,6 +118,14 @@ jobs:
             sketch: SimpleDisplay
           - unit: UnitNCIR
             sketch: SimpleDisplay
+          - board: m5stack_atom
+            sketch: SmoothDraw
+          - board: m5stack_capsule
+            sketch: SmoothDraw
+          - board: m5stack_stamp_s3
+            sketch: SmoothDraw
+          - unit: UnitNCIR
+            sketch: SmoothDraw
 
     steps:
       - name: Checkout

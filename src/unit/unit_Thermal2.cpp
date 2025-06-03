@@ -60,7 +60,7 @@ namespace unit {
 // class UnitThermal2
 const char UnitThermal2::name[] = "UnitThermal2";
 const types::uid_t UnitThermal2::uid{"UnitThermal2"_mmh3};
-const types::attr_t UnitThermal2::attr{0};
+const types::attr_t UnitThermal2::attr{attribute::AccessI2C};
 
 bool UnitThermal2::begin()
 {

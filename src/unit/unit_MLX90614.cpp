@@ -191,7 +191,7 @@ namespace unit {
 // class UnitMLX90614
 const char UnitMLX90614::name[] = "UnitMLX90614";
 const types::uid_t UnitMLX90614::uid{"UnitMLX90614"_mmh3};
-const types::attr_t UnitMLX90614::attr{0};
+const types::attr_t UnitMLX90614::attr{attribute::AccessI2C};
 
 bool UnitMLX90614::begin()
 {
@@ -734,7 +734,7 @@ uint32_t UnitMLX90614::get_interval(const mlx90614::IIR iir, const mlx90614::FIR
 // class UnitMLX90614BAA
 const char UnitMLX90614BAA::name[] = "UnitMLX90614BAA";
 const types::uid_t UnitMLX90614BAA::uid{"UnitMLX90614BAA"_mmh3};
-const types::attr_t UnitMLX90614BAA::attr{0};
+const types::attr_t UnitMLX90614BAA::attr{attribute::AccessI2C};
 
 uint32_t UnitMLX90614BAA::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
 {

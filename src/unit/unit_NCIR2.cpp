@@ -35,7 +35,7 @@ namespace unit {
 // class UnitNCIR2
 const char UnitNCIR2::name[] = "UnitNCIR2";
 const types::uid_t UnitNCIR2::uid{"UnitNCIR2"_mmh3};
-const types::attr_t UnitNCIR2::attr{0};
+const types::attr_t UnitNCIR2::attr{attribute::AccessI2C};
 
 bool UnitNCIR2::begin()
 {

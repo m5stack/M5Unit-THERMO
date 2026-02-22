@@ -10,6 +10,9 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
+#if !defined(USING_ARDUINO)
+#include <driver/gpio.h>
+#endif
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -205,8 +208,11 @@ bool UnitMLX90614::begin()
         }
     }
 
-    // Sleep and wakeup
-    applySettings();
+    // Wakeup: ensure device is in normal mode (also resets SMBus state if awake)
+    if (!wakeup()) {
+        M5_LIB_LOGE("Failed to wakeup");
+        return false;
+    }
 
     //
     if (!read_eeprom(_eeprom)) {
@@ -220,7 +226,7 @@ bool UnitMLX90614::begin()
         _eeprom.taRange, taRaw_to_celsius((_eeprom.taRange) >> 8 & 0xFF), taRaw_to_celsius(_eeprom.taRange & 0xFF),
         _eeprom.emissivity, _eeprom.config, _eeprom.addr, _eeprom.id[0], _eeprom.id[1], _eeprom.id[2], _eeprom.id[3]);
 
-    PWMCtrl pc;
+    PWMCtrl pc{};
     pc.value = _eeprom.pwmCtrl;
     M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
@@ -561,7 +567,7 @@ bool UnitMLX90614::write_emissivity(const uint16_t emiss, const bool apply)
 
     if (write_eeprom(EEPROM_EMISSIVITY, emiss, apply)) {
         _eeprom.emissivity = emiss;
-        return apply ? applySettings() : true;
+        return true;
     }
     return false;
 }
@@ -597,11 +603,15 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
 
 bool UnitMLX90614::sleep()
 {
-#if defined(ARDUINO)
-    auto ada = adapter();
-    auto scl = ada->scl();
+    auto ad = asAdapter<AdapterI2C>(Adapter::Type::I2C);
+    if (!ad) {
+        M5_LIB_LOGE("No AdapterI2C");
+        return false;
+    }
+
+    auto scl = ad->scl();
     if (scl < 0) {
-        M5_LIB_LOGE("SCL pin cannot be detcted");
+        M5_LIB_LOGE("SCL pin cannot be detected");
         return false;
     }
 
@@ -609,50 +619,78 @@ bool UnitMLX90614::sleep()
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
     buf[2] = crc8.update(buf, 2);
-    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ada->end() /* Keep peripheral settings */) {
+    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ad->end() /* Keep peripheral settings */) {
         /*
           datasheet says:
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
-          disabled inorder to keep the overall power drain in sleep mode really small.
+          disabled in order to keep the overall power drain in sleep mode really small.
          */
-        ada->pinMode(scl, OUTPUT);
-        ada->digitalWrite(scl, LOW);
-        ada->pinMode(scl, INPUT);
+#if defined(USING_ARDUINO)
+        ::pinMode(scl, OUTPUT);
+        ::digitalWrite(scl, LOW);
+#else
+        gpio_set_direction((gpio_num_t)scl, GPIO_MODE_OUTPUT);
+        gpio_set_level((gpio_num_t)scl, 0);
+#endif
+        // SCL is kept LOW here; released by wakeup()
         return true;
     }
     return false;
-#else
-#pragma message "Implement for M5HAL not yet"
-    return false;
-#endif
 }
 
 bool UnitMLX90614::wakeup()
 {
-#if defined(ARDUINO)
-    auto ada = adapter();
-    auto scl = ada->scl();
-    auto sda = ada->sda();
-    if (scl < 0 || sda < 0) {
-        M5_LIB_LOGE("SCL or SDA pin cannot be detcted %d,%d", scl, sda);
+    auto ad = asAdapter<AdapterI2C>(Adapter::Type::I2C);
+    if (!ad) {
+        M5_LIB_LOGE("No AdapterI2C");
         return false;
     }
+    auto scl = ad->scl();
+    auto sda = ad->sda();
+    if (scl < 0 || sda < 0) {
+        M5_LIB_LOGE("SCL or SDA pin cannot be detected %d,%d", scl, sda);
+        return false;
+    }
+    ad->end();  // Release I2C bus before GPIO manipulation (safe to call even if not begun)
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
-    ada->pinMode(scl, INPUT);  // SCL H
-    ada->pinMode(sda, OUTPUT);
-    ada->digitalWrite(sda, LOW);  // SDA L
+#if defined(USING_ARDUINO)
+    ::pinMode(scl, INPUT);  // SCL H
+    ::pinMode(sda, OUTPUT);
+    ::digitalWrite(sda, LOW);  // SDA L
     m5::utility::delay(33 * 1.5f);
     // After wake up the first data is available after 0.25 seconds (typ).
-    ada->pinMode(sda, INPUT);  // SDA H
-    delay(550);
-
-    return ada->begin();  // restart Wire
-
+    ::pinMode(sda, INPUT);  // SDA H
+    m5::utility::delay(550);
+    // Restore open-drain mode: BusImpl::begin() is a no-op and does not reconfigure pins,
+    // so SoftwareI2C requires the mode to be restored explicitly here.
+    // WireImpl::begin() (Wire.begin()) will reconfigure the pins itself, so this is harmless.
+    ::pinMode(scl, OUTPUT_OPEN_DRAIN);
+    ::digitalWrite(scl, HIGH);
+    ::pinMode(sda, OUTPUT_OPEN_DRAIN);
+    ::digitalWrite(sda, HIGH);
 #else
-#pragma message "Implement for M5HAL not yet"
-    return false;
+    // ESP-IDF version.
+    // GPIO_MODE_INPUT_OUTPUT_OD is required (not OUTPUT_OD alone): the input buffer
+    // must be enabled so that gpio_get_level() can read the actual pad state.
+    // SoftwareI2C relies on scl->read() for clock-stretch detection and ACK sensing;
+    // OUTPUT_OD alone disables the input buffer, causing gpio_get_level() to return 0
+    // always, which results in waitClockStretch() timing out unconditionally.
+    gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT);  // SCL H
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_OUTPUT);
+    gpio_set_level((gpio_num_t)sda, 0);  // SDA L
+    m5::utility::delay(33 * 1.5f);
+    // After wake up the first data is available after 0.25 seconds (typ).
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT);  // SDA H
+    m5::utility::delay(550);
+    // Restore input+open-drain mode so SoftwareI2C can both drive and read back SCL/SDA
+    gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT_OUTPUT_OD);
+    gpio_set_level((gpio_num_t)scl, 1);
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT_OUTPUT_OD);
+    gpio_set_level((gpio_num_t)sda, 1);
 #endif
+
+    return ad->begin();  // restart Wire (no-op for BusImpl)
 }
 
 //
@@ -673,13 +711,16 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
 
     // Read 3bytes (low,high,PEC) and check PEC
-    uint8_t crc{};
-    if (readRegister(reg, rbuf + 3, 3, 0, stopbit) && (crc = crc8.update(rbuf, 5)) == rbuf[5]) {
-        v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
-        return true;
+    if (readRegister(reg, rbuf + 3, 3, 0, stopbit)) {
+        uint8_t crc = crc8.update(rbuf, 5);
+        if (crc == rbuf[5]) {
+            v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
+            return true;
+        }
+        // M5_LIB_LOGE("CRC Error %02X/%02X", crc, rbuf[5]);
     }
-    //    M5_LIB_LOGD("R:%02X SB:%u CRC8:%02X PEC:%02X", reg, stopbit, crc, rbuf[5]);
-    //    M5_DUMPD(rbuf, 6);
+    // M5_LIB_LOGE("Reg:%02X Stop:%u", reg, stopbit);
+    // M5_DUMPE(rbuf, 6);
     return false;
 }
 

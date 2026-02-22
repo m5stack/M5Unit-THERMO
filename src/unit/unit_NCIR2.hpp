@@ -90,12 +90,12 @@ public:
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -160,7 +160,7 @@ public:
     ///@{
     /*!
       @brief Measurement single shot
-      @param[out] d Measuerd data
+      @param[out] d Measured data
       @return True if successful
       @note Valid to the second decimal place
       @warning During periodic detection runs, an error is returned
@@ -344,13 +344,13 @@ public:
 
     /*!
       @brief Read the Buzzer control
-      @param[out] enabled True:enabled False;disabled
+      @param[out] enabled True:enabled False: disabled
       @return True if successful
      */
     bool readBuzzerControl(bool& enabled);
     /*!
       @brief Write the Buzzer control
-      @param enabled True:enabled False;disabled
+      @param enabled True:enabled False: disabled
       @return True if successful
      */
     bool writeBuzzerControl(const bool enabled);
@@ -387,7 +387,7 @@ public:
     ///@{
     /*!
       @brief Read the Chip temperature
-      @param[out] d Measuerd data
+      @param[out] d Measured data
       @return True if successful
       @note Valid to the second decimal place
     */
@@ -444,7 +444,7 @@ public:
     /*!
       @brief Read the firmware version
       @param[out] ver Version
-      @return True if released
+      @return True if successful
      */
     bool readFirmwareVersion(uint8_t& ver);
 
@@ -496,15 +496,15 @@ constexpr uint8_t EMISSIVITY_REG{0x10};                  // R/W
 constexpr uint8_t ALARM_TEMPERATURE_REG{0x20};           // R/W
 constexpr uint8_t ALARM_LED_REG{0x30};                   // R/W
 constexpr uint8_t ALARM_BUZZER_REG{0x40};                // W
-constexpr uint8_t ALARM_BUZZER_LOW_FREQ_REG{0x40};       // R
-constexpr uint8_t ALARM_BUZZER_LOW_INTERVAL_REG{0x42};   // R
-constexpr uint8_t ALARM_BUZZER_LOW_DUTY_REG{0x44};       // R
-constexpr uint8_t ALARM_BUZZER_HIGH_FREQ_REG{0x45};      // R
-constexpr uint8_t ALARM_BUZZER_HIGH_INTERVAL_REG{0x47};  // R
-constexpr uint8_t ALARM_BUZZER_HIGH_DUTY_REG{0x48};      // R
+constexpr uint8_t ALARM_BUZZER_LOW_FREQ_REG{0x40};       // R/W
+constexpr uint8_t ALARM_BUZZER_LOW_INTERVAL_REG{0x42};   // R/W
+constexpr uint8_t ALARM_BUZZER_LOW_DUTY_REG{0x44};       // R/W
+constexpr uint8_t ALARM_BUZZER_HIGH_FREQ_REG{0x45};      // R/W
+constexpr uint8_t ALARM_BUZZER_HIGH_INTERVAL_REG{0x47};  // R/W
+constexpr uint8_t ALARM_BUZZER_HIGH_DUTY_REG{0x49};      // R/W
 constexpr uint8_t BUZZER_REG{0x50};                      // W
-constexpr uint8_t BUZZER_FREQ_REG{0x50};                 // R
-constexpr uint8_t BUZZER_DUTY_REG{0x52};                 // R
+constexpr uint8_t BUZZER_FREQ_REG{0x50};                 // R/W
+constexpr uint8_t BUZZER_DUTY_REG{0x52};                 // R/W
 constexpr uint8_t BUZZER_CONTROL_REG{0x53};              // R/W
 constexpr uint8_t LED_REG{0x60};                         // R/W
 constexpr uint8_t BUTTON_REG{0x70};                      // R

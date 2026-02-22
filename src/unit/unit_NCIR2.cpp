@@ -49,8 +49,22 @@ bool UnitNCIR2::begin()
         }
     }
 
+    // On NessoN1, GROVE power is enabled by M5.begin() via IO expander (EXT_PWR_EN).
+    // The STM32F0 in NCIR2 needs time to boot its firmware after power-on before
+    // it can respond to I2C. Without this delay, readFirmwareVersion() returns NO_ACK
+    // when using SoftwareI2C on the GROVE port.
+    m5::utility::delay(200);
+
     uint8_t ver{};
-    if (!readFirmwareVersion(ver) || ver == 0) {
+    for (uint8_t retry = 0; retry < 8; ++retry) {
+        if (readFirmwareVersion(ver) && ver != 0) {
+            break;
+        }
+        M5_LIB_LOGD("NCIR2 read retry %u", retry);
+        ver = 0;
+        m5::utility::delay(100);
+    }
+    if (ver == 0) {
         M5_LIB_LOGE("Cannot detect NCIR2 %02X", ver);
         return false;
     }
@@ -392,35 +406,3 @@ bool UnitNCIR2::read_temperature(const uint8_t reg, uint8_t v[2])
 
 }  // namespace unit
 }  // namespace m5
-
-#if 0
-#include <iostream>
-#include <cmath>
-#include <cstdio>
-#include <cstdint>
-
-constexpr float EPSILON = -2.32e-10f;
-constexpr float INV_255 = 1.0f / 255.0f;
-
-float toFloat(uint8_t x) {
-    //return (x + 0.5f) / 255.0f;
-    return x * INV_255;
-
-}
-
-uint8_t toUint8(float f) {
-    //return static_cast<uint8_t>(f * 255.0f);
- //return static_cast<uint8_t>(std::round((f + EPSILON) * 255.0f));
- return static_cast<uint8_t>(std::floor(f * 255.0f + 0.5f)); 
-}
-
-
-int main(int argc, char **argv) {
-    for(uint16_t i=  0; i<256; ++i)
-        {
-        printf("%u => %f => %u\n", i, toFloat(i), toUint8(toFloat(i)));
-        }
-
-
-}
-#endif

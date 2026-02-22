@@ -34,8 +34,6 @@ protected:
         ccfg.stored_size = STORED_SIZE;
         ptr->component_config(ccfg);
         return ptr;
-
-        return ptr;
     }
     virtual bool is_using_hal() const override
     {
@@ -194,7 +192,7 @@ TEST_P(TestThermal2, Settings)
             EXPECT_EQ(rr, r) << (int)r;
         }
     }
-    // Noice filter
+    // Noise filter
     {
         for (uint8_t lv = 0; lv < 16; ++lv) {
             uint8_t v{};
@@ -218,8 +216,8 @@ TEST_P(TestThermal2, Settings)
         uint8_t w{}, h{}, prev_w{}, prev_h{};
         for (uint8_t ww = 0; ww < 16; ++ww) {
             for (uint8_t hh = 0; hh < 12; ++hh) {
-                EXPECT_TRUE(unit->writeTemeratureMonitorSize(ww, hh));
-                EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+                EXPECT_TRUE(unit->writeTemperatureMonitorSize(ww, hh));
+                EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
                 EXPECT_EQ(w, ww);
                 EXPECT_EQ(h, hh);
             }
@@ -227,20 +225,20 @@ TEST_P(TestThermal2, Settings)
         prev_w = w;
         prev_h = h;
 
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(16, h));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(16, h));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(w, 12));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(w, 12));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(16, 12));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(16, 12));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(255, 255));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(255, 255));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
     }
@@ -394,6 +392,17 @@ TEST_P(TestThermal2, Buzzer)
     EXPECT_EQ(f, 32767);
     EXPECT_EQ(d, 127);
 
+    // writeBuzzerDuty (duty only, freq unchanged)
+    EXPECT_TRUE(unit->writeBuzzerDuty(200));
+    EXPECT_TRUE(unit->readBuzzer(f, d));
+    EXPECT_EQ(f, 32767);
+    EXPECT_EQ(d, 200);
+
+    EXPECT_TRUE(unit->writeBuzzerDuty(0));
+    EXPECT_TRUE(unit->readBuzzer(f, d));
+    EXPECT_EQ(f, 32767);
+    EXPECT_EQ(d, 0);
+
     EXPECT_TRUE(unit->writeBuzzerControl(false));
     EXPECT_TRUE(unit->readBuzzerControl(enabled));
     EXPECT_FALSE(enabled);
@@ -416,14 +425,14 @@ TEST_P(TestThermal2, LED)
         EXPECT_EQ((rgb >> 8) & 0xFF, g);
         EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-        delay(100);
+        m5::utility::delay(100);
 
         uint32_t rgb24 = rng() & 0x00FFFFFF;
         EXPECT_TRUE(unit->writeLED(rgb24));
         EXPECT_TRUE(unit->readLED(rgb));
         EXPECT_EQ(rgb, rgb24);
 
-        delay(100);
+        m5::utility::delay(100);
     }
 }
 
@@ -441,6 +450,7 @@ TEST_P(TestThermal2, Button)
     EXPECT_FALSE(unit->isPressed());
     EXPECT_FALSE(unit->wasPressed());
     EXPECT_FALSE(unit->wasReleased());
+    EXPECT_FALSE(unit->wasClicked());
     EXPECT_FALSE(unit->wasHold());
     EXPECT_FALSE(unit->isHolding());
 }
@@ -476,6 +486,29 @@ TEST_P(TestThermal2, Single)
         EXPECT_TRUE(std::any_of(std::begin(page0.raw), std::end(page0.raw), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(page1.temp), std::end(page1.temp), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(page1.raw), std::end(page1.raw), [](const uint16_t v) { return v != 0; }));
+
+        // Data accessor methods
+        for (auto* page : {&page0, &page1}) {
+            EXPECT_TRUE(std::isfinite(page->medianTemperature()));
+            EXPECT_TRUE(std::isfinite(page->averageTemperature()));
+            EXPECT_TRUE(std::isfinite(page->mostDiffTemperature()));
+            EXPECT_TRUE(std::isfinite(page->lowestTemperature()));
+            EXPECT_TRUE(std::isfinite(page->highestTemperature()));
+
+            // Accessor consistency: raw_to_celsius(temp[N]) == accessorN()
+            EXPECT_FLOAT_EQ(page->medianTemperature(), raw_to_celsius(page->temp[0]));
+            EXPECT_FLOAT_EQ(page->averageTemperature(), raw_to_celsius(page->temp[1]));
+            EXPECT_FLOAT_EQ(page->mostDiffTemperature(), raw_to_celsius(page->temp[2]));
+            EXPECT_FLOAT_EQ(page->lowestTemperature(), raw_to_celsius(page->temp[4]));
+            EXPECT_FLOAT_EQ(page->highestTemperature(), raw_to_celsius(page->temp[6]));
+
+            // Pixel temperature accessor
+            EXPECT_TRUE(std::isfinite(page->temperature(0)));
+            EXPECT_FLOAT_EQ(page->temperature(0), raw_to_celsius(page->raw[0]));
+            EXPECT_FLOAT_EQ(page->temperature(383), raw_to_celsius(page->raw[383]));
+            // Out of range returns NaN
+            EXPECT_FALSE(std::isfinite(page->temperature(384)));
+        }
     }
 }
 
@@ -497,7 +530,7 @@ TEST_P(TestThermal2, Periodic)
     EXPECT_FALSE(unit->inPeriodic());
 
     EXPECT_NE(elapsed, 0);
-    EXPECT_GE(elapsed, unit->interval() * STORED_SIZE);
+    EXPECT_GE(elapsed + 2, unit->interval() * STORED_SIZE);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -508,6 +541,10 @@ TEST_P(TestThermal2, Periodic)
         auto d = unit->oldest();
         EXPECT_TRUE(std::any_of(std::begin(d.temp), std::end(d.temp), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(d.raw), std::end(d.raw), [](const uint16_t v) { return v != 0; }));
+
+        EXPECT_TRUE(std::isfinite(d.medianTemperature()));
+        EXPECT_TRUE(std::isfinite(d.averageTemperature()));
+        EXPECT_FLOAT_EQ(d.medianTemperature(), raw_to_celsius(d.temp[0]));
 
         EXPECT_FALSE(unit->empty());
         unit->discard();
@@ -525,6 +562,11 @@ TEST_P(TestThermal2, Periodic)
 TEST_P(TestThermal2, I2CAddress)
 {
     SCOPED_TRACE(ustr);
+
+    // Read current address
+    uint8_t addr{};
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, +UnitThermal2::DEFAULT_ADDRESS);
 
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid

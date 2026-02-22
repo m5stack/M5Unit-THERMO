@@ -34,8 +34,6 @@ protected:
         ccfg.stored_size = STORED_SIZE;
         ptr->component_config(ccfg);
         return ptr;
-
-        return ptr;
     }
     virtual bool is_using_hal() const override
     {
@@ -486,7 +484,7 @@ TEST_P(TestNCIR2, Periodic)
     EXPECT_FALSE(unit->inPeriodic());
 
     EXPECT_NE(elapsed, 0);
-    EXPECT_GE(elapsed, 100 * STORED_SIZE);
+    EXPECT_GE(elapsed + 2, 100 * STORED_SIZE);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());

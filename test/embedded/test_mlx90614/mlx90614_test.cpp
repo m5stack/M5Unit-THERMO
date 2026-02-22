@@ -34,8 +34,6 @@ protected:
         ccfg.stored_size = STORED_SIZE;
         ptr->component_config(ccfg);
         return ptr;
-
-        return ptr;
     }
     virtual bool is_using_hal() const override
     {
@@ -130,7 +128,7 @@ auto rng = std::default_random_engine{};
 std::uniform_real_distribution<> dist_to(-273.15f, 382.2f);
 std::uniform_real_distribution<> dist_ta(-38.2f, 125.f);
 
-// From UnitMLX90416.cpp
+// From UnitMLX90614.cpp
 inline float toRaw_to_celsius(const uint16_t t)
 {
     return t * 0.01f - 273.15f;

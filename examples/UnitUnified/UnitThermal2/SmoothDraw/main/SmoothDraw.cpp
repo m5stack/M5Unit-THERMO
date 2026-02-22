@@ -12,6 +12,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
+#include <inttypes.h>
 
 namespace {
 auto& display = M5.Display;
@@ -886,7 +887,7 @@ void drawTask(void*)
         uint8_t sec   = msec / 1000;
         if (prev_sec != sec) {
             prev_sec = sec;
-            Serial.printf("fps: %d : %d\n", framecount, draw_param.update_count);
+            Serial.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
             framecount              = 0;
             draw_param.update_count = 0;
             delay(1);
@@ -991,25 +992,48 @@ void layoutChange(void)
 
 void setup(void)
 {
-    M5.begin();
-    if (display.width() < display.height()) {
-        display.setRotation(display.getRotation() ^ 1);
-    }
+    delay(1500);
 
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
     // The screen shall be in landscape mode
     if (display.height() > display.width()) {
         display.setRotation(1);
     }
 
+    // No LCD or display device?
+    if (display.width() == 0 || display.height() == 0 || display.isEPD()) {
+        M5_LOGE("The core must be equipped with LCD");
+        while (true) {
+            m5::utility::delay(10000);
+        }
+    }
+
+    auto board       = M5.getBoard();
     auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
     auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
 
+    // SmoothDraw requires a separate FreeRTOS draw task (xTaskCreatePinnedToCore).
+    // NessoN1 (ESP32-C6) is single-core, so the draw task and main loop contend for
+    // the SPI display mutex, causing xTaskPriorityDisinherit assertion failure.
+    // Use SimpleDisplay example instead, which runs everything in the main loop.
+    if (board == m5::board_t::board_ArduinoNessoN1) {
+        M5_LOGE(
+            "SmoothDraw is not supported on NessoN1 (ESP32-C6 single-core).\n"
+            " The dual-task architecture conflicts with single-core FreeRTOS.\n"
+            " Use SimpleDisplay example instead");
+        display.fillScreen(TFT_RED);
+        while (true) {
+            m5::utility::delay(10000);
+        }
+    }
+
+    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+    Wire.end();
+    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
     if (!Units.add(thermal2, Wire) || !Units.begin()) {
         M5_LOGE("Failed to begin");
-        display.clear(TFT_RED);
+        display.fillScreen(TFT_RED);
         while (true) {
             m5::utility::delay(10000);
         }

@@ -10,6 +10,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
+#include <M5HAL.hpp>
 
 using namespace m5::unit::ncir2;
 
@@ -18,8 +19,10 @@ auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 m5::unit::UnitNCIR2 unit;
 
-constexpr float min_temp{0.0f};
-constexpr float max_temp{100.0f};
+// Temperature range for LED color mapping (Blue: min_temp -> Red: max_temp)
+// Adjust these values to suit your measurement environment
+constexpr float min_temp{20.0f};  // Lower bound (Celsius): LED turns Blue
+constexpr float max_temp{50.0f};  // Upper bound (Celsius): LED turns Red
 
 void ring_buzzer(const uint16_t freq, const uint8_t duty, const uint32_t count = 1, const uint32_t interval = 50)
 {
@@ -60,17 +63,40 @@ uint32_t HSV_to_RGB(const float h, const float s, const float v)
 void setup()
 {
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
+    // The screen shall be in landscape mode
+    if (lcd.height() > lcd.width()) {
+        lcd.setRotation(1);
+    }
 
+    auto board       = M5.getBoard();
     auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
     auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
-
-    if (!Units.add(unit, Wire) || !Units.begin()) {
-        M5_LOGE("Failed to begin");
-        lcd.clear(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
+    if (board == m5::board_t::board_ArduinoNessoN1) {
+        pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
+        pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
+        M5_LOGI("getPin(NessoN1): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        m5::hal::bus::I2CBusConfig i2c_cfg;
+        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
+        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
+        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
+        if (!Units.add(unit, i2c_bus ? i2c_bus.value() : nullptr) || !Units.begin()) {
+            M5_LOGE("Failed to begin");
+            lcd.fillScreen(TFT_RED);
+            while (true) {
+                m5::utility::delay(10000);
+            }
+        }
+    } else {
+        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        Wire.end();
+        Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
+        if (!Units.add(unit, Wire) || !Units.begin()) {
+            M5_LOGE("Failed to begin");
+            lcd.fillScreen(TFT_RED);
+            while (true) {
+                m5::utility::delay(10000);
+            }
         }
     }
     M5_LOGI("M5UnitUnified has been begun");
@@ -86,6 +112,8 @@ void setup()
     unit.writeConfig();
 
     ring_buzzer(4000, 204);
+
+    lcd.fillScreen(TFT_DARKGREEN);
 }
 
 void loop()
@@ -105,10 +133,10 @@ void loop()
 
     // Button
     if (unit.wasPressed()) {
-        M5.Log.printf("Button pressed\n");
+        M5.Log.printf("NCIR2 Button pressed\n");
     }
     if (unit.wasReleased()) {
-        M5.Log.printf("Button released\n");
+        M5.Log.printf("NCIR2 Button released\n");
     }
 
     // Toggle between periodic and single (Use the button on UnitNCIR2)
@@ -134,16 +162,17 @@ void loop()
         }
     }
 
-    // Change LED color min_tenp:Blue <- temp -> max_temp:Red
-    if ((int32_t)(ptemp * 100) != (int32_t)(temp * 100)) {
+    // Change LED color min_temp:Blue <- temp -> max_temp:Red (updates every 1°C)
+    if ((int32_t)ptemp != (int32_t)temp) {
         static uint32_t prgb{};
         ptemp        = temp;
-        auto ratio   = temp / (max_temp - min_temp);
+        auto ratio   = (temp - min_temp) / (max_temp - min_temp);
         ratio        = std::fmax(std::fmin(1.0f, ratio), 0.0f);
         auto h       = 240.f * (1.0f - ratio);
         uint32_t rgb = HSV_to_RGB(h, 1.0f, 1.0f);
         if (prgb != rgb) {
             prgb = rgb;
+            M5_LOGI("LED %08X", rgb);
             unit.writeLED(rgb);
         }
     }

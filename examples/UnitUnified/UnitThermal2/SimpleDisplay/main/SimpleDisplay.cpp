@@ -10,6 +10,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
+#include <M5HAL.hpp>
 #include <cmath>
 
 using namespace m5::unit::thermal2;
@@ -73,14 +74,14 @@ constexpr const uint32_t color_table[256] = {
 
 class HeatmapView {
 public:
-    HeatmapView(const uint32_t wid, const uint32_t hgt) : _wid{wid}, _hgt{hgt}
+    HeatmapView(const uint32_t wid, const uint32_t hgt, const bool use_psram = false) : _wid{wid}, _hgt{hgt}
     {
         _rwid = _wid / 32;
         _rhgt = _hgt / 24;
         // M5_LOGI("  <%d,%d>", _rwid, _rhgt);
 
         assert(_rwid > 3 && _rhgt > 3);
-        _sprite.setPsram(false);
+        _sprite.setPsram(use_psram);
         _sprite.setColorDepth(8);  // 256 colors
         auto r = _sprite.createSprite(_wid, _hgt);
         assert(r);
@@ -188,21 +189,48 @@ LGFX_Sprite text{};
 void setup()
 {
     M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
     // The screen shall be in landscape mode
     if (lcd.height() > lcd.width()) {
         lcd.setRotation(1);
     }
 
-    auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-    auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
-
-    if (!Units.add(unit, Wire) || !Units.begin()) {
-        M5_LOGE("Failed to begin");
-        lcd.clear(TFT_RED);
+    // No LCD or display device?
+    if (lcd.width() == 0 || lcd.height() == 0 || lcd.isEPD()) {
+        M5_LOGE("The core must be equipped with LCD");
         while (true) {
             m5::utility::delay(10000);
+        }
+    }
+
+    auto board       = M5.getBoard();
+    auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
+    auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
+    if (board == m5::board_t::board_ArduinoNessoN1) {
+        pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
+        pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
+        M5_LOGI("getPin(NessoN1): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        m5::hal::bus::I2CBusConfig i2c_cfg;
+        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
+        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
+        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
+        if (!Units.add(unit, i2c_bus ? i2c_bus.value() : nullptr) || !Units.begin()) {
+            M5_LOGE("Failed to begin");
+            lcd.fillScreen(TFT_RED);
+            while (true) {
+                m5::utility::delay(10000);
+            }
+        }
+    } else {
+        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+        Wire.end();
+        Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
+        if (!Units.add(unit, Wire) || !Units.begin()) {
+            M5_LOGE("Failed to begin");
+            lcd.fillScreen(TFT_RED);
+            while (true) {
+                m5::utility::delay(10000);
+            }
         }
     }
     M5_LOGI("M5UnitUnified has been begun");
@@ -228,9 +256,10 @@ void setup()
     uint32_t w{}, h{};
     auto right_text = calculate_heatmap_size(w, h, lcd.width(), lcd.height(), lcd.fontWidth(), lcd.fontHeight());
     M5_LOGI("WH:%u,%u %u,%u %d", w, h, text_x, text_y, right_text);
-    text_x = right_text ? w : 0;
-    text_y = right_text ? 0 : h;
-    view   = new HeatmapView(w, h);
+    text_x         = right_text ? w : 0;
+    text_y         = right_text ? 0 : h;
+    bool use_psram = (board == m5::board_t::board_M5Tab5);
+    view           = new HeatmapView(w, h, use_psram);
 
     text.setPsram(false);
     text.setColorDepth(4);  // 16 colors

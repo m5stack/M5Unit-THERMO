@@ -47,11 +47,11 @@ jobs:
   build:
     name: ${{ matrix.unit }}:${{ matrix.sketch }}:${{matrix.board}}@${{matrix.platform-version}}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
 
     strategy:
       fail-fast: false
-      #max-parallel: 1
+      max-parallel: 20
       matrix:
         platform-url:
           - https://espressif.github.io/arduino-esp32/package_esp32_index.json
@@ -67,33 +67,27 @@ jobs:
           - UnitThermal2
 
         board:
+          - arduino_nesso_n1
           - m5stack_atom
           - m5stack_atoms3
           - m5stack_capsule
-#          - m5stack_cardputer
+          - m5stack_cardputer
           - m5stack_core
           - m5stack_core2
           - m5stack_coreink
           - m5stack_cores3
           - m5stack_dial
+          - m5stack_dinmeter
           - m5stack_fire
           - m5stack_nanoc6
           - m5stack_paper
-#          - m5stack_poe_cam
-#          - m5stack_stamp_c3
-#          - m5stack_stamp_pico
           - m5stack_stamp_s3
-#          - m5stack_station
-#          - m5stack_stickc
           - m5stack_stickc_plus
           - m5stack_stickc_plus2
-#          - m5stack_timer_cam
-#          - m5stack_tough
-#          - m5stack_unit_cam
-#          - m5stack_unit_cams3
+          - m5stack_tab5
 
         platform-version:
-          - 3.0.4
+          - 3.3.6
 
         platform:
           - esp32
@@ -102,34 +96,87 @@ jobs:
           - esp32
 
         exclude:
+          # UnitNCIR has no SimpleDisplay/SmoothDraw examples
           - unit: UnitNCIR
             sketch: SimpleDisplay
           - unit: UnitNCIR
             sketch: SmoothDraw
+          # UnitNCIR2 has no SmoothDraw example
           - unit: UnitNCIR2
             sketch: SmoothDraw
+          # SimpleDisplay/SmoothDraw: Core only
+          - board: arduino_nesso_n1
+            sketch: SimpleDisplay
+          - board: arduino_nesso_n1
+            sketch: SmoothDraw
           - board: m5stack_atom
             sketch: SimpleDisplay
-          - board: m5stack_capsule
-            sketch: SimpleDisplay
-          - board: m5stack_nanoc6
-            sketch: SimpleDisplay
-          - board: m5stack_stamp_s3
-            sketch: SimpleDisplay
           - board: m5stack_atom
             sketch: SmoothDraw
+          - board: m5stack_atoms3
+            sketch: SimpleDisplay
+          - board: m5stack_atoms3
+            sketch: SmoothDraw
+          - board: m5stack_capsule
+            sketch: SimpleDisplay
           - board: m5stack_capsule
             sketch: SmoothDraw
+          - board: m5stack_cardputer
+            sketch: SimpleDisplay
+          - board: m5stack_cardputer
+            sketch: SmoothDraw
+          - board: m5stack_core2
+            sketch: SimpleDisplay
+          - board: m5stack_core2
+            sketch: SmoothDraw
+          - board: m5stack_coreink
+            sketch: SimpleDisplay
+          - board: m5stack_coreink
+            sketch: SmoothDraw
+          - board: m5stack_cores3
+            sketch: SimpleDisplay
+          - board: m5stack_cores3
+            sketch: SmoothDraw
+          - board: m5stack_dial
+            sketch: SimpleDisplay
+          - board: m5stack_dial
+            sketch: SmoothDraw
+          - board: m5stack_dinmeter
+            sketch: SimpleDisplay
+          - board: m5stack_dinmeter
+            sketch: SmoothDraw
+          - board: m5stack_fire
+            sketch: SimpleDisplay
+          - board: m5stack_fire
+            sketch: SmoothDraw
+          - board: m5stack_nanoc6
+            sketch: SimpleDisplay
           - board: m5stack_nanoc6
             sketch: SmoothDraw
+          - board: m5stack_paper
+            sketch: SimpleDisplay
+          - board: m5stack_paper
+            sketch: SmoothDraw
           - board: m5stack_stamp_s3
+            sketch: SimpleDisplay
+          - board: m5stack_stamp_s3
+            sketch: SmoothDraw
+          - board: m5stack_stickc_plus
+            sketch: SimpleDisplay
+          - board: m5stack_stickc_plus
+            sketch: SmoothDraw
+          - board: m5stack_stickc_plus2
+            sketch: SimpleDisplay
+          - board: m5stack_stickc_plus2
+            sketch: SmoothDraw
+          - board: m5stack_tab5
+            sketch: SimpleDisplay
+          - board: m5stack_tab5
             sketch: SmoothDraw
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       # Build 
       - name: Compile examples

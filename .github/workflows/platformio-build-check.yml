@@ -46,11 +46,11 @@ jobs:
   build:
     name: ${{ matrix.unit }}:${{ matrix.example }}@${{ matrix.board }}:${{ matrix.framework }}:${{ matrix.espressif32 }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
 
     strategy:
       fail-fast: false
-      #max-parallel: 1
+      max-parallel: 20
       
       matrix:
         example:
@@ -70,14 +70,18 @@ jobs:
           - Fire
           - StampS3
           - Dial
-          - AtomMatrix
+          - Atom
           - AtomS3
           - AtomS3R
           - NanoC6
           - StickCPlus
           - StickCPlus2
+          - StickS3
           - Paper
           - CoreInk
+          - Cardputer
+          - Tab5
+          - NessoN1
 
         framework:
           - Arduino
@@ -118,38 +122,87 @@ jobs:
 #            espressif32: '4_4_0'
 
         exclude:
+          # UnitNCIR has no SimpleDisplay/SmoothDraw examples
           - unit: UnitNCIR
             example: SimpleDisplay
           - unit: UnitNCIR
             example: SmoothDraw
+          # UnitNCIR2 has no SmoothDraw example
           - unit: UnitNCIR2
             example: SmoothDraw
+          # SimpleDisplay/SmoothDraw: Core only (env exists only for Core)
+          - board: Core2
+            example: SimpleDisplay
+          - board: Core2
+            example: SmoothDraw
+          - board: CoreS3
+            example: SimpleDisplay
+          - board: CoreS3
+            example: SmoothDraw
+          - board: Fire
+            example: SimpleDisplay
+          - board: Fire
+            example: SmoothDraw
           - board: StampS3
-            example: SimpleDisplay
-          - board: AtomMatrix
-            example: SimpleDisplay
-          - board: NanoC6
             example: SimpleDisplay
           - board: StampS3
             example: SmoothDraw
-          - board: AtomMatrix
+          - board: Dial
+            example: SimpleDisplay
+          - board: Dial
+            example: SmoothDraw
+          - board: Atom
+            example: SimpleDisplay
+          - board: Atom
+            example: SmoothDraw
+          - board: AtomS3
+            example: SimpleDisplay
+          - board: AtomS3
+            example: SmoothDraw
+          - board: AtomS3R
+            example: SimpleDisplay
+          - board: AtomS3R
             example: SmoothDraw
           - board: NanoC6
+            example: SimpleDisplay
+          - board: NanoC6
+            example: SmoothDraw
+          - board: StickCPlus
+            example: SimpleDisplay
+          - board: StickCPlus
+            example: SmoothDraw
+          - board: StickCPlus2
+            example: SimpleDisplay
+          - board: StickCPlus2
+            example: SmoothDraw
+          - board: StickS3
+            example: SimpleDisplay
+          - board: StickS3
             example: SmoothDraw
           - board: Paper
             example: SimpleDisplay
-          - board: CoreINK
-            example: SimpleDisplay
           - board: Paper
             example: SmoothDraw
-          - board: CoreINK
+          - board: CoreInk
+            example: SimpleDisplay
+          - board: CoreInk
+            example: SmoothDraw
+          - board: Cardputer
+            example: SimpleDisplay
+          - board: Cardputer
+            example: SmoothDraw
+          - board: Tab5
+            example: SimpleDisplay
+          - board: Tab5
+            example: SmoothDraw
+          - board: NessoN1
+            example: SimpleDisplay
+          - board: NessoN1
             example: SmoothDraw
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Build examples
         uses: karniv00l/platformio-run-action@v1

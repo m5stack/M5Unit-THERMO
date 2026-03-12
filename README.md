@@ -14,14 +14,14 @@ Unlike most temperature sensors, this sensor measures infrared light bouncing of
 The NCIR 2 Thermometer Unit utilizes the MLX90614 temperature sensor, and take ambient and object temperature readings with No Contact. Great for socially-distant reality.
 
 ### SKU:U149
-Unit Thermal2 is a thermal imaging acquisition unit equipped with a data processing MCU, featuring the MLX90640 sensor. It has an imaging resolution of 32 x 24 pixels, a field of view of 110° x 75°, and a temperature measurement range of -40°C to 300°C. The MCU is based on the ESP32,
+Unit Thermal2 is a thermal imaging acquisition unit equipped with a data processing MCU. It features an MLX90640 thermal imaging sensor with an imaging resolution of 32 x 24 pixels, a field of view of 110° x 75°, and a temperature measurement range of -40°C to 300°C. The MCU adopts an ESP32, enabling functions such as high/low temperature alarms, average/maximum/minimum value reading, and data caching through data processing.
 
 
 ## Related Link
 See also examples using conventional methods here.
 
 - [Unit NCIR & Datasheet](https://docs.m5stack.com/en/unit/ncir)
-- [Unit NCIR2 & Datasheet](https://docs.m5stack.com/ja/unit/NCIR2)
+- [Unit NCIR2 & Datasheet](https://docs.m5stack.com/en/unit/NCIR2)
 - [Unit Thermal2 & Datasheet](https://docs.m5stack.com/en/unit/Thermal2)
 
 ### Required Libraries:
@@ -56,7 +56,7 @@ It will output it under docs/html
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
 #### Required
-- [Doxyegn](https://www.doxygen.nl/)
+- [Doxygen](https://www.doxygen.nl/)
 - [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
 

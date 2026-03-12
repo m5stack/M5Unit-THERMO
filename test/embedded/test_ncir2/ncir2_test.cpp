@@ -13,19 +13,18 @@
 #include <googletest/test_template.hpp>
 #include <googletest/test_helper.hpp>
 #include <unit/unit_NCIR2.hpp>
+#include <m5_unit_component/adapter_i2c.hpp>
 #include <cmath>
-#include <random>
+#include <esp_random.h>
 
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::ncir2;
 using m5::unit::types::elapsed_time_t;
 
-const ::testing::Environment* global_fixture = ::testing::AddGlobalTestEnvironment(new GlobalFixture<100000U>());
-
 constexpr uint32_t STORED_SIZE{4};
 
-class TestNCIR2 : public ComponentTestBase<UnitNCIR2, bool> {
+class TestNCIR2 : public I2CComponentTestBase<UnitNCIR2> {
 protected:
     virtual UnitNCIR2* get_instance() override
     {
@@ -35,60 +34,15 @@ protected:
         ptr->component_config(ccfg);
         return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
 };
-
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestNCIR2, ::testing::Values(false, true));
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestNCIR2, ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestNCIR2, ::testing::Values(false));
 
 namespace {
 
-template <class U>
-elapsed_time_t test_periodic(U* unit, const uint32_t times, const uint32_t measure_duration = 0)
-{
-    auto tm         = unit->interval();
-    auto timeout_at = m5::utility::millis() + 10 * 1000;
-
-    do {
-        unit->update();
-        if (unit->updated()) {
-            break;
-        }
-        std::this_thread::yield();
-    } while (!unit->updated() && m5::utility::millis() <= timeout_at);
-    // timeout
-    if (!unit->updated()) {
-        return 0;
-    }
-
-    //
-    uint32_t measured{};
-    auto start_at = m5::utility::millis();
-    timeout_at    = start_at + (times * (tm + measure_duration) * 2);
-
-    do {
-        unit->update();
-        measured += unit->updated() ? 1 : 0;
-        if (measured >= times) {
-            break;
-        }
-        std::this_thread::yield();
-
-    } while (measured < times && m5::utility::millis() <= timeout_at);
-    return (measured == times) ? m5::utility::millis() - start_at : 0;
-    //   return (measured == times) ? unit->updatedMillis() - start_at : 0;
-}
-
-auto rng                  = std::default_random_engine{};
 constexpr bool hl_table[] = {false, true};
 
 }  // namespace
 
-TEST_P(TestNCIR2, Emissivity)
+TEST_F(TestNCIR2, Emissivity)
 {
     SCOPED_TRACE(ustr);
 
@@ -137,7 +91,7 @@ TEST_P(TestNCIR2, Emissivity)
     }
 }
 
-TEST_P(TestNCIR2, Alarm)
+TEST_F(TestNCIR2, Alarm)
 {
     SCOPED_TRACE(ustr);
 
@@ -201,9 +155,9 @@ TEST_P(TestNCIR2, Alarm)
                 auto s = m5::utility::formatString("HL:%u", hl);
                 SCOPED_TRACE(s);
 
-                uint8_t r = rng() & 0xFF;
-                uint8_t g = rng() & 0xFF;
-                uint8_t b = rng() & 0xFF;
+                uint8_t r = esp_random() & 0xFF;
+                uint8_t g = esp_random() & 0xFF;
+                uint8_t b = esp_random() & 0xFF;
                 uint32_t rgb{};
                 EXPECT_TRUE(unit->writeAlarmLED(hl, r, g, b));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
@@ -211,7 +165,7 @@ TEST_P(TestNCIR2, Alarm)
                 EXPECT_EQ((rgb >> 8) & 0xFF, g);
                 EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-                uint32_t rgb24 = rng() & 0x00FFFFFF;
+                uint32_t rgb24 = esp_random() & 0x00FFFFFF;
                 EXPECT_TRUE(unit->writeAlarmLED(hl, rgb24));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
                 EXPECT_EQ(rgb, rgb24);
@@ -307,7 +261,7 @@ TEST_P(TestNCIR2, Alarm)
     }
 }
 
-TEST_P(TestNCIR2, Buzzer)
+TEST_F(TestNCIR2, Buzzer)
 {
     SCOPED_TRACE(ustr);
 
@@ -384,15 +338,15 @@ TEST_P(TestNCIR2, Buzzer)
     EXPECT_FALSE(enabled);
 }
 
-TEST_P(TestNCIR2, LED)
+TEST_F(TestNCIR2, LED)
 {
     SCOPED_TRACE(ustr);
 
     uint32_t count{8};
     while (count--) {
-        uint8_t r = rng() & 0xFF;
-        uint8_t g = rng() & 0xFF;
-        uint8_t b = rng() & 0xFF;
+        uint8_t r = esp_random() & 0xFF;
+        uint8_t g = esp_random() & 0xFF;
+        uint8_t b = esp_random() & 0xFF;
         uint32_t rgb{};
         EXPECT_TRUE(unit->writeLED(r, g, b));
         EXPECT_TRUE(unit->readLED(rgb));
@@ -400,14 +354,14 @@ TEST_P(TestNCIR2, LED)
         EXPECT_EQ((rgb >> 8) & 0xFF, g);
         EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-        uint32_t rgb24 = rng() & 0x00FFFFFF;
+        uint32_t rgb24 = esp_random() & 0x00FFFFFF;
         EXPECT_TRUE(unit->writeLED(rgb24));
         EXPECT_TRUE(unit->readLED(rgb));
         EXPECT_EQ(rgb, rgb24);
     }
 }
 
-TEST_P(TestNCIR2, Button)
+TEST_F(TestNCIR2, Button)
 {
     SCOPED_TRACE(ustr);
 
@@ -423,7 +377,7 @@ TEST_P(TestNCIR2, Button)
     EXPECT_FALSE(unit->wasReleased());
 }
 
-TEST_P(TestNCIR2, Firmware)
+TEST_F(TestNCIR2, Firmware)
 {
     SCOPED_TRACE(ustr);
 
@@ -432,7 +386,7 @@ TEST_P(TestNCIR2, Firmware)
     EXPECT_NE(ver, 0);
 }
 
-TEST_P(TestNCIR2, SingleAndChip)
+TEST_F(TestNCIR2, SingleAndChip)
 {
     SCOPED_TRACE(ustr);
 
@@ -466,7 +420,7 @@ TEST_P(TestNCIR2, SingleAndChip)
     }
 }
 
-TEST_P(TestNCIR2, Periodic)
+TEST_F(TestNCIR2, Periodic)
 {
     SCOPED_TRACE(ustr);
 
@@ -478,13 +432,17 @@ TEST_P(TestNCIR2, Periodic)
     EXPECT_TRUE(unit->startPeriodicMeasurement(100));
     EXPECT_TRUE(unit->inPeriodic());
 
-    auto elapsed = test_periodic(unit.get(), STORED_SIZE);
+    auto ad          = unit->asAdapter<m5::unit::AdapterI2C>(m5::unit::Adapter::Type::I2C);
+    bool is_bus      = ad && ad->implType() == m5::unit::AdapterI2C::ImplType::Bus;
+    uint32_t timeout = is_bus ? std::max<uint32_t>(unit->interval(), 500) * (STORED_SIZE + 1) * 4
+                              : unit->interval() * (STORED_SIZE + 1) * 2;
+    auto r           = collect_periodic_measurements(unit.get(), STORED_SIZE, timeout);
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
 
-    EXPECT_NE(elapsed, 0);
-    EXPECT_GE(elapsed + 2, 100 * STORED_SIZE);
+    EXPECT_FALSE(r.timed_out);
+    EXPECT_EQ(r.update_count, STORED_SIZE);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -514,10 +472,81 @@ TEST_P(TestNCIR2, Periodic)
 }
 
 /*
+  WARNING: writeConfig() persists ALL settings (Emissivity, Alarm, LED) to flash.
+  If restore fails, flash retains test values. Original values are logged via M5_LOGI.
+  Known factory default — Emissivity: 0.95 (raw 62258), others: undocumented.
+*/
+TEST_F(TestNCIR2, WriteConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    // Save all flash-persistent settings (ASSERT to abort if read fails)
+    uint16_t orig_emiss{};
+    int16_t orig_alarm_lo{}, orig_alarm_hi{};
+    uint32_t orig_alarm_led_lo{}, orig_alarm_led_hi{};
+    uint16_t orig_abuz_lo_f{}, orig_abuz_lo_i{}, orig_abuz_hi_f{}, orig_abuz_hi_i{};
+    uint8_t orig_abuz_lo_d{}, orig_abuz_hi_d{};
+    uint32_t orig_led{};
+    ASSERT_TRUE(unit->readEmissivity(orig_emiss));
+    ASSERT_TRUE(unit->readAlarmTemperature(false, orig_alarm_lo));
+    ASSERT_TRUE(unit->readAlarmTemperature(true, orig_alarm_hi));
+    ASSERT_TRUE(unit->readAlarmLED(false, orig_alarm_led_lo));
+    ASSERT_TRUE(unit->readAlarmLED(true, orig_alarm_led_hi));
+    ASSERT_TRUE(unit->readAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d));
+    ASSERT_TRUE(unit->readAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d));
+    ASSERT_TRUE(unit->readLED(orig_led));
+
+    M5_LOGI("Original emiss:%u alarm_lo:%d alarm_hi:%d", orig_emiss, orig_alarm_lo, orig_alarm_hi);
+    M5_LOGI("Original alarm_led_lo:0x%06X alarm_led_hi:0x%06X led:0x%06X", orig_alarm_led_lo, orig_alarm_led_hi,
+            orig_led);
+    M5_LOGI("Original abuz_lo f:%u i:%u d:%u  abuz_hi f:%u i:%u d:%u", orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d,
+            orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d);
+
+    // Modify settings
+    EXPECT_TRUE(unit->writeEmissivity(0.5f));
+    EXPECT_TRUE(unit->writeAlarmTemperature(false, (int16_t)-1000));
+    EXPECT_TRUE(unit->writeAlarmTemperature(true, (int16_t)5000));
+    EXPECT_TRUE(unit->writeAlarmLED(false, (uint32_t)0x112233));
+    EXPECT_TRUE(unit->writeAlarmLED(true, (uint32_t)0x445566));
+    EXPECT_TRUE(unit->writeLED((uint32_t)0x778899));
+
+    // Persist to flash
+    EXPECT_TRUE(unit->writeConfig());
+
+    // Verify settings after save
+    uint16_t emiss{};
+    int16_t alarm_lo{}, alarm_hi{};
+    uint32_t alarm_led_lo{}, alarm_led_hi{}, led{};
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_TRUE(unit->readAlarmTemperature(false, alarm_lo));
+    EXPECT_TRUE(unit->readAlarmTemperature(true, alarm_hi));
+    EXPECT_TRUE(unit->readAlarmLED(false, alarm_led_lo));
+    EXPECT_TRUE(unit->readAlarmLED(true, alarm_led_hi));
+    EXPECT_TRUE(unit->readLED(led));
+    EXPECT_EQ(emiss, 32768);
+    EXPECT_EQ(alarm_lo, -1000);
+    EXPECT_EQ(alarm_hi, 5000);
+    EXPECT_EQ(alarm_led_lo, (uint32_t)0x112233);
+    EXPECT_EQ(alarm_led_hi, (uint32_t)0x445566);
+    EXPECT_EQ(led, (uint32_t)0x778899);
+
+    // Restore all original values and save back
+    ASSERT_TRUE(unit->writeEmissivity(orig_emiss)) << "Flash may retain test emissivity (32768)";
+    ASSERT_TRUE(unit->writeAlarmTemperature(false, orig_alarm_lo)) << "Flash may retain alarm_lo (-1000)";
+    ASSERT_TRUE(unit->writeAlarmTemperature(true, orig_alarm_hi)) << "Flash may retain alarm_hi (5000)";
+    ASSERT_TRUE(unit->writeAlarmLED(false, orig_alarm_led_lo)) << "Flash may retain alarm_led_lo (0x112233)";
+    ASSERT_TRUE(unit->writeAlarmLED(true, orig_alarm_led_hi)) << "Flash may retain alarm_led_hi (0x445566)";
+    ASSERT_TRUE(unit->writeAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d));
+    ASSERT_TRUE(unit->writeAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d));
+    ASSERT_TRUE(unit->writeLED(orig_led)) << "Flash may retain LED (0x778899)";
+    ASSERT_TRUE(unit->writeConfig()) << "Failed to persist restored values";
+}
+
+/*
   WARNING!!
   Failure of this test will result in an unexpected I2C address being set!
 */
-TEST_P(TestNCIR2, I2CAddress)
+TEST_F(TestNCIR2, I2CAddress)
 {
     SCOPED_TRACE(ustr);
 

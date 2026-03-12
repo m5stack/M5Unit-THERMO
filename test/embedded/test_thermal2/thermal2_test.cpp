@@ -13,19 +13,18 @@
 #include <googletest/test_template.hpp>
 #include <googletest/test_helper.hpp>
 #include <unit/unit_Thermal2.hpp>
+#include <m5_unit_component/adapter_i2c.hpp>
 #include <cmath>
-#include <random>
+#include <esp_random.h>
 
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::thermal2;
 using m5::unit::types::elapsed_time_t;
 
-const ::testing::Environment* global_fixture = ::testing::AddGlobalTestEnvironment(new GlobalFixture<400000U>());
-
 constexpr uint32_t STORED_SIZE{4};
 
-class TestThermal2 : public ComponentTestBase<UnitThermal2, bool> {
+class TestThermal2 : public I2CComponentTestBase<UnitThermal2> {
 protected:
     virtual UnitThermal2* get_instance() override
     {
@@ -35,55 +34,9 @@ protected:
         ptr->component_config(ccfg);
         return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
 };
 
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(false, true));
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(false));
-
 namespace {
-
-template <class U>
-elapsed_time_t test_periodic(U* unit, const uint32_t times, const uint32_t measure_duration = 0)
-{
-    auto tm         = unit->interval();
-    auto timeout_at = m5::utility::millis() + 10 * 1000;
-
-    do {
-        unit->update();
-        if (unit->updated()) {
-            break;
-        }
-        std::this_thread::yield();
-    } while (!unit->updated() && m5::utility::millis() <= timeout_at);
-    // timeout
-    if (!unit->updated()) {
-        return 0;
-    }
-
-    //
-    uint32_t measured{};
-    auto start_at = m5::utility::millis();
-    timeout_at    = start_at + (times * (tm + measure_duration) * 2);
-
-    do {
-        unit->update();
-        measured += unit->updated() ? 1 : 0;
-        if (measured >= times) {
-            break;
-        }
-        std::this_thread::yield();
-
-    } while (measured < times && m5::utility::millis() <= timeout_at);
-    return (measured == times) ? m5::utility::millis() - start_at : 0;
-    //   return (measured == times) ? unit->updatedMillis() - start_at : 0;
-}
-
-auto rng = std::default_random_engine{};
 
 constexpr Refresh rate_table[] = {
     Refresh::Rate0_5Hz, Refresh::Rate1Hz,  Refresh::Rate2Hz,  Refresh::Rate4Hz,
@@ -100,7 +53,7 @@ constexpr struct {
 
 }  // namespace
 
-TEST_P(TestThermal2, Conversion)
+TEST_F(TestThermal2, Conversion)
 {
     SCOPED_TRACE(ustr);
 
@@ -114,7 +67,7 @@ TEST_P(TestThermal2, Conversion)
     }
 }
 
-TEST_P(TestThermal2, Settings)
+TEST_F(TestThermal2, Settings)
 {
     SCOPED_TRACE(ustr);
 
@@ -244,7 +197,7 @@ TEST_P(TestThermal2, Settings)
     }
 }
 
-TEST_P(TestThermal2, Alarm)
+TEST_F(TestThermal2, Alarm)
 {
     SCOPED_TRACE(ustr);
 
@@ -288,9 +241,9 @@ TEST_P(TestThermal2, Alarm)
                 auto s = m5::utility::formatString("HL:%u", hl);
                 SCOPED_TRACE(s);
 
-                uint8_t r = rng() & 0xFF;
-                uint8_t g = rng() & 0xFF;
-                uint8_t b = rng() & 0xFF;
+                uint8_t r = esp_random() & 0xFF;
+                uint8_t g = esp_random() & 0xFF;
+                uint8_t b = esp_random() & 0xFF;
                 uint32_t rgb{};
                 EXPECT_TRUE(unit->writeAlarmLED(hl, r, g, b));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
@@ -298,7 +251,7 @@ TEST_P(TestThermal2, Alarm)
                 EXPECT_EQ((rgb >> 8) & 0xFF, g);
                 EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-                uint32_t rgb24 = rng() & 0x00FFFFFF;
+                uint32_t rgb24 = esp_random() & 0x00FFFFFF;
                 EXPECT_TRUE(unit->writeAlarmLED(hl, rgb24));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
                 EXPECT_EQ(rgb, rgb24);
@@ -351,7 +304,7 @@ TEST_P(TestThermal2, Alarm)
 
         uint32_t count{16};
         while (count--) {
-            uint8_t eb = rng() & 0xFF;
+            uint8_t eb = esp_random() & 0xFF;
             EXPECT_TRUE(unit->writeAlarmEnabled(eb));
             EXPECT_TRUE(unit->readAlarmEnabled(bits));
             EXPECT_EQ(bits, eb);
@@ -363,7 +316,7 @@ TEST_P(TestThermal2, Alarm)
     }
 }
 
-TEST_P(TestThermal2, Buzzer)
+TEST_F(TestThermal2, Buzzer)
 {
     SCOPED_TRACE(ustr);
     EXPECT_TRUE(unit->writeAlarmEnabled(0));
@@ -408,16 +361,16 @@ TEST_P(TestThermal2, Buzzer)
     EXPECT_FALSE(enabled);
 }
 
-TEST_P(TestThermal2, LED)
+TEST_F(TestThermal2, LED)
 {
     SCOPED_TRACE(ustr);
     EXPECT_TRUE(unit->writeAlarmEnabled(0));
 
     uint32_t count{8};
     while (count--) {
-        uint8_t r = rng() & 0xFF;
-        uint8_t g = rng() & 0xFF;
-        uint8_t b = rng() & 0xFF;
+        uint8_t r = esp_random() & 0xFF;
+        uint8_t g = esp_random() & 0xFF;
+        uint8_t b = esp_random() & 0xFF;
         uint32_t rgb{};
         EXPECT_TRUE(unit->writeLED(r, g, b));
         EXPECT_TRUE(unit->readLED(rgb));
@@ -427,7 +380,7 @@ TEST_P(TestThermal2, LED)
 
         m5::utility::delay(100);
 
-        uint32_t rgb24 = rng() & 0x00FFFFFF;
+        uint32_t rgb24 = esp_random() & 0x00FFFFFF;
         EXPECT_TRUE(unit->writeLED(rgb24));
         EXPECT_TRUE(unit->readLED(rgb));
         EXPECT_EQ(rgb, rgb24);
@@ -436,7 +389,7 @@ TEST_P(TestThermal2, LED)
     }
 }
 
-TEST_P(TestThermal2, Button)
+TEST_F(TestThermal2, Button)
 {
     SCOPED_TRACE(ustr);
 
@@ -455,7 +408,7 @@ TEST_P(TestThermal2, Button)
     EXPECT_FALSE(unit->isHolding());
 }
 
-TEST_P(TestThermal2, Firmware)
+TEST_F(TestThermal2, Firmware)
 {
     SCOPED_TRACE(ustr);
 
@@ -464,7 +417,7 @@ TEST_P(TestThermal2, Firmware)
     EXPECT_NE(ver, 0);
 }
 
-TEST_P(TestThermal2, Single)
+TEST_F(TestThermal2, Single)
 {
     Data page0{}, page1{};
     SCOPED_TRACE(ustr);
@@ -512,7 +465,7 @@ TEST_P(TestThermal2, Single)
     }
 }
 
-TEST_P(TestThermal2, Periodic)
+TEST_F(TestThermal2, Periodic)
 {
     SCOPED_TRACE(ustr);
 
@@ -524,13 +477,17 @@ TEST_P(TestThermal2, Periodic)
     EXPECT_TRUE(unit->startPeriodicMeasurement(Refresh::Rate16Hz));
     EXPECT_TRUE(unit->inPeriodic());
 
-    auto elapsed = test_periodic(unit.get(), STORED_SIZE);
+    auto ad          = unit->asAdapter<m5::unit::AdapterI2C>(m5::unit::Adapter::Type::I2C);
+    bool is_bus      = ad && ad->implType() == m5::unit::AdapterI2C::ImplType::Bus;
+    uint32_t timeout = is_bus ? std::max<uint32_t>(unit->interval(), 500) * (STORED_SIZE + 1) * 4
+                              : unit->interval() * (STORED_SIZE + 1) * 2;
+    auto r           = collect_periodic_measurements(unit.get(), STORED_SIZE, timeout);
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
 
-    EXPECT_NE(elapsed, 0);
-    EXPECT_GE(elapsed + 2, unit->interval() * STORED_SIZE);
+    EXPECT_FALSE(r.timed_out);
+    EXPECT_EQ(r.update_count, STORED_SIZE);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -559,7 +516,7 @@ TEST_P(TestThermal2, Periodic)
     EXPECT_FALSE(unit->full());
 }
 
-TEST_P(TestThermal2, I2CAddress)
+TEST_F(TestThermal2, I2CAddress)
 {
     SCOPED_TRACE(ustr);
 

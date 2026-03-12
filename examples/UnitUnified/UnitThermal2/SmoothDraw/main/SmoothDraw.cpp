@@ -992,8 +992,6 @@ void layoutChange(void)
 
 void setup(void)
 {
-    delay(1500);
-
     M5.begin();
     M5.setTouchButtonHeightByRatio(100);
     // The screen shall be in landscape mode

@@ -10,9 +10,7 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
-#if !defined(USING_ARDUINO)
 #include <driver/gpio.h>
-#endif
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -214,7 +212,6 @@ bool UnitMLX90614::begin()
         return false;
     }
 
-    //
     if (!read_eeprom(_eeprom)) {
         M5_LIB_LOGE("Failed to read EEPROM");
         return false;
@@ -597,8 +594,16 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
         M5_LIB_LOGE("Invalid address : %02X", i2c_address);
         return false;
     }
-    return write_eeprom(EEPROM_ADDR, i2c_address) && changeAddress(i2c_address) &&
-           read_register16(EEPROM_ADDR, _eeprom.addr);
+    // 1. Write new address to EEPROM (no POR yet — device still at old address)
+    // 2. Verify the EEPROM write while the device still responds at the old address
+    // 3. Sleep at old address (device enters low-power mode)
+    // 4. Switch the adapter to the new address (memory only, no I2C traffic)
+    // 5. Wakeup (POR) — device loads new address from EEPROM, wakeup verify uses new address
+    if (!write_eeprom(EEPROM_ADDR, i2c_address, false) || !read_register16(EEPROM_ADDR, _eeprom.addr) || !sleep() ||
+        !changeAddress(i2c_address) || !wakeup()) {
+        return false;
+    }
+    return true;
 }
 
 bool UnitMLX90614::sleep()
@@ -625,13 +630,8 @@ bool UnitMLX90614::sleep()
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
           disabled in order to keep the overall power drain in sleep mode really small.
          */
-#if defined(USING_ARDUINO)
-        ::pinMode(scl, OUTPUT);
-        ::digitalWrite(scl, LOW);
-#else
         gpio_set_direction((gpio_num_t)scl, GPIO_MODE_OUTPUT);
         gpio_set_level((gpio_num_t)scl, 0);
-#endif
         // SCL is kept LOW here; released by wakeup()
         return true;
     }
@@ -654,28 +654,11 @@ bool UnitMLX90614::wakeup()
     ad->end();  // Release I2C bus before GPIO manipulation (safe to call even if not begun)
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
-#if defined(USING_ARDUINO)
-    ::pinMode(scl, INPUT);  // SCL H
-    ::pinMode(sda, OUTPUT);
-    ::digitalWrite(sda, LOW);  // SDA L
-    m5::utility::delay(33 * 1.5f);
-    // After wake up the first data is available after 0.25 seconds (typ).
-    ::pinMode(sda, INPUT);  // SDA H
-    m5::utility::delay(550);
-    // Restore open-drain mode: BusImpl::begin() is a no-op and does not reconfigure pins,
-    // so SoftwareI2C requires the mode to be restored explicitly here.
-    // WireImpl::begin() (Wire.begin()) will reconfigure the pins itself, so this is harmless.
-    ::pinMode(scl, OUTPUT_OPEN_DRAIN);
-    ::digitalWrite(scl, HIGH);
-    ::pinMode(sda, OUTPUT_OPEN_DRAIN);
-    ::digitalWrite(sda, HIGH);
-#else
-    // ESP-IDF version.
     // GPIO_MODE_INPUT_OUTPUT_OD is required (not OUTPUT_OD alone): the input buffer
     // must be enabled so that gpio_get_level() can read the actual pad state.
     // SoftwareI2C relies on scl->read() for clock-stretch detection and ACK sensing;
-    // OUTPUT_OD alone disables the input buffer, causing gpio_get_level() to return 0
-    // always, which results in waitClockStretch() timing out unconditionally.
+    // Arduino's OUTPUT_OPEN_DRAIN disables the input buffer, causing gpio_get_level()
+    // to return 0 always, which breaks SoftwareI2C. Use ESP-IDF API directly.
     gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT);  // SCL H
     gpio_set_direction((gpio_num_t)sda, GPIO_MODE_OUTPUT);
     gpio_set_level((gpio_num_t)sda, 0);  // SDA L
@@ -684,13 +667,25 @@ bool UnitMLX90614::wakeup()
     gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT);  // SDA H
     m5::utility::delay(550);
     // Restore input+open-drain mode so SoftwareI2C can both drive and read back SCL/SDA
+    // WireImpl::begin() (Wire.begin()) will reconfigure the pins itself, so this is harmless.
     gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT_OUTPUT_OD);
     gpio_set_level((gpio_num_t)scl, 1);
     gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT_OUTPUT_OD);
     gpio_set_level((gpio_num_t)sda, 1);
-#endif
 
-    return ad->begin();  // restart Wire (no-op for BusImpl)
+    if (!ad->begin()) {  // restart Wire (no-op for BusImpl)
+        return false;
+    }
+    // Verify device is responsive after wakeup (retry for SoftwareI2C NO_ACK)
+    uint16_t dummy{};
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
+        if (read_register16(EEPROM_ADDR, dummy)) {
+            return true;
+        }
+        M5_LIB_LOGW("wakeup verify retry %u", retry);
+        m5::utility::delay(100);
+    }
+    return false;
 }
 
 //
@@ -746,14 +741,29 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
         return false;
     }
 
+    // Retry for SoftwareI2C NO_ACK on first transaction
     // Write 0x0000 first (as erase)
-    if (write_register16(reg, 0)) {
-        m5::utility::delay(10);  // Delay here is required (Typ:5, Max:10)
-        // Write value
+    bool erased{false};
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
+        if (write_register16(reg, 0)) {
+            erased = true;
+            break;
+        }
+        M5_LIB_LOGW("write_eeprom erase retry %u", retry);
+        m5::utility::delay(100);
+    }
+    if (!erased) {
+        return false;
+    }
+    m5::utility::delay(10);  // Delay here is required (Typ:5, Max:10)
+    // Write value
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
         if (write_register16(reg, val)) {
             m5::utility::delay(10);
             return apply ? applySettings() : true;
         }
+        M5_LIB_LOGW("write_eeprom write retry %u", retry);
+        m5::utility::delay(100);
     }
     return false;
 }

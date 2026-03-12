@@ -350,7 +350,12 @@ bool UnitNCIR2::readChipTemperature(Data& d)
 
 bool UnitNCIR2::writeConfig()
 {
-    return writeRegister8(SAVE_CONFIG_REG, 1);
+    if (!writeRegister8(SAVE_CONFIG_REG, 1)) {
+        return false;
+    }
+    // Wait for STM32 flash write to complete (undocumented; ESP32 fails without this)
+    m5::utility::delay(100);
+    return true;
 }
 
 bool UnitNCIR2::readButtonStatus(bool& press)

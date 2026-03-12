@@ -322,8 +322,9 @@ public:
     }
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
     ///@warning Some settings are writable in SMBus mode, but not reflected in operation
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings(Config)
     ///@{
     /*!
@@ -443,8 +444,9 @@ public:
     bool writePositiveKf2(const bool pos, const bool apply = true);
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
     ///@warning Some settings are writable in SMBus mode, but not reflected in operation
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings(Temperature range)
     ///@{
     /*!
@@ -519,7 +521,8 @@ public:
     bool writeAmbientMinMax(const float taMin, const float taMax, const bool apply = true);
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings (Emissivity)
     ///@{
     /*!
@@ -563,6 +566,8 @@ public:
       @brief Change device I2C address
       @param i2c_address I2C address
       @return True if successful
+      @warning Internally calls applySettings() (sleep + wakeup), which temporarily releases and reinitializes
+      the I2C bus. All devices sharing the same bus are affected during this period
     */
     bool changeI2CAddress(const uint8_t i2c_address);
     /*!
@@ -576,17 +581,22 @@ public:
     /*!
       @brief Sleep
       @return True if successful
+      @warning Temporarily releases the I2C bus via end(), which affects all devices sharing the same bus
      */
     bool sleep();
     /*!
       @brief Wakeup
       @return True if successful
+      @warning Temporarily releases the I2C bus via end() for GPIO manipulation (SDA low >33ms),
+      then reinitializes via begin(). All devices sharing the same bus are affected during this period (~600ms)
      */
     bool wakeup();
     /*!
       @brief Apply EEPROM settings
       @return True if successful
-      @note After writing to EEPROM , a reset or sleep.wakeup is required for the settings to take effect
+      @note After writing to EEPROM, a POR or sleep/wakeup is required for the settings to take effect
+      @warning Internally calls sleep() + wakeup(), which temporarily releases and reinitializes the I2C bus.
+      All devices sharing the same bus are affected during this period
      */
     inline bool applySettings()
     {

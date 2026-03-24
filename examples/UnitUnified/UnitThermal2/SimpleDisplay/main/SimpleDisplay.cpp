@@ -36,7 +36,7 @@ void ring_buzzer(const uint16_t freq, const uint8_t duty, const uint16_t count =
     unit.writeBuzzerControl(false);
 }
 
-// Rainbow 256 paletts
+// Rainbow 256 palettes
 constexpr const uint32_t color_table[256] = {
     0x0000FFu, 0x0003FFu, 0x0006FFu, 0x0009FFu, 0x000CFFu, 0x000FFFu, 0x0012FFu, 0x0016FFu,  // 0
     0x0019FEu, 0x001CFEu, 0x001FFEu, 0x0022FDu, 0x0025FDu, 0x0028FCu, 0x002BFCu, 0x002FFBu,  //
@@ -184,7 +184,7 @@ constexpr float high_alarm_temp{50.0f};
 
 static uint32_t text_color_table[] = {0x00000000, 0x00808080u, 0x00008000u, 0x00FFCF00u, 0x0000CFFFu};
 LGFX_Sprite text{};
-};  // namespace
+}  // namespace
 
 void setup()
 {

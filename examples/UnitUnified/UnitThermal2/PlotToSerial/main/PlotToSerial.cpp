@@ -79,7 +79,7 @@ void dump(const Data& d)
     }
 }
 
-};  // namespace
+}  // namespace
 
 void setup()
 {

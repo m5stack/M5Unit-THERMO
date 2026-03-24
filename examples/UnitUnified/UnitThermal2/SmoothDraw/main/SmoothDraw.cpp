@@ -1026,6 +1026,11 @@ void setup(void)
         }
     }
 
+    // Refresh rate (must be set before begin)
+    auto tcfg = thermal2.config();
+    tcfg.rate = m5::unit::thermal2::Refresh::Rate32Hz;
+    thermal2.config(tcfg);
+
     M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
     Wire.end();
     Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
@@ -1039,9 +1044,6 @@ void setup(void)
     M5_LOGI("M5UnitUnified has been begun");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
-    // Refresh rate
-    thermal2.writeRefreshRate(m5::unit::thermal2::Refresh::Rate32Hz);
-
     // Noise filter strength can be specified from 0~15.
     thermal2.writeNoiseFilterLevel(8);
 
@@ -1052,14 +1054,14 @@ void setup(void)
 
 void loop(void)
 {
+    M5.update();
+    Units.update();
+
     if (thermal2.wasClicked()) {
         uint8_t lv{};
         thermal2.readNoiseFilterLevel(lv);
         thermal2.writeNoiseFilterLevel(lv ? 0 : 8);
     }
-
-    M5.update();
-    Units.update();
 
     bool color_change  = M5.BtnA.wasClicked();
     bool marker_change = M5.BtnB.wasClicked();

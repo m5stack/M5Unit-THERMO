@@ -239,7 +239,7 @@ TEST_F(TestNCIR2, Alarm)
             EXPECT_TRUE(unit->readAlarmBuzzer(hl, f, i, fd));
             EXPECT_EQ(f, 0);
             EXPECT_EQ(i, 1);
-            EXPECT_FLOAT_EQ(fd, 0.5f);
+            EXPECT_NEAR(fd, 0.5f, 1 / 255.0f);
             EXPECT_TRUE(unit->readAlarmBuzzer(hl, f, i, d));
             EXPECT_EQ(f, 0);
             EXPECT_EQ(i, 1);
@@ -310,7 +310,7 @@ TEST_F(TestNCIR2, Buzzer)
     EXPECT_TRUE(unit->writeBuzzer(0, 0.5f));
     EXPECT_TRUE(unit->readBuzzer(f, fd));
     EXPECT_EQ(f, 0);
-    EXPECT_FLOAT_EQ(fd, 0.5f);
+    EXPECT_NEAR(fd, 0.5f, 1 / 255.0f);
     EXPECT_TRUE(unit->readBuzzer(f, d));
     EXPECT_EQ(f, 0);
     EXPECT_EQ(d, 127);
@@ -319,7 +319,7 @@ TEST_F(TestNCIR2, Buzzer)
     EXPECT_FALSE(unit->writeBuzzer(0, -0.0001f));
     EXPECT_TRUE(unit->readBuzzer(f, fd));
     EXPECT_EQ(f, 0);
-    EXPECT_FLOAT_EQ(fd, 0.5f);
+    EXPECT_NEAR(fd, 0.5f, 1 / 255.0f);
     EXPECT_TRUE(unit->readBuzzer(f, d));
     EXPECT_EQ(f, 0);
     EXPECT_EQ(d, 127);
@@ -327,7 +327,7 @@ TEST_F(TestNCIR2, Buzzer)
     EXPECT_FALSE(unit->writeBuzzer(0, 1.0001f));
     EXPECT_TRUE(unit->readBuzzer(f, fd));
     EXPECT_EQ(f, 0);
-    EXPECT_FLOAT_EQ(fd, 0.5f);
+    EXPECT_NEAR(fd, 0.5f, 1 / 255.0f);
     EXPECT_TRUE(unit->readBuzzer(f, d));
     EXPECT_EQ(f, 0);
     EXPECT_EQ(d, 127);

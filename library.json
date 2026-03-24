@@ -1,17 +1,17 @@
 {
     "name": "M5Unit-THERMO",
     "description": "Library for M5Stack UNIT THERMO using M5UnitUnified",
-    "keywords": "M5Stack UNIT THERMO M5UnitUnified",
+    "keywords": "m5stack, unit, thermo, m5unitunified, mlx90614, mlx90640, ncir, infrared, temperature, thermal, i2c",
     "authors": {
         "name": "M5Stack",
-        "url": "http://www.m5stack.com"
+        "url": "https://www.m5stack.com"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/m5stack/M5Unit-THERMO.git"
     },
     "dependencies": {
-        "m5stack/M5UnitUnified": ">=0.4.2"
+        "m5stack/M5UnitUnified": ">=0.4.4"
     },
     "version": "0.3.0",
     "frameworks": [

@@ -316,7 +316,7 @@ public:
      */
     bool readBuzzer(uint16_t& freq, uint8_t& rawDuty);
     /*!
-      @brief Write the buzzer settings
+      @brief Read the buzzer settings
       @param[out] freq Frequency
       @param[out] duty Duty
       @return True if successful
@@ -404,7 +404,7 @@ public:
     bool writeConfig();
     ///@}
 
-    ////@name Button
+    ///@name Button
     ///@{
     /*!
       @brief Read the button status

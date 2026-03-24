@@ -30,10 +30,10 @@ struct Flag {
     {
         return value & (1U << 5);
     }
-    // POR initialization routine is still ongoing if false
+    // POR initialization routine has completed (Low active)
     inline bool initialized() const
     {
-        return (value & (1U << 4)) == 0;
+        return value & (1U << 4);
     }
     uint16_t value{};
 };
@@ -94,7 +94,8 @@ struct Config {
     }
     inline Gain gain() const
     {
-        return static_cast<Gain>((value >> 11) & 0x07);
+        uint8_t g = (value >> 11) & 0x07;
+        return static_cast<Gain>(g > 6 ? 6 : g);  // [7] duplicate of Coeff100
     }
     inline IRSensor irSensor() const
     {
@@ -161,7 +162,7 @@ inline float toRaw_to_celsius(const uint16_t t)
 inline uint16_t celsius_to_toRaw(const float c)
 {
     float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
-    return 100 * (v + 0.005f + 273.15f);
+    return static_cast<uint16_t>(100 * (v + 0.005f + 273.15f));
 }
 
 inline float taRaw_to_celsius(const uint8_t t)
@@ -172,7 +173,7 @@ inline float taRaw_to_celsius(const uint8_t t)
 inline uint8_t celsius_to_taRaw(const float c)
 {
     float v = std::fmax(std::fmin(c, 125.f), -38.2f);
-    return 100 * (v + 0.32f + 38.2f) / 64.0f;
+    return static_cast<uint8_t>(100 * (v + 0.32f + 38.2f) / 64.0f);
 }
 
 inline float raw_to_emissivity(const uint16_t e)
@@ -182,7 +183,7 @@ inline float raw_to_emissivity(const uint16_t e)
 
 inline uint16_t emissivity_to_raw(const float e)
 {
-    return std::round(65535.f * e);
+    return static_cast<uint16_t>(std::round(65535.f * e));
 }
 
 }  // namespace
@@ -217,7 +218,7 @@ bool UnitMLX90614::begin()
         return false;
     }
     M5_LIB_LOGV(
-        "toMax:%u(%f) toMin:%u(%f) pwm:%04X TaRange:%X(%f,%f) emmiss:%04X config:%04X\n"
+        "toMax:%u(%f) toMin:%u(%f) pwm:%04X TaRange:%X(%f,%f) emiss:%04X config:%04X\n"
         "addr:%04X ID:%04X:%04X:%04X:%04X",
         _eeprom.toMax, toRaw_to_celsius(_eeprom.toMax), _eeprom.toMin, toRaw_to_celsius(_eeprom.toMin), _eeprom.pwmCtrl,
         _eeprom.taRange, taRaw_to_celsius((_eeprom.taRange) >> 8 & 0xFF), taRaw_to_celsius(_eeprom.taRange & 0xFF),
@@ -480,7 +481,7 @@ bool UnitMLX90614::write_object_minmax(const uint16_t toMin, const uint16_t toMa
         M5_LIB_LOGE("Need %u <= %u", toMin, toMax);
         return false;
     }
-    if (write_eeprom(EEPROM_TO_MIN, toMin, apply) && write_eeprom(EEPROM_TO_MAX, toMax, apply)) {
+    if (write_eeprom(EEPROM_TO_MIN, toMin, false) && write_eeprom(EEPROM_TO_MAX, toMax, false)) {
         _eeprom.toMax = toMax;
         _eeprom.toMin = toMin;
         return apply ? applySettings() : true;
@@ -527,8 +528,8 @@ bool UnitMLX90614::write_ambient_minmax(const uint8_t taMin, const uint8_t taMax
         return false;
     }
     uint16_t v{};
-    v = (uint16_t)taMax << 8 | taMin;
-    if (write_eeprom(EEPROM_TARANGE, v, apply)) {
+    v = static_cast<uint16_t>(taMax) << 8 | taMin;
+    if (write_eeprom(EEPROM_TARANGE, v, false)) {
         _eeprom.taRange = v;
         return apply ? applySettings() : true;
     }

@@ -278,7 +278,7 @@ public:
       @param[out] rate Refresh rate
       @return True if successful
      */
-    bool readRefreshRate(thermal2 ::Refresh& rate);
+    bool readRefreshRate(thermal2::Refresh& rate);
     /*!
       @brief Write the refresh rate
       @param rate Refresh rate
@@ -495,7 +495,7 @@ public:
      */
     inline bool writeLED(const uint32_t rgb, const bool verify = true)
     {
-        return writeLED(rgb >> 16, rgb >> 8, rgb & 0xFF);
+        return writeLED(rgb >> 16, rgb >> 8, rgb & 0xFF, verify);
     }
     /*!
       @brief Write the LED color

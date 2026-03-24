@@ -424,8 +424,8 @@ bool UnitThermal2::writeLED(const uint8_t r, const uint8_t g, const uint8_t b, c
     if (writeRegister(LED_REG, v, 3)) {
         auto timeout_at = m5::utility::millis() + 100;
         do {
-            uint8_t v[3]{};
-            if (!verify || (read_register(LED_REG, v, 3) && v[0] == r && v[1] == g && v[2] == b)) {
+            uint8_t rv[3]{};
+            if (!verify || (read_register(LED_REG, rv, 3) && rv[0] == r && rv[1] == g && rv[2] == b)) {
                 return true;
             }
             m5::utility::delay(1);

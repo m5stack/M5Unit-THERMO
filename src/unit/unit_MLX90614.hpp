@@ -30,7 +30,7 @@ namespace mlx90614 {
  */
 enum class Output : uint8_t {
     TA_TO1,         //!< PWM1: Ta PWM2:To1 (Ambient & Object 1)
-    TA_TO2,         //!< PWM1: Ta PWM2:To2 (Ambient & Object 1)
+    TA_TO2,         //!< PWM1: Ta PWM2:To2 (Ambient & Object 2)
     TO2_Undefined,  //!< PWM1: To2 PWM2:Undefined (Object 2)
     TO1_TO2,        //!< PWM1: To1 PWM2:To2 (Object 1 & 2)
 };
@@ -42,7 +42,7 @@ enum class Output : uint8_t {
 enum class IIR : uint8_t {
     Filter50,   //!< 50% (a1 = 0.5, b1 = 0.5)
     Filter25,   //!< 25% (a1 = 0.25, b1 = 0.75)
-    Filter17,   //!< 17% (a1 = 0x166(6), b1 = 0x83(3))
+    Filter17,   //!< 17% (a1 = 0.166(6), b1 = 0.833(3))
     Filter13,   //!< 13% (a1 = 0.125, b1 = 0.875)
     Filter100,  //!< 100% (a1 = 1, b1 = 0)
     Filter80,   //!< 80% (a1 = 0.8, b1 = 0.2)
@@ -78,6 +78,7 @@ enum class Gain : uint8_t {
     Coeff25,    //!< 25
     Coeff50,    //!< 50
     Coeff100,   //!< 100
+    // [7] Coeff100 (duplicate)
 };
 
 /*!
@@ -149,12 +150,12 @@ struct Data {
 };
 
 /*!
-  @struct EEPROM structure
-  @brief EEPROM values
+  @struct EEPROM
+  @brief EEPROM structure values
  */
 struct EEPROM {
     uint16_t toMax{}, toMin{},  //!< Max,Min of the Object Temperature
-        pwmCtrl{},              //!< Pulse With Modulation control
+        pwmCtrl{},              //!< Pulse Width Modulation control
         taRange{},              //!< Range of the Ambient Temperature (H/L)
         emissivity{},           //!< Emissivity
         config{},               //!< Configuration
@@ -169,7 +170,7 @@ struct EEPROM {
   @brief Base class of the UnitMLX90614 series
   @brief It can be used to measure the surface temperature of a human body or other object
   @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
-  @todo In the future, PMW mode will be supported to allow various configurations
+  @todo In the future, PWM mode will be supported to allow various configurations
 */
 class UnitMLX90614 : public Component, public PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614, 0x5A);
@@ -373,7 +374,7 @@ public:
     bool writeIIR(const mlx90614::IIR iir, const bool apply = true);
     /*!
       @brief Read the FIR
-      @param[out] dir FIR
+      @param[out] fir FIR
       @return True if successful
      */
     bool readFIR(mlx90614::FIR& fir);

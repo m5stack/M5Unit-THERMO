@@ -20,12 +20,12 @@ namespace {
 
 inline float raw_to_duty(const uint8_t x)
 {
-    return (x < 128) ? x / 127.0f * 0.5f : ((x - 127) / 128.0f) * 0.5f + 0.5f;
+    return x / 255.0f;
 }
 
 inline uint8_t duty_to_raw(const float f)
 {
-    return f <= 0.5f ? static_cast<uint8_t>(f * 255.0f) : static_cast<float>(127 + 128.0f * (2 * (f - 0.5f)));
+    return static_cast<uint8_t>(f * 255.0f);
 }
 
 }  // namespace

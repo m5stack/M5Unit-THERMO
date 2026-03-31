@@ -890,12 +890,12 @@ void drawTask(void*)
             Serial.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
             framecount              = 0;
             draw_param.update_count = 0;
-            delay(1);
+            m5::utility::delay(1);
         }
         int limit_delay = 17 - (msec - prev_msec);
         prev_msec       = msec;
         if (limit_delay > 0) {
-            delay(limit_delay);
+            m5::utility::delay(limit_delay);
         }
 
         if (prev_color_table_idx != color_map_table_idx) {
@@ -1094,7 +1094,7 @@ void loop(void)
     }
 
     if (!thermal2.updated()) {
-        delay(1);
+        m5::utility::delay(1);
     } else {
         int idx_recv_next = (idx_recv + 1) & 3;
         auto frame        = &framedata[idx_recv_next];

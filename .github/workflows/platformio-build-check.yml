@@ -19,6 +19,9 @@ on:
       - 'examples/UnitUnified/**.c'
       - '.github/workflows/platformio-build-check.yml'
       - 'platformio.ini'
+      - 'unit_ncir_env.ini'
+      - 'unit_ncir2_env.ini'
+      - 'unit_thermal2_env.ini'
   pull_request:
     paths:
       - 'src/**.cpp'
@@ -32,6 +35,9 @@ on:
       - 'examples/UnitUnified/**.c'
       - '.github/workflows/platformio-build-check.yml'
       - 'platformio.ini'
+      - 'unit_ncir_env.ini'
+      - 'unit_ncir2_env.ini'
+      - 'unit_thermal2_env.ini'
   workflow_dispatch:
 
 defaults:

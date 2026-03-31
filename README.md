@@ -11,7 +11,7 @@ NCIR featured with built-in infrared MLX90614 sensor, It can be used to measure 
 Unlike most temperature sensors, this sensor measures infrared light bouncing off of remote objects so it can sense temperature without having to touch them physically.
 
 ### SKU:U150
-The NCIR 2 Thermometer Unit utilizes the MLX90614 temperature sensor, and take ambient and object temperature readings with No Contact. Great for socially-distant reality.
+Unit NCIR2 is a non-contact infrared single-point temperature measurement unit equipped with a data processing MCU (STM32). It features a temperature measurement range of -70°C to 380°C, with functions such as high/low temperature alarms, RGB LED indicator, and a built-in buzzer.
 
 ### SKU:U149
 Unit Thermal2 is a thermal imaging acquisition unit equipped with a data processing MCU. It features an MLX90640 thermal imaging sensor with an imaging resolution of 32 x 24 pixels, a field of view of 110° x 75°, and a temperature measurement range of -40°C to 300°C. The MCU adopts an ESP32, enabling functions such as high/low temperature alarms, average/maximum/minimum value reading, and data caching through data processing.

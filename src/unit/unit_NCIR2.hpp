@@ -55,7 +55,7 @@ struct Data {
 
 /*!
   @class m5::unit::UnitNCIR2
-  @brief Unit NCIR2
+  @brief MLX90614-based non-contact IR thermometer with STM32 MCU (NCIR2, SKU:U150)
 */
 class UnitNCIR2 : public Component, public PeriodicMeasurementAdapter<UnitNCIR2, ncir2::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitNCIR2, 0x5A);
@@ -435,7 +435,7 @@ public:
       @return True if released
       @note The state is managed by update
      */
-    inline bool wasReleased()
+    inline bool wasReleased() const
     {
         return !_button && (_button != _prev_button);
     }

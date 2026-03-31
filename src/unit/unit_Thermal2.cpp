@@ -494,7 +494,7 @@ bool UnitThermal2::read_data(thermal2::Data& data)
         return false;
     }
 
-    auto wptr    = (uint8_t*)data.temp;
+    auto wptr    = reinterpret_cast<uint8_t*>(data.temp);
     int32_t left = (384 + 8) * sizeof(uint16_t);
     // M5_LIB_LOGD("Read:[%02X] %u", reg, left);
 

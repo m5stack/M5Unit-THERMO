@@ -103,11 +103,11 @@ struct Config {
     }
     inline bool positiveKs() const
     {
-        return value & (1U << 7);
+        return !(value & (1U << 7));  // bit7: 0=positive, 1=negative
     }
     inline bool positiveKf2() const
     {
-        return value & (1U << 14);
+        return !(value & (1U << 14));  // bit14: 0=positive, 1=negative
     }
     //
     inline void iir(const IIR iir)
@@ -132,11 +132,11 @@ struct Config {
     }
     inline void positiveKs(const bool pos)
     {
-        value = (value & ~(1U << 7)) | ((uint16_t)pos << 7);
+        value = (value & ~(1U << 7)) | ((uint16_t)(!pos) << 7);  // bit7: 0=positive, 1=negative
     }
     inline void positiveKf2(const bool pos)
     {
-        value = (value & ~(1U << 14)) | ((uint16_t)pos << 14);
+        value = (value & ~(1U << 14)) | ((uint16_t)(!pos) << 14);  // bit14: 0=positive, 1=negative
     }
     uint16_t value{};
 };

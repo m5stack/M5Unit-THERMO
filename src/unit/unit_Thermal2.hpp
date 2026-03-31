@@ -73,7 +73,7 @@ enum class Refresh : uint8_t {
 inline static uint16_t celsius_to_raw(const float f)
 {
     int i = std::round((f + 64) * 128);
-    return static_cast<uint16_t>(std::max(std::min(i, (int)std::numeric_limits<uint16_t>::max()), 0));
+    return static_cast<uint16_t>(std::max(std::min(i, static_cast<int>(std::numeric_limits<uint16_t>::max())), 0));
 }
 //! @brief Raw temperature value to celsius
 inline static float raw_to_celsius(const uint16_t u16)
@@ -88,48 +88,54 @@ inline static float raw_to_celsius(const uint16_t u16)
   @brief Measurement data group
  */
 struct Data {
-    uint8_t subpage{};  // Subpage 0:even 1:odd
+    uint8_t subpage{};  //!< Subpage 0:even 1:odd
     union {
-        uint16_t temp[8]{};  // Temperature information
+        uint16_t temp[8]{};  //!< Temperature information
         struct {
-            uint16_t median_temperature;
-            uint16_t average_temperature;
-            uint16_t most_diff_temperature;
-            uint8_t most_diff_x;
-            uint8_t most_diff_y;
-            uint16_t lowest_temperature;
-            uint8_t lowest_diff_x;
-            uint8_t lowest_diff_y;
-            uint16_t highest_temperature;
-            uint8_t highest_diff_x;
-            uint8_t highest_diff_y;
+            uint16_t median_temperature;     //!< Median temperature (raw)
+            uint16_t average_temperature;    //!< Average temperature (raw)
+            uint16_t most_diff_temperature;  //!< Most different temperature (raw)
+            uint8_t most_diff_x;             //!< Most different pixel X
+            uint8_t most_diff_y;             //!< Most different pixel Y
+            uint16_t lowest_temperature;     //!< Lowest temperature (raw)
+            uint8_t lowest_diff_x;           //!< Lowest pixel X
+            uint8_t lowest_diff_y;           //!< Lowest pixel Y
+            uint16_t highest_temperature;    //!< Highest temperature (raw)
+            uint8_t highest_diff_x;          //!< Highest pixel X
+            uint8_t highest_diff_y;          //!< Highest pixel Y
         };
     };
-    uint16_t raw[384]{};  // Raw pixel data (1/2)
+    uint16_t raw[384]{};  //!< Raw pixel data (1/2)
 
-    // temperature information
+    //! @brief Gets median temperature in Celsius
     inline float medianTemperature() const
     {
         return thermal2::raw_to_celsius(temp[0]);
     }
+    //! @brief Gets average temperature in Celsius
     inline float averageTemperature() const
     {
         return thermal2::raw_to_celsius(temp[1]);
     }
+    //! @brief Gets most different temperature in Celsius
     inline float mostDiffTemperature() const
     {
         return thermal2::raw_to_celsius(temp[2]);
     }
+    //! @brief Gets lowest temperature in Celsius
     inline float lowestTemperature() const
     {
         return thermal2::raw_to_celsius(temp[4]);
     }
+    //! @brief Gets highest temperature in Celsius
     inline float highestTemperature() const
     {
         return thermal2::raw_to_celsius(temp[6]);
     }
 
-    // pixel temperature
+    //! @brief Gets pixel temperature in Celsius
+    //! @param idx Pixel index (0-383)
+    //! @return Temperature in Celsius, or NaN if idx is out of range
     inline float temperature(const uint_fast16_t idx) const
     {
         return (idx < 384) ? thermal2::raw_to_celsius(raw[idx]) : std::numeric_limits<float>::quiet_NaN();
@@ -141,7 +147,7 @@ struct Data {
 
 /*!
   @class m5::unit::UnitThermal2
-  @brief Unit Thermal2
+  @brief Unit Thermal2 (MLX90640 32x24 thermal camera, SKU:U149)
 */
 class UnitThermal2 : public Component, public PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitThermal2, 0x32);
@@ -531,7 +537,7 @@ public:
       @return True if pressed
       @note The state is managed by update
      */
-    inline bool wasPressed()
+    inline bool wasPressed() const
     {
         return _button & thermal2::button_was_pressed;
     }
@@ -540,7 +546,7 @@ public:
       @return True if released
       @note The state is managed by update
      */
-    inline bool wasReleased()
+    inline bool wasReleased() const
     {
         return _button & thermal2::button_was_released;
     }
@@ -549,7 +555,7 @@ public:
       @return True if clicked
       @note The state is managed by update
      */
-    inline bool wasClicked()
+    inline bool wasClicked() const
     {
         return _button & thermal2::button_was_clicked;
     }
@@ -558,7 +564,7 @@ public:
       @return True if hold
       @note The state is managed by update
      */
-    inline bool wasHold()
+    inline bool wasHold() const
     {
         return _button & thermal2::button_was_hold;
     }
@@ -567,7 +573,7 @@ public:
       @return True if holding
       @note The state is managed by update
      */
-    inline bool isHolding()
+    inline bool isHolding() const
     {
         return isPressed() && _holding;
     }

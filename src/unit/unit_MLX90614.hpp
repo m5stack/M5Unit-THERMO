@@ -95,54 +95,66 @@ enum class IRSensor : uint8_t {
   @brief Measurement data group
  */
 struct Data {
-    std::array<uint16_t, 3> raw{};  // linearized raw [0]:Ambient [1]:Object1 [2]:Object2
+    std::array<uint16_t, 3> raw{};  //!< Linearized raw [0]:Ambient [1]:Object1 [2]:Object2
 
+    //! @brief Gets ambient temperature in Kelvin
     inline float ambientKelvin() const
     {
         return ((raw[0] & 0x8000) == 0) ? raw[0] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets ambient temperature in Celsius (alias of ambientCelsius)
     inline float ambientTemperature() const
     {
         return ambientCelsius();
     }
+    //! @brief Gets ambient temperature in Celsius
     inline float ambientCelsius() const
     {
         return ambientKelvin() - 273.15f;
     }
+    //! @brief Gets ambient temperature in Fahrenheit
     inline float ambientFahrenheit() const
     {
         return ambientCelsius() * 9.0f / 5.0f + 32.f;
     }
 
+    //! @brief Gets object1 temperature in Kelvin
     inline float objectKelvin1() const
     {
         return ((raw[1] & 0x8000) == 0) ? raw[1] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets object1 temperature in Celsius (alias of objectCelsius1)
     inline float objectTemperature1() const
     {
         return objectCelsius1();
     }
+    //! @brief Gets object1 temperature in Celsius
     inline float objectCelsius1() const
     {
         return objectKelvin1() - 273.15f;
     }
+    //! @brief Gets object1 temperature in Fahrenheit
     inline float objectFahrenheit1() const
     {
         return objectCelsius1() * 9.0f / 5.0f + 32.f;
     }
 
+    //! @brief Gets object2 temperature in Kelvin (dual sensor only)
     inline float objectKelvin2() const
     {
         return ((raw[2] & 0x8000) == 0) ? raw[2] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets object2 temperature in Celsius (alias of objectCelsius2)
     inline float objectTemperature2() const
     {
         return objectCelsius2();
     }
+    //! @brief Gets object2 temperature in Celsius (dual sensor only)
     inline float objectCelsius2() const
     {
         return objectKelvin2() - 273.15f;
     }
+    //! @brief Gets object2 temperature in Fahrenheit (dual sensor only)
     inline float objectFahrenheit2() const
     {
         return objectCelsius2() * 9.0f / 5.0f + 32.f;
@@ -397,6 +409,7 @@ public:
       @param gain Gain
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writeGain(const mlx90614::Gain gain, const bool apply = true);
@@ -416,30 +429,34 @@ public:
      */
     bool writeIRSensor(const mlx90614::IRSensor irs, const bool apply = true);
     /*!
-      @brief Read the positiveKs
+      @brief Read the sign of Ks (Config Register1 bit7)
       @param[out] pos Positive if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
      */
     bool readPositiveKs(bool& pos);
     /*!
-      @brief Write the positiveKs
+      @brief Write the sign of Ks (Config Register1 bit7)
       @param pos Positive if true
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writePositiveKs(const bool pos, const bool apply = true);
     /*!
-      @brief Read the positiveKf2
+      @brief Read the sign of Kt2 (Config Register1 bit14)
       @param[out] pos Positive if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
      */
     bool readPositiveKf2(bool& pos);
     /*!
-      @brief Write the positiveKf2
+      @brief Write the sign of Kt2 (Config Register1 bit14)
       @param pos Positive if true
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writePositiveKf2(const bool pos, const bool apply = true);
@@ -635,7 +652,7 @@ private:
 
 /*!
   @class UnitMLX90614BAA
-  @brief For UnitMLX90614BAA (NCIR using it)
+  @brief MLX90614BAA dual IR sensor unit (NCIR, SKU:U028)
  */
 class UnitMLX90614BAA : public UnitMLX90614 {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614BAA, 0x5A);

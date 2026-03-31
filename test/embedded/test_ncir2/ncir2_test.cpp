@@ -443,6 +443,8 @@ TEST_F(TestNCIR2, Periodic)
 
     EXPECT_FALSE(r.timed_out);
     EXPECT_EQ(r.update_count, STORED_SIZE);
+    uint32_t tolerance = is_bus ? 5 : 1;
+    EXPECT_LE(r.median(), unit->interval() + tolerance);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -469,6 +471,20 @@ TEST_F(TestNCIR2, Periodic)
 
     EXPECT_FALSE(std::isfinite(unit->temperature()));
     EXPECT_FALSE(std::isfinite(unit->fahrenheit()));
+}
+
+TEST_F(TestNCIR2, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    // Verify that begin() started periodic measurement with default config
+    EXPECT_TRUE(unit->inPeriodic());
+
+    // Default interval is 250ms
+    EXPECT_EQ(unit->interval(), 250U);
+
+    // Verify button state methods are accessible (const correctness)
+    EXPECT_FALSE(unit->wasReleased());
 }
 
 /*

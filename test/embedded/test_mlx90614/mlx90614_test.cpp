@@ -515,6 +515,8 @@ TEST_F(TestMLX90614BAA, Periodic)
 
         EXPECT_FALSE(r.timed_out);
         EXPECT_EQ(r.update_count, STORED_SIZE);
+        uint32_t tolerance = is_bus ? 5 : 1;
+        EXPECT_LE(r.median(), static_cast<uint32_t>(cycle + tolerance));
 
         M5_LOGI("TM:%u IT:%u med:%u", tm, unit->interval(), r.median());
 
@@ -572,6 +574,35 @@ TEST_F(TestMLX90614BAA, Periodic)
     // Restore EEPROM only; next test's begin() → wakeup() applies via POR
     restore_setting();
     restore_config();
+}
+
+TEST_F(TestMLX90614BAA, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    // Verify that begin() started periodic measurement with default config
+    EXPECT_TRUE(unit->inPeriodic());
+
+    // Read back config register values that begin() should have applied
+    mlx90614::IIR iir{};
+    mlx90614::FIR fir{};
+    mlx90614::Gain gain{};
+    mlx90614::IRSensor irs{};
+    EXPECT_TRUE(unit->readIIR(iir));
+    EXPECT_TRUE(unit->readFIR(fir));
+    EXPECT_TRUE(unit->readGain(gain));
+    EXPECT_TRUE(unit->readIRSensor(irs));
+
+    // Default config values
+    EXPECT_EQ(iir, mlx90614::IIR::Filter100);
+    EXPECT_EQ(fir, mlx90614::FIR::Filter1024);
+    EXPECT_EQ(gain, mlx90614::Gain::Coeff12_5);
+    EXPECT_EQ(irs, mlx90614::IRSensor::Single);
+
+    // Emissivity: default is 1.0f (raw 65535)
+    float emiss{};
+    EXPECT_TRUE(unit->readEmissivity(emiss));
+    EXPECT_NEAR(emiss, 1.0f, 0.001f);
 }
 
 TEST_F(TestMLX90614BAA, ChangeAddress)

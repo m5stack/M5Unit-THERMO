@@ -488,6 +488,10 @@ TEST_F(TestThermal2, Periodic)
 
     EXPECT_FALSE(r.timed_out);
     EXPECT_EQ(r.update_count, STORED_SIZE);
+    // Thermal2 transfers ~784 bytes per update, so median exceeds nominal interval.
+    // SoftwareI2C (Bus) has even larger overhead due to bit-banging.
+    uint32_t tolerance = is_bus ? 100 : 25;
+    EXPECT_LE(r.median(), unit->interval() + tolerance);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -514,6 +518,48 @@ TEST_F(TestThermal2, Periodic)
     EXPECT_EQ(unit->available(), 0);
     EXPECT_TRUE(unit->empty());
     EXPECT_FALSE(unit->full());
+}
+
+TEST_F(TestThermal2, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    // Verify that begin() applied config values.
+    // Note: firmware may enable auto_refresh automatically when periodic starts,
+    // so function_control may have additional bits set beyond what was configured.
+
+    // function_control: begin() writes enabled_function_led (0x02),
+    // but firmware adds enabled_function_auto_refresh (0x04) during periodic
+    uint8_t fc{};
+    EXPECT_TRUE(unit->readFunctionControl(fc));
+    EXPECT_TRUE(fc & thermal2::enabled_function_led);
+
+    // monitor_width/height: default is 15x11
+    uint8_t w{}, h{};
+    EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
+    EXPECT_EQ(w, 15);
+    EXPECT_EQ(h, 11);
+
+    // writeFunctionControl requires stopping periodic measurement first
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    uint8_t new_fc = thermal2::enabled_function_buzzer | thermal2::enabled_function_led;
+    EXPECT_TRUE(unit->writeFunctionControl(new_fc));
+    EXPECT_TRUE(unit->readFunctionControl(fc));
+    EXPECT_EQ(fc, new_fc);
+
+    EXPECT_TRUE(unit->writeTemperatureMonitorSize(8, 6));
+    EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
+    EXPECT_EQ(w, 8);
+    EXPECT_EQ(h, 6);
+
+    // Restore defaults
+    EXPECT_TRUE(unit->writeFunctionControl(thermal2::enabled_function_led));
+    EXPECT_TRUE(unit->writeTemperatureMonitorSize(15, 11));
+
+    // Restart periodic for subsequent tests
+    EXPECT_TRUE(unit->startPeriodicMeasurement());
 }
 
 TEST_F(TestThermal2, I2CAddress)

@@ -1,5 +1,5 @@
 /*
-:n * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
  *
  * SPDX-License-Identifier: MIT
  */
@@ -85,7 +85,7 @@ bool UnitThermal2::begin()
     _button_interval = _cfg.button_interval;
 
     return writeRegister8(BUTTON_STATUS_REG, 1) && writeFunctionControl(_cfg.function_control) && writeBuzzer(0, 0) &&
-           writeLED(0, 0, 0) && writeTemeratureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
+           writeLED(0, 0, 0) && writeTemperatureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
            (_cfg.start_periodic ? startPeriodicMeasurement(_cfg.rate) : true);
 }
 
@@ -262,7 +262,7 @@ bool UnitThermal2::writeNoiseFilterLevel(const uint8_t level)
     return writeRegister8(NOISE_FILTER_CONFIG_REG, level);
 }
 
-bool UnitThermal2::readTemeratureMonitorSize(uint8_t& wid, uint8_t& hgt)
+bool UnitThermal2::readTemperatureMonitorSize(uint8_t& wid, uint8_t& hgt)
 {
     wid = hgt = 0;
     uint8_t v{};
@@ -274,10 +274,10 @@ bool UnitThermal2::readTemeratureMonitorSize(uint8_t& wid, uint8_t& hgt)
     return false;
 }
 
-bool UnitThermal2::writeTemeratureMonitorSize(const uint8_t wid, const uint8_t hgt)
+bool UnitThermal2::writeTemperatureMonitorSize(const uint8_t wid, const uint8_t hgt)
 {
     if (wid > 15 || hgt > 11) {
-        M5_LIB_LOGE("wid must be between 0 - 15, hgt muset be between 0 - 11 (%u,%u)", wid, hgt);
+        M5_LIB_LOGE("wid must be between 0 - 15, hgt must be between 0 - 11 (%u,%u)", wid, hgt);
         return false;
     }
     uint8_t v = (hgt << 4) | wid;
@@ -298,7 +298,7 @@ bool UnitThermal2::readAlarmTemperature(const bool highlow, uint16_t& raw)
 {
     raw = 0;
 
-    const uint8_t reg = LOW_ALARM_THERSHOLD_REG + 0x10 * highlow;
+    const uint8_t reg = LOW_ALARM_THRESHOLD_REG + 0x10 * highlow;
     return read_register16LE(reg, raw);
 }
 
@@ -315,7 +315,7 @@ bool UnitThermal2::readAlarmTemperature(const bool highlow, float& celsius)
 
 bool UnitThermal2::writeAlarmTemperature(const bool highlow, const uint16_t raw)
 {
-    const uint8_t reg = LOW_ALARM_THERSHOLD_REG + 0x10 * highlow;
+    const uint8_t reg = LOW_ALARM_THRESHOLD_REG + 0x10 * highlow;
     return writeRegister16LE(reg, static_cast<uint16_t>(raw));
 }
 
@@ -357,7 +357,7 @@ bool UnitThermal2::readAlarmBuzzer(const bool highlow, uint16_t& freq, uint8_t& 
 bool UnitThermal2::writeAlarmBuzzer(const bool highlow, const uint16_t freq, const uint8_t interval)
 {
     if (interval < 5) {
-        M5_LIB_LOGE("intrval must be between 5 - 255 (%u)", interval);
+        M5_LIB_LOGE("interval must be between 5 - 255 (%u)", interval);
         return false;
     }
 
@@ -424,8 +424,8 @@ bool UnitThermal2::writeLED(const uint8_t r, const uint8_t g, const uint8_t b, c
     if (writeRegister(LED_REG, v, 3)) {
         auto timeout_at = m5::utility::millis() + 100;
         do {
-            uint8_t v[3]{};
-            if (!verify || (read_register(LED_REG, v, 3) && v[0] == r && v[1] == g && v[2] == b)) {
+            uint8_t rv[3]{};
+            if (!verify || (read_register(LED_REG, rv, 3) && rv[0] == r && rv[1] == g && rv[2] == b)) {
                 return true;
             }
             m5::utility::delay(1);
@@ -459,14 +459,14 @@ bool UnitThermal2::changeI2CAddress(const uint8_t i2c_address)
     uint8_t v[2]{};
     v[0] = i2c_address;
     v[1] = ~i2c_address;
-    return writeRegister(I2C_ADDRESS_REG, v, 2) && changeAddress(0x10);
+    return writeRegister(I2C_ADDRESS_REG, v, 2) && changeAddress(i2c_address);
 }
 
 bool UnitThermal2::readI2CAddress(uint8_t& i2c_address)
 {
-    uint8_t v[2]{};  // [0]:addr, [1]:bit invtert addr
+    uint8_t v[2]{};  // [0]:addr, [1]:bit inverted addr
     if (read_register(I2C_ADDRESS_REG, v, 2)) {
-        if (v[0] != ~v[1]) {
+        if (v[0] != static_cast<uint8_t>(~v[1])) {
             M5_LIB_LOGE("Invalid data %02X/%02X", v[0], v[1]);
             return false;
         }
@@ -489,12 +489,12 @@ bool UnitThermal2::request_data()
 bool UnitThermal2::read_data(thermal2::Data& data)
 {
     // batch read
-    uint8_t reg{MEDIAN_TEPERATURE_REG};
+    uint8_t reg{MEDIAN_TEMPERATURE_REG};
     if (writeWithTransaction(&reg, 1) != m5::hal::error::error_t::OK) {
         return false;
     }
 
-    auto wptr    = (uint8_t*)data.temp;
+    auto wptr    = reinterpret_cast<uint8_t*>(data.temp);
     int32_t left = (384 + 8) * sizeof(uint16_t);
     // M5_LIB_LOGD("Read:[%02X] %u", reg, left);
 

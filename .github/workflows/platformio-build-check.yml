@@ -8,30 +8,36 @@ on:
     branches:
       - '*'
     paths:
-      - 'src/unit/**.cpp'
-      - 'src/unit/**.hpp'
-      - 'src/unit/**.h'
-      - 'src/unit/**.c'
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
       - 'examples/UnitUnified/**.ino'
       - 'examples/UnitUnified/**.cpp'
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '**platformio-build-check.yml'
-      - '**platformio.ini'
+      - '.github/workflows/platformio-build-check.yml'
+      - 'platformio.ini'
+      - 'unit_ncir_env.ini'
+      - 'unit_ncir2_env.ini'
+      - 'unit_thermal2_env.ini'
   pull_request:
     paths:
-      - 'src/unit/**.cpp'
-      - 'src/unit/**.hpp'
-      - 'src/unit/**.h'
-      - 'src/unit/**.c'
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
       - 'examples/UnitUnified/**.ino'
       - 'examples/UnitUnified/**.cpp'
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '**platformio-build-check.yml'
-      - '**platformio.ini'
+      - '.github/workflows/platformio-build-check.yml'
+      - 'platformio.ini'
+      - 'unit_ncir_env.ini'
+      - 'unit_ncir2_env.ini'
+      - 'unit_thermal2_env.ini'
   workflow_dispatch:
 
 defaults:
@@ -46,11 +52,11 @@ jobs:
   build:
     name: ${{ matrix.unit }}:${{ matrix.example }}@${{ matrix.board }}:${{ matrix.framework }}:${{ matrix.espressif32 }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
 
     strategy:
       fail-fast: false
-      #max-parallel: 1
+      max-parallel: 20
       
       matrix:
         example:
@@ -70,14 +76,18 @@ jobs:
           - Fire
           - StampS3
           - Dial
-          - AtomMatrix
+          - Atom
           - AtomS3
           - AtomS3R
           - NanoC6
           - StickCPlus
           - StickCPlus2
+          - StickS3
           - Paper
           - CoreInk
+          - Cardputer
+          - Tab5
+          - NessoN1
 
         framework:
           - Arduino
@@ -118,38 +128,95 @@ jobs:
 #            espressif32: '4_4_0'
 
         exclude:
+          # UnitNCIR has no SimpleDisplay/SmoothDraw examples
           - unit: UnitNCIR
             example: SimpleDisplay
           - unit: UnitNCIR
             example: SmoothDraw
+          # UnitNCIR2 has no SmoothDraw example
           - unit: UnitNCIR2
             example: SmoothDraw
+          # SimpleDisplay/SmoothDraw: Core only (env exists only for Core)
+          - board: Core2
+            example: SimpleDisplay
+          - board: Core2
+            example: SmoothDraw
+          - board: CoreS3
+            example: SimpleDisplay
+          - board: CoreS3
+            example: SmoothDraw
+          - board: Fire
+            example: SimpleDisplay
+          - board: Fire
+            example: SmoothDraw
           - board: StampS3
-            example: SimpleDisplay
-          - board: AtomMatrix
-            example: SimpleDisplay
-          - board: NanoC6
             example: SimpleDisplay
           - board: StampS3
             example: SmoothDraw
-          - board: AtomMatrix
+          - board: Dial
+            example: SimpleDisplay
+          - board: Dial
+            example: SmoothDraw
+          - board: Atom
+            example: SimpleDisplay
+          - board: Atom
+            example: SmoothDraw
+          - board: AtomS3
+            example: SimpleDisplay
+          - board: AtomS3
+            example: SmoothDraw
+          - board: AtomS3R
+            example: SimpleDisplay
+          - board: AtomS3R
             example: SmoothDraw
           - board: NanoC6
+            example: SimpleDisplay
+          - board: NanoC6
+            example: SmoothDraw
+          - board: StickCPlus
+            example: SimpleDisplay
+          - board: StickCPlus
+            example: SmoothDraw
+          - board: StickCPlus2
+            example: SimpleDisplay
+          - board: StickCPlus2
+            example: SmoothDraw
+          - board: StickS3
+            example: SimpleDisplay
+          - board: StickS3
             example: SmoothDraw
           - board: Paper
             example: SimpleDisplay
-          - board: CoreINK
-            example: SimpleDisplay
           - board: Paper
             example: SmoothDraw
-          - board: CoreINK
+          - board: CoreInk
+            example: SimpleDisplay
+          - board: CoreInk
+            example: SmoothDraw
+          - board: Cardputer
+            example: SimpleDisplay
+          - board: Cardputer
+            example: SmoothDraw
+          - board: Tab5
+            example: SimpleDisplay
+          - board: Tab5
+            example: SmoothDraw
+          - board: NessoN1
+            example: SimpleDisplay
+          - board: NessoN1
             example: SmoothDraw
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          python-version: '3.10'
+
+      - name: Install intelhex
+        run: pip install intelhex
 
       - name: Build examples
         uses: karniv00l/platformio-run-action@v1

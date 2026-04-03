@@ -10,6 +10,7 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
+#include <driver/gpio.h>
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -29,10 +30,10 @@ struct Flag {
     {
         return value & (1U << 5);
     }
-    // POR initialization routine is still ongoing if false
+    // POR initialization routine has completed (Low active)
     inline bool initialized() const
     {
-        return (value & (1U << 4)) == 0;
+        return value & (1U << 4);
     }
     uint16_t value{};
 };
@@ -93,7 +94,8 @@ struct Config {
     }
     inline Gain gain() const
     {
-        return static_cast<Gain>((value >> 11) & 0x07);
+        uint8_t g = (value >> 11) & 0x07;
+        return static_cast<Gain>(g > 6 ? 6 : g);  // [7] duplicate of Coeff100
     }
     inline IRSensor irSensor() const
     {
@@ -101,11 +103,11 @@ struct Config {
     }
     inline bool positiveKs() const
     {
-        return value & (1U << 7);
+        return !(value & (1U << 7));  // bit7: 0=positive, 1=negative
     }
     inline bool positiveKf2() const
     {
-        return value & (1U << 14);
+        return !(value & (1U << 14));  // bit14: 0=positive, 1=negative
     }
     //
     inline void iir(const IIR iir)
@@ -130,11 +132,11 @@ struct Config {
     }
     inline void positiveKs(const bool pos)
     {
-        value = (value & ~(1U << 7)) | ((uint16_t)pos << 7);
+        value = (value & ~(1U << 7)) | ((uint16_t)(!pos) << 7);  // bit7: 0=positive, 1=negative
     }
     inline void positiveKf2(const bool pos)
     {
-        value = (value & ~(1U << 14)) | ((uint16_t)pos << 14);
+        value = (value & ~(1U << 14)) | ((uint16_t)(!pos) << 14);  // bit14: 0=positive, 1=negative
     }
     uint16_t value{};
 };
@@ -160,7 +162,7 @@ inline float toRaw_to_celsius(const uint16_t t)
 inline uint16_t celsius_to_toRaw(const float c)
 {
     float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
-    return 100 * (v + 0.005f + 273.15f);
+    return static_cast<uint16_t>(100 * (v + 0.005f + 273.15f));
 }
 
 inline float taRaw_to_celsius(const uint8_t t)
@@ -171,7 +173,7 @@ inline float taRaw_to_celsius(const uint8_t t)
 inline uint8_t celsius_to_taRaw(const float c)
 {
     float v = std::fmax(std::fmin(c, 125.f), -38.2f);
-    return 100 * (v + 0.32f + 38.2f) / 64.0f;
+    return static_cast<uint8_t>(100 * (v + 0.32f + 38.2f) / 64.0f);
 }
 
 inline float raw_to_emissivity(const uint16_t e)
@@ -181,7 +183,7 @@ inline float raw_to_emissivity(const uint16_t e)
 
 inline uint16_t emissivity_to_raw(const float e)
 {
-    return std::round(65535.f * e);
+    return static_cast<uint16_t>(std::round(65535.f * e));
 }
 
 }  // namespace
@@ -205,22 +207,24 @@ bool UnitMLX90614::begin()
         }
     }
 
-    // Sleep and wakeup
-    applySettings();
+    // Wakeup: ensure device is in normal mode (also resets SMBus state if awake)
+    if (!wakeup()) {
+        M5_LIB_LOGE("Failed to wakeup");
+        return false;
+    }
 
-    //
     if (!read_eeprom(_eeprom)) {
         M5_LIB_LOGE("Failed to read EEPROM");
         return false;
     }
     M5_LIB_LOGV(
-        "toMax:%u(%f) toMin:%u(%f) pwm:%04X TaRange:%X(%f,%f) emmiss:%04X config:%04X\n"
+        "toMax:%u(%f) toMin:%u(%f) pwm:%04X TaRange:%X(%f,%f) emiss:%04X config:%04X\n"
         "addr:%04X ID:%04X:%04X:%04X:%04X",
         _eeprom.toMax, toRaw_to_celsius(_eeprom.toMax), _eeprom.toMin, toRaw_to_celsius(_eeprom.toMin), _eeprom.pwmCtrl,
         _eeprom.taRange, taRaw_to_celsius((_eeprom.taRange) >> 8 & 0xFF), taRaw_to_celsius(_eeprom.taRange & 0xFF),
         _eeprom.emissivity, _eeprom.config, _eeprom.addr, _eeprom.id[0], _eeprom.id[1], _eeprom.id[2], _eeprom.id[3]);
 
-    PWMCtrl pc;
+    PWMCtrl pc{};
     pc.value = _eeprom.pwmCtrl;
     M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
@@ -477,7 +481,7 @@ bool UnitMLX90614::write_object_minmax(const uint16_t toMin, const uint16_t toMa
         M5_LIB_LOGE("Need %u <= %u", toMin, toMax);
         return false;
     }
-    if (write_eeprom(EEPROM_TO_MIN, toMin, apply) && write_eeprom(EEPROM_TO_MAX, toMax, apply)) {
+    if (write_eeprom(EEPROM_TO_MIN, toMin, false) && write_eeprom(EEPROM_TO_MAX, toMax, false)) {
         _eeprom.toMax = toMax;
         _eeprom.toMin = toMin;
         return apply ? applySettings() : true;
@@ -524,8 +528,8 @@ bool UnitMLX90614::write_ambient_minmax(const uint8_t taMin, const uint8_t taMax
         return false;
     }
     uint16_t v{};
-    v = (uint16_t)taMax << 8 | taMin;
-    if (write_eeprom(EEPROM_TARANGE, v, apply)) {
+    v = static_cast<uint16_t>(taMax) << 8 | taMin;
+    if (write_eeprom(EEPROM_TARANGE, v, false)) {
         _eeprom.taRange = v;
         return apply ? applySettings() : true;
     }
@@ -561,7 +565,7 @@ bool UnitMLX90614::write_emissivity(const uint16_t emiss, const bool apply)
 
     if (write_eeprom(EEPROM_EMISSIVITY, emiss, apply)) {
         _eeprom.emissivity = emiss;
-        return apply ? applySettings() : true;
+        return true;
     }
     return false;
 }
@@ -591,17 +595,29 @@ bool UnitMLX90614::changeI2CAddress(const uint8_t i2c_address)
         M5_LIB_LOGE("Invalid address : %02X", i2c_address);
         return false;
     }
-    return write_eeprom(EEPROM_ADDR, i2c_address) && changeAddress(i2c_address) &&
-           read_register16(EEPROM_ADDR, _eeprom.addr);
+    // 1. Write new address to EEPROM (no POR yet — device still at old address)
+    // 2. Verify the EEPROM write while the device still responds at the old address
+    // 3. Sleep at old address (device enters low-power mode)
+    // 4. Switch the adapter to the new address (memory only, no I2C traffic)
+    // 5. Wakeup (POR) — device loads new address from EEPROM, wakeup verify uses new address
+    if (!write_eeprom(EEPROM_ADDR, i2c_address, false) || !read_register16(EEPROM_ADDR, _eeprom.addr) || !sleep() ||
+        !changeAddress(i2c_address) || !wakeup()) {
+        return false;
+    }
+    return true;
 }
 
 bool UnitMLX90614::sleep()
 {
-#if defined(ARDUINO)
-    auto ada = adapter();
-    auto scl = ada->scl();
+    auto ad = asAdapter<AdapterI2C>(Adapter::Type::I2C);
+    if (!ad) {
+        M5_LIB_LOGE("No AdapterI2C");
+        return false;
+    }
+
+    auto scl = ad->scl();
     if (scl < 0) {
-        M5_LIB_LOGE("SCL pin cannot be detcted");
+        M5_LIB_LOGE("SCL pin cannot be detected");
         return false;
     }
 
@@ -609,50 +625,68 @@ bool UnitMLX90614::sleep()
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
     buf[2] = crc8.update(buf, 2);
-    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ada->end() /* Keep peripheral settings */) {
+    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ad->end() /* Keep peripheral settings */) {
         /*
           datasheet says:
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
-          disabled inorder to keep the overall power drain in sleep mode really small.
+          disabled in order to keep the overall power drain in sleep mode really small.
          */
-        ada->pinMode(scl, OUTPUT);
-        ada->digitalWrite(scl, LOW);
-        ada->pinMode(scl, INPUT);
+        gpio_set_direction((gpio_num_t)scl, GPIO_MODE_OUTPUT);
+        gpio_set_level((gpio_num_t)scl, 0);
+        // SCL is kept LOW here; released by wakeup()
         return true;
     }
     return false;
-#else
-#pragma message "Implement for M5HAL not yet"
-    return false;
-#endif
 }
 
 bool UnitMLX90614::wakeup()
 {
-#if defined(ARDUINO)
-    auto ada = adapter();
-    auto scl = ada->scl();
-    auto sda = ada->sda();
-    if (scl < 0 || sda < 0) {
-        M5_LIB_LOGE("SCL or SDA pin cannot be detcted %d,%d", scl, sda);
+    auto ad = asAdapter<AdapterI2C>(Adapter::Type::I2C);
+    if (!ad) {
+        M5_LIB_LOGE("No AdapterI2C");
         return false;
     }
+    auto scl = ad->scl();
+    auto sda = ad->sda();
+    if (scl < 0 || sda < 0) {
+        M5_LIB_LOGE("SCL or SDA pin cannot be detected %d,%d", scl, sda);
+        return false;
+    }
+    ad->end();  // Release I2C bus before GPIO manipulation (safe to call even if not begun)
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
-    ada->pinMode(scl, INPUT);  // SCL H
-    ada->pinMode(sda, OUTPUT);
-    ada->digitalWrite(sda, LOW);  // SDA L
+    // GPIO_MODE_INPUT_OUTPUT_OD is required (not OUTPUT_OD alone): the input buffer
+    // must be enabled so that gpio_get_level() can read the actual pad state.
+    // SoftwareI2C relies on scl->read() for clock-stretch detection and ACK sensing;
+    // Arduino's OUTPUT_OPEN_DRAIN disables the input buffer, causing gpio_get_level()
+    // to return 0 always, which breaks SoftwareI2C. Use ESP-IDF API directly.
+    gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT);  // SCL H
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_OUTPUT);
+    gpio_set_level((gpio_num_t)sda, 0);  // SDA L
     m5::utility::delay(33 * 1.5f);
     // After wake up the first data is available after 0.25 seconds (typ).
-    ada->pinMode(sda, INPUT);  // SDA H
-    delay(550);
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT);  // SDA H
+    m5::utility::delay(550);
+    // Restore input+open-drain mode so SoftwareI2C can both drive and read back SCL/SDA
+    // WireImpl::begin() (Wire.begin()) will reconfigure the pins itself, so this is harmless.
+    gpio_set_direction((gpio_num_t)scl, GPIO_MODE_INPUT_OUTPUT_OD);
+    gpio_set_level((gpio_num_t)scl, 1);
+    gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT_OUTPUT_OD);
+    gpio_set_level((gpio_num_t)sda, 1);
 
-    return ada->begin();  // restart Wire
-
-#else
-#pragma message "Implement for M5HAL not yet"
+    if (!ad->begin()) {  // restart Wire (no-op for BusImpl)
+        return false;
+    }
+    // Verify device is responsive after wakeup (retry for SoftwareI2C NO_ACK)
+    uint16_t dummy{};
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
+        if (read_register16(EEPROM_ADDR, dummy)) {
+            return true;
+        }
+        M5_LIB_LOGW("wakeup verify retry %u", retry);
+        m5::utility::delay(100);
+    }
     return false;
-#endif
 }
 
 //
@@ -673,13 +707,16 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
 
     // Read 3bytes (low,high,PEC) and check PEC
-    uint8_t crc{};
-    if (readRegister(reg, rbuf + 3, 3, 0, stopbit) && (crc = crc8.update(rbuf, 5)) == rbuf[5]) {
-        v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
-        return true;
+    if (readRegister(reg, rbuf + 3, 3, 0, stopbit)) {
+        uint8_t crc = crc8.update(rbuf, 5);
+        if (crc == rbuf[5]) {
+            v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
+            return true;
+        }
+        // M5_LIB_LOGE("CRC Error %02X/%02X", crc, rbuf[5]);
     }
-    //    M5_LIB_LOGD("R:%02X SB:%u CRC8:%02X PEC:%02X", reg, stopbit, crc, rbuf[5]);
-    //    M5_DUMPD(rbuf, 6);
+    // M5_LIB_LOGE("Reg:%02X Stop:%u", reg, stopbit);
+    // M5_DUMPE(rbuf, 6);
     return false;
 }
 
@@ -705,14 +742,29 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
         return false;
     }
 
+    // Retry for SoftwareI2C NO_ACK on first transaction
     // Write 0x0000 first (as erase)
-    if (write_register16(reg, 0)) {
-        m5::utility::delay(10);  // Delay here is required (Typ:5, Max:10)
-        // Write value
+    bool erased{false};
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
+        if (write_register16(reg, 0)) {
+            erased = true;
+            break;
+        }
+        M5_LIB_LOGW("write_eeprom erase retry %u", retry);
+        m5::utility::delay(100);
+    }
+    if (!erased) {
+        return false;
+    }
+    m5::utility::delay(10);  // Delay here is required (Typ:5, Max:10)
+    // Write value
+    for (uint_fast8_t retry = 0; retry < 3; ++retry) {
         if (write_register16(reg, val)) {
             m5::utility::delay(10);
             return apply ? applySettings() : true;
         }
+        M5_LIB_LOGW("write_eeprom write retry %u", retry);
+        m5::utility::delay(100);
     }
     return false;
 }

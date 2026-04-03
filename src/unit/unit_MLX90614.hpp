@@ -30,7 +30,7 @@ namespace mlx90614 {
  */
 enum class Output : uint8_t {
     TA_TO1,         //!< PWM1: Ta PWM2:To1 (Ambient & Object 1)
-    TA_TO2,         //!< PWM1: Ta PWM2:To2 (Ambient & Object 1)
+    TA_TO2,         //!< PWM1: Ta PWM2:To2 (Ambient & Object 2)
     TO2_Undefined,  //!< PWM1: To2 PWM2:Undefined (Object 2)
     TO1_TO2,        //!< PWM1: To1 PWM2:To2 (Object 1 & 2)
 };
@@ -42,7 +42,7 @@ enum class Output : uint8_t {
 enum class IIR : uint8_t {
     Filter50,   //!< 50% (a1 = 0.5, b1 = 0.5)
     Filter25,   //!< 25% (a1 = 0.25, b1 = 0.75)
-    Filter17,   //!< 17% (a1 = 0x166(6), b1 = 0x83(3))
+    Filter17,   //!< 17% (a1 = 0.166(6), b1 = 0.833(3))
     Filter13,   //!< 13% (a1 = 0.125, b1 = 0.875)
     Filter100,  //!< 100% (a1 = 1, b1 = 0)
     Filter80,   //!< 80% (a1 = 0.8, b1 = 0.2)
@@ -78,6 +78,7 @@ enum class Gain : uint8_t {
     Coeff25,    //!< 25
     Coeff50,    //!< 50
     Coeff100,   //!< 100
+    // [7] Coeff100 (duplicate)
 };
 
 /*!
@@ -94,54 +95,66 @@ enum class IRSensor : uint8_t {
   @brief Measurement data group
  */
 struct Data {
-    std::array<uint16_t, 3> raw{};  // linearized raw [0]:Ambient [1]:Object1 [2]:Object2
+    std::array<uint16_t, 3> raw{};  //!< Linearized raw [0]:Ambient [1]:Object1 [2]:Object2
 
+    //! @brief Gets ambient temperature in Kelvin
     inline float ambientKelvin() const
     {
         return ((raw[0] & 0x8000) == 0) ? raw[0] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets ambient temperature in Celsius (alias of ambientCelsius)
     inline float ambientTemperature() const
     {
         return ambientCelsius();
     }
+    //! @brief Gets ambient temperature in Celsius
     inline float ambientCelsius() const
     {
         return ambientKelvin() - 273.15f;
     }
+    //! @brief Gets ambient temperature in Fahrenheit
     inline float ambientFahrenheit() const
     {
         return ambientCelsius() * 9.0f / 5.0f + 32.f;
     }
 
+    //! @brief Gets object1 temperature in Kelvin
     inline float objectKelvin1() const
     {
         return ((raw[1] & 0x8000) == 0) ? raw[1] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets object1 temperature in Celsius (alias of objectCelsius1)
     inline float objectTemperature1() const
     {
         return objectCelsius1();
     }
+    //! @brief Gets object1 temperature in Celsius
     inline float objectCelsius1() const
     {
         return objectKelvin1() - 273.15f;
     }
+    //! @brief Gets object1 temperature in Fahrenheit
     inline float objectFahrenheit1() const
     {
         return objectCelsius1() * 9.0f / 5.0f + 32.f;
     }
 
+    //! @brief Gets object2 temperature in Kelvin (dual sensor only)
     inline float objectKelvin2() const
     {
         return ((raw[2] & 0x8000) == 0) ? raw[2] * 0.02f : std::numeric_limits<float>::quiet_NaN();
     }
+    //! @brief Gets object2 temperature in Celsius (alias of objectCelsius2)
     inline float objectTemperature2() const
     {
         return objectCelsius2();
     }
+    //! @brief Gets object2 temperature in Celsius (dual sensor only)
     inline float objectCelsius2() const
     {
         return objectKelvin2() - 273.15f;
     }
+    //! @brief Gets object2 temperature in Fahrenheit (dual sensor only)
     inline float objectFahrenheit2() const
     {
         return objectCelsius2() * 9.0f / 5.0f + 32.f;
@@ -149,12 +162,12 @@ struct Data {
 };
 
 /*!
-  @struct EEPROM structure
-  @brief EEPROM values
+  @struct EEPROM
+  @brief EEPROM structure values
  */
 struct EEPROM {
     uint16_t toMax{}, toMin{},  //!< Max,Min of the Object Temperature
-        pwmCtrl{},              //!< Pulse With Modulation control
+        pwmCtrl{},              //!< Pulse Width Modulation control
         taRange{},              //!< Range of the Ambient Temperature (H/L)
         emissivity{},           //!< Emissivity
         config{},               //!< Configuration
@@ -169,7 +182,7 @@ struct EEPROM {
   @brief Base class of the UnitMLX90614 series
   @brief It can be used to measure the surface temperature of a human body or other object
   @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
-  @todo In the future, PMW mode will be supported to allow various configurations
+  @todo In the future, PWM mode will be supported to allow various configurations
 */
 class UnitMLX90614 : public Component, public PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614, 0x5A);
@@ -210,12 +223,12 @@ public:
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -322,8 +335,9 @@ public:
     }
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
     ///@warning Some settings are writable in SMBus mode, but not reflected in operation
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings(Config)
     ///@{
     /*!
@@ -372,7 +386,7 @@ public:
     bool writeIIR(const mlx90614::IIR iir, const bool apply = true);
     /*!
       @brief Read the FIR
-      @param[out] dir FIR
+      @param[out] fir FIR
       @return True if successful
      */
     bool readFIR(mlx90614::FIR& fir);
@@ -395,6 +409,7 @@ public:
       @param gain Gain
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writeGain(const mlx90614::Gain gain, const bool apply = true);
@@ -414,37 +429,42 @@ public:
      */
     bool writeIRSensor(const mlx90614::IRSensor irs, const bool apply = true);
     /*!
-      @brief Read the positiveKs
+      @brief Read the sign of Ks (Config Register1 bit7)
       @param[out] pos Positive if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
      */
     bool readPositiveKs(bool& pos);
     /*!
-      @brief Write the positiveKs
+      @brief Write the sign of Ks (Config Register1 bit7)
       @param pos Positive if true
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writePositiveKs(const bool pos, const bool apply = true);
     /*!
-      @brief Read the positiveKf2
+      @brief Read the sign of Kt2 (Config Register1 bit14)
       @param[out] pos Positive if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
      */
     bool readPositiveKf2(bool& pos);
     /*!
-      @brief Write the positiveKf2
+      @brief Write the sign of Kt2 (Config Register1 bit14)
       @param pos Positive if true
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
     bool writePositiveKf2(const bool pos, const bool apply = true);
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
     ///@warning Some settings are writable in SMBus mode, but not reflected in operation
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings(Temperature range)
     ///@{
     /*!
@@ -519,7 +539,8 @@ public:
     bool writeAmbientMinMax(const float taMin, const float taMax, const bool apply = true);
     ///@}
 
-    ///@note If apply is false, a POR or call applySetting() is required to enable the setting
+    ///@note If apply is false, a POR or call applySettings() is required to enable the setting
+    ///@warning When apply is true, the I2C bus is temporarily released and reinitializes (see applySettings())
     ///@name Settings (Emissivity)
     ///@{
     /*!
@@ -563,6 +584,8 @@ public:
       @brief Change device I2C address
       @param i2c_address I2C address
       @return True if successful
+      @warning Internally calls applySettings() (sleep + wakeup), which temporarily releases and reinitializes
+      the I2C bus. All devices sharing the same bus are affected during this period
     */
     bool changeI2CAddress(const uint8_t i2c_address);
     /*!
@@ -576,17 +599,22 @@ public:
     /*!
       @brief Sleep
       @return True if successful
+      @warning Temporarily releases the I2C bus via end(), which affects all devices sharing the same bus
      */
     bool sleep();
     /*!
       @brief Wakeup
       @return True if successful
+      @warning Temporarily releases the I2C bus via end() for GPIO manipulation (SDA low >33ms),
+      then reinitializes via begin(). All devices sharing the same bus are affected during this period (~600ms)
      */
     bool wakeup();
     /*!
       @brief Apply EEPROM settings
       @return True if successful
-      @note After writing to EEPROM , a reset or sleep.wakeup is required for the settings to take effect
+      @note After writing to EEPROM, a POR or sleep/wakeup is required for the settings to take effect
+      @warning Internally calls sleep() + wakeup(), which temporarily releases and reinitializes the I2C bus.
+      All devices sharing the same bus are affected during this period
      */
     inline bool applySettings()
     {
@@ -624,7 +652,7 @@ private:
 
 /*!
   @class UnitMLX90614BAA
-  @brief For UnitMLX90614BAA (NCIR using it)
+  @brief MLX90614BAA dual IR sensor unit (NCIR, SKU:U028)
  */
 class UnitMLX90614BAA : public UnitMLX90614 {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614BAA, 0x5A);

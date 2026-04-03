@@ -12,6 +12,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
+#include <inttypes.h>
 
 namespace {
 auto& display = M5.Display;
@@ -886,15 +887,15 @@ void drawTask(void*)
         uint8_t sec   = msec / 1000;
         if (prev_sec != sec) {
             prev_sec = sec;
-            Serial.printf("fps: %d : %d\n", framecount, draw_param.update_count);
+            Serial.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
             framecount              = 0;
             draw_param.update_count = 0;
-            delay(1);
+            m5::utility::delay(1);
         }
         int limit_delay = 17 - (msec - prev_msec);
         prev_msec       = msec;
         if (limit_delay > 0) {
-            delay(limit_delay);
+            m5::utility::delay(limit_delay);
         }
 
         if (prev_color_table_idx != color_map_table_idx) {
@@ -992,33 +993,56 @@ void layoutChange(void)
 void setup(void)
 {
     M5.begin();
-    if (display.width() < display.height()) {
-        display.setRotation(display.getRotation() ^ 1);
-    }
-
-    M5.begin();
+    M5.setTouchButtonHeightByRatio(100);
     // The screen shall be in landscape mode
     if (display.height() > display.width()) {
         display.setRotation(1);
     }
 
+    // No LCD or display device?
+    if (display.width() == 0 || display.height() == 0 || display.isEPD()) {
+        M5_LOGE("The core must be equipped with LCD");
+        while (true) {
+            m5::utility::delay(10000);
+        }
+    }
+
+    auto board       = M5.getBoard();
     auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
     auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
 
+    // SmoothDraw requires a separate FreeRTOS draw task (xTaskCreatePinnedToCore).
+    // NessoN1 (ESP32-C6) is single-core, so the draw task and main loop contend for
+    // the SPI display mutex, causing xTaskPriorityDisinherit assertion failure.
+    // Use SimpleDisplay example instead, which runs everything in the main loop.
+    if (board == m5::board_t::board_ArduinoNessoN1) {
+        M5_LOGE(
+            "SmoothDraw is not supported on NessoN1 (ESP32-C6 single-core).\n"
+            " The dual-task architecture conflicts with single-core FreeRTOS.\n"
+            " Use SimpleDisplay example instead");
+        display.fillScreen(TFT_RED);
+        while (true) {
+            m5::utility::delay(10000);
+        }
+    }
+
+    // Refresh rate (must be set before begin)
+    auto tcfg = thermal2.config();
+    tcfg.rate = m5::unit::thermal2::Refresh::Rate32Hz;
+    thermal2.config(tcfg);
+
+    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
+    Wire.end();
+    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
     if (!Units.add(thermal2, Wire) || !Units.begin()) {
         M5_LOGE("Failed to begin");
-        display.clear(TFT_RED);
+        display.fillScreen(TFT_RED);
         while (true) {
             m5::utility::delay(10000);
         }
     }
     M5_LOGI("M5UnitUnified has been begun");
     M5_LOGI("%s", Units.debugInfo().c_str());
-
-    // Refresh rate
-    thermal2.writeRefreshRate(m5::unit::thermal2::Refresh::Rate32Hz);
 
     // Noise filter strength can be specified from 0~15.
     thermal2.writeNoiseFilterLevel(8);
@@ -1030,14 +1054,14 @@ void setup(void)
 
 void loop(void)
 {
+    M5.update();
+    Units.update();
+
     if (thermal2.wasClicked()) {
         uint8_t lv{};
         thermal2.readNoiseFilterLevel(lv);
         thermal2.writeNoiseFilterLevel(lv ? 0 : 8);
     }
-
-    M5.update();
-    Units.update();
 
     bool color_change  = M5.BtnA.wasClicked();
     bool marker_change = M5.BtnB.wasClicked();
@@ -1070,7 +1094,7 @@ void loop(void)
     }
 
     if (!thermal2.updated()) {
-        delay(1);
+        m5::utility::delay(1);
     } else {
         int idx_recv_next = (idx_recv + 1) & 3;
         auto frame        = &framedata[idx_recv_next];

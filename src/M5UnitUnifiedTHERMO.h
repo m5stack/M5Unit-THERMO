@@ -5,7 +5,7 @@
  */
 /*!
   @file M5UnitUnifiedTHERMO.h
-  @brief Main header of M5UnitTHERMO using M5UnitUnfied
+  @brief Main header of M5UnitTHERMO using M5UnitUnified
 */
 #ifndef M5_UNIT_UNIFIED_THERMO_H
 #define M5_UNIT_UNIFIED_THERMO_H

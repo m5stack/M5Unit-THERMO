@@ -73,7 +73,7 @@ enum class Refresh : uint8_t {
 inline static uint16_t celsius_to_raw(const float f)
 {
     int i = std::round((f + 64) * 128);
-    return static_cast<uint16_t>(std::max(std::min(i, (int)std::numeric_limits<uint16_t>::max()), 0));
+    return static_cast<uint16_t>(std::max(std::min(i, static_cast<int>(std::numeric_limits<uint16_t>::max())), 0));
 }
 //! @brief Raw temperature value to celsius
 inline static float raw_to_celsius(const uint16_t u16)
@@ -88,48 +88,54 @@ inline static float raw_to_celsius(const uint16_t u16)
   @brief Measurement data group
  */
 struct Data {
-    uint8_t subpage{};  // Subpage 0:even 1:odd
+    uint8_t subpage{};  //!< Subpage 0:even 1:odd
     union {
-        uint16_t temp[8]{};  // Temperature information
+        uint16_t temp[8]{};  //!< Temperature information
         struct {
-            uint16_t median_temperature;
-            uint16_t average_temperature;
-            uint16_t most_diff_temperature;
-            uint8_t most_diff_x;
-            uint8_t most_diff_y;
-            uint16_t lowest_temperature;
-            uint8_t lowest_diff_x;
-            uint8_t lowest_diff_y;
-            uint16_t highest_temperature;
-            uint8_t highest_diff_x;
-            uint8_t highest_diff_y;
+            uint16_t median_temperature;     //!< Median temperature (raw)
+            uint16_t average_temperature;    //!< Average temperature (raw)
+            uint16_t most_diff_temperature;  //!< Most different temperature (raw)
+            uint8_t most_diff_x;             //!< Most different pixel X
+            uint8_t most_diff_y;             //!< Most different pixel Y
+            uint16_t lowest_temperature;     //!< Lowest temperature (raw)
+            uint8_t lowest_diff_x;           //!< Lowest pixel X
+            uint8_t lowest_diff_y;           //!< Lowest pixel Y
+            uint16_t highest_temperature;    //!< Highest temperature (raw)
+            uint8_t highest_diff_x;          //!< Highest pixel X
+            uint8_t highest_diff_y;          //!< Highest pixel Y
         };
     };
-    uint16_t raw[384]{};  // Raw pixel data (1/2)
+    uint16_t raw[384]{};  //!< Raw pixel data (1/2)
 
-    // temperture information
+    //! @brief Gets median temperature in Celsius
     inline float medianTemperature() const
     {
         return thermal2::raw_to_celsius(temp[0]);
     }
+    //! @brief Gets average temperature in Celsius
     inline float averageTemperature() const
     {
         return thermal2::raw_to_celsius(temp[1]);
     }
+    //! @brief Gets most different temperature in Celsius
     inline float mostDiffTemperature() const
     {
         return thermal2::raw_to_celsius(temp[2]);
     }
+    //! @brief Gets lowest temperature in Celsius
     inline float lowestTemperature() const
     {
         return thermal2::raw_to_celsius(temp[4]);
     }
+    //! @brief Gets highest temperature in Celsius
     inline float highestTemperature() const
     {
         return thermal2::raw_to_celsius(temp[6]);
     }
 
-    // piexl temperature
+    //! @brief Gets pixel temperature in Celsius
+    //! @param idx Pixel index (0-383)
+    //! @return Temperature in Celsius, or NaN if idx is out of range
     inline float temperature(const uint_fast16_t idx) const
     {
         return (idx < 384) ? thermal2::raw_to_celsius(raw[idx]) : std::numeric_limits<float>::quiet_NaN();
@@ -141,7 +147,7 @@ struct Data {
 
 /*!
   @class m5::unit::UnitThermal2
-  @brief Unit Thermal2
+  @brief Unit Thermal2 (MLX90640 32x24 thermal camera, SKU:U149)
 */
 class UnitThermal2 : public Component, public PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitThermal2, 0x32);
@@ -182,12 +188,12 @@ public:
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -224,8 +230,8 @@ public:
     ///@{
     /*!
       @brief Measurement single shot
-      @param[out] page0  Measuerd data subpage 0
-      @param[out] page1  Measuerd data subpage 1
+      @param[out] page0  Measured data subpage 0
+      @param[out] page1  Measured data subpage 1
       @return True if successful
       @note Pixel temperature data is retrieved half at a time
       @note Measure based on the current refresh rate
@@ -257,7 +263,7 @@ public:
     /*!
       @brief Write the function control
       @param value Function control value
-      @param verify Verify the value is written if true z(it is not reflected immediately)
+      @param verify Verify the value is written if true (it is not reflected immediately)
       @return True if successful
       @warning During periodic detection runs, an error is returned
      */
@@ -278,7 +284,7 @@ public:
       @param[out] rate Refresh rate
       @return True if successful
      */
-    bool readRefreshRate(thermal2 ::Refresh& rate);
+    bool readRefreshRate(thermal2::Refresh& rate);
     /*!
       @brief Write the refresh rate
       @param rate Refresh rate
@@ -308,14 +314,26 @@ public:
       @param[out] hgt Height (0-11)
       @return True if successful
      */
-    bool readTemeratureMonitorSize(uint8_t& wid, uint8_t& hgt);
+    bool readTemperatureMonitorSize(uint8_t& wid, uint8_t& hgt);
     /*!
       @brief Write the temperature monitor size
       @param wid Width (0-15)
-      @param hgt Heigh (0-11)
+      @param hgt Height (0-11)
       @return True if successful
      */
-    bool writeTemeratureMonitorSize(const uint8_t wid, const uint8_t hgt);
+    bool writeTemperatureMonitorSize(const uint8_t wid, const uint8_t hgt);
+
+    //! @deprecated Use readTemperatureMonitorSize instead
+    [[deprecated("Use readTemperatureMonitorSize")]] inline bool readTemeratureMonitorSize(uint8_t& wid, uint8_t& hgt)
+    {
+        return readTemperatureMonitorSize(wid, hgt);
+    }
+    //! @deprecated Use writeTemperatureMonitorSize instead
+    [[deprecated("Use writeTemperatureMonitorSize")]] inline bool writeTemeratureMonitorSize(const uint8_t wid,
+                                                                                             const uint8_t hgt)
+    {
+        return writeTemperatureMonitorSize(wid, hgt);
+    }
     ///@}
 
     ///@name Alarm
@@ -431,7 +449,7 @@ public:
       @brief Write the buzzer settings
       @param freq Frequency
       @param duty Duty 0 - 255
-      @param verify Verify the value is written if true z(it is not reflected immediately)
+      @param verify Verify the value is written if true (it is not reflected immediately)
       @return True if successful
       @note buzzer duty. 0~255 (default:128 : The loudest sound setting; the further away from 128, the quieter the
       sound)
@@ -448,7 +466,7 @@ public:
 
     /*!
       @brief Read the Buzzer control
-      @param[out] enabled True:enabled False;disabled
+      @param[out] enabled True:enabled False: disabled
       @return True if successful
      */
     inline bool readBuzzerControl(bool& enabled)
@@ -457,7 +475,7 @@ public:
     }
     /*!
       @brief Write the Buzzer control
-      @param enabled True:enabled False;disabled
+      @param enabled True:enabled False: disabled
       @return True if successful
      */
     inline bool writeBuzzerControl(const bool enabled)
@@ -478,19 +496,19 @@ public:
     /*!
       @brief Write the LED color
       @param rgb RGB24 color
-      @param verify Verify the value is written if true z(it is not reflected immediately)
+      @param verify Verify the value is written if true (it is not reflected immediately)
       @return True if successful
      */
     inline bool writeLED(const uint32_t rgb, const bool verify = true)
     {
-        return writeLED(rgb >> 16, rgb >> 8, rgb & 0xFF);
+        return writeLED(rgb >> 16, rgb >> 8, rgb & 0xFF, verify);
     }
     /*!
       @brief Write the LED color
       @param r Red
       @param g Green
       @param b Blue
-      @param verify Verify the value is written if true z(it is not reflected immediately)
+      @param verify Verify the value is written if true (it is not reflected immediately)
       @return True if successful
      */
     bool writeLED(const uint8_t r, const uint8_t g, const uint8_t b, const bool verify = true);
@@ -519,7 +537,7 @@ public:
       @return True if pressed
       @note The state is managed by update
      */
-    inline bool wasPressed()
+    inline bool wasPressed() const
     {
         return _button & thermal2::button_was_pressed;
     }
@@ -528,34 +546,34 @@ public:
       @return True if released
       @note The state is managed by update
      */
-    inline bool wasReleased()
+    inline bool wasReleased() const
     {
         return _button & thermal2::button_was_released;
     }
     /*!
       @brief Was button clicked?
-      @return True if released
+      @return True if clicked
       @note The state is managed by update
      */
-    inline bool wasClicked()
+    inline bool wasClicked() const
     {
         return _button & thermal2::button_was_clicked;
     }
     /*!
       @brief Was button hold?
-      @return True if released
+      @return True if hold
       @note The state is managed by update
      */
-    inline bool wasHold()
+    inline bool wasHold() const
     {
         return _button & thermal2::button_was_hold;
     }
     /*!
       @brief Is button holding?
-      @return True if released
+      @return True if holding
       @note The state is managed by update
      */
-    inline bool isHolding()
+    inline bool isHolding() const
     {
         return isPressed() && _holding;
     }
@@ -647,12 +665,12 @@ constexpr uint8_t BUZZER_FREQ_REG{0x12};               // R/W 2
 constexpr uint8_t BUZZER_DUTY_REG{0x14};               // R/W
 constexpr uint8_t LED_REG{0x15};                       // R/W 3(R,G,B)
 
-constexpr uint8_t LOW_ALARM_THERSHOLD_REG{0x20};    // R/W 2 I
+constexpr uint8_t LOW_ALARM_THRESHOLD_REG{0x20};    // R/W 2 I
 constexpr uint8_t LOW_ALARM_BUZZER_FREQ_REG{0x22};  // R/W 2 I
 constexpr uint8_t LOW_ALARM_INTERVAL_REG{0x24};     // R/W I
 constexpr uint8_t LOW_ALARM_LED_REG{0x25};          // R/W 3 I
 
-constexpr uint8_t HIGH_ALARM_THERSHOLD_REG{0x30};    // R/W 2 I
+constexpr uint8_t HIGH_ALARM_THRESHOLD_REG{0x30};    // R/W 2 I
 constexpr uint8_t HIGH_ALARM_BUZZER_FREQ_REG{0x32};  // R/W 2 I
 constexpr uint8_t HIGH_ALARM_INTERVAL_REG{0x34};     // R/W I
 constexpr uint8_t HIGH_ALARM_LED_REG{0x35};          // R/W 3 I
@@ -660,17 +678,17 @@ constexpr uint8_t HIGH_ALARM_LED_REG{0x35};          // R/W 3 I
 constexpr uint8_t DATA_REFRESH_CONTROL_REG{0x6E};  // R/W I
 constexpr uint8_t SUB_PAGE_INFORMATION_REG{0x6F};  // R
 
-constexpr uint8_t MEDIAN_TEPERATURE_REG{0x70};     // R 2
-constexpr uint8_t AVERAGE_TEPERATURE_REG{0x72};    // R 2
-constexpr uint8_t MOST_DIFF_TEPERATURE_REG{0x74};  // R 2
-constexpr uint8_t MOST_DIFF_X_POS_REG{0x76};       // R
-constexpr uint8_t MOST_DIFF_Y_POS_REG{0x77};       // R
-constexpr uint8_t LOWEST_TEPERATURE_REG{0x78};     // R 2
-constexpr uint8_t LOWEST_DIFF_X_POS_REG{0x7A};     // R
-constexpr uint8_t LOWEST_DIFF_Y_POS_REG{0x7B};     // R
-constexpr uint8_t HIGHEST_TEPERATURE_REG{0x7C};    // R 2
-constexpr uint8_t HIGHEST_DIFF_X_POS_REG{0x7E};    // R
-constexpr uint8_t HIGHEST_DIFF_Y_POS_REG{0x7F};    // R
+constexpr uint8_t MEDIAN_TEMPERATURE_REG{0x70};     // R 2
+constexpr uint8_t AVERAGE_TEMPERATURE_REG{0x72};    // R 2
+constexpr uint8_t MOST_DIFF_TEMPERATURE_REG{0x74};  // R 2
+constexpr uint8_t MOST_DIFF_X_POS_REG{0x76};        // R
+constexpr uint8_t MOST_DIFF_Y_POS_REG{0x77};        // R
+constexpr uint8_t LOWEST_TEMPERATURE_REG{0x78};     // R 2
+constexpr uint8_t LOWEST_DIFF_X_POS_REG{0x7A};      // R
+constexpr uint8_t LOWEST_DIFF_Y_POS_REG{0x7B};      // R
+constexpr uint8_t HIGHEST_TEMPERATURE_REG{0x7C};    // R 2
+constexpr uint8_t HIGHEST_DIFF_X_POS_REG{0x7E};     // R
+constexpr uint8_t HIGHEST_DIFF_Y_POS_REG{0x7F};     // R
 
 constexpr uint8_t TEMPERATURE_DATA_REG{0x80};  // R 768
 }  // namespace command

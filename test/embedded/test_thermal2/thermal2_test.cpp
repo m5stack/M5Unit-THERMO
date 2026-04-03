@@ -13,19 +13,18 @@
 #include <googletest/test_template.hpp>
 #include <googletest/test_helper.hpp>
 #include <unit/unit_Thermal2.hpp>
+#include <m5_unit_component/adapter_i2c.hpp>
 #include <cmath>
-#include <random>
+#include <esp_random.h>
 
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::thermal2;
 using m5::unit::types::elapsed_time_t;
 
-const ::testing::Environment* global_fixture = ::testing::AddGlobalTestEnvironment(new GlobalFixture<400000U>());
-
 constexpr uint32_t STORED_SIZE{4};
 
-class TestThermal2 : public ComponentTestBase<UnitThermal2, bool> {
+class TestThermal2 : public I2CComponentTestBase<UnitThermal2> {
 protected:
     virtual UnitThermal2* get_instance() override
     {
@@ -34,58 +33,10 @@ protected:
         ccfg.stored_size = STORED_SIZE;
         ptr->component_config(ccfg);
         return ptr;
-
-        return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
 };
 
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(false, true));
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestThermal2, ::testing::Values(false));
-
 namespace {
-
-template <class U>
-elapsed_time_t test_periodic(U* unit, const uint32_t times, const uint32_t measure_duration = 0)
-{
-    auto tm         = unit->interval();
-    auto timeout_at = m5::utility::millis() + 10 * 1000;
-
-    do {
-        unit->update();
-        if (unit->updated()) {
-            break;
-        }
-        std::this_thread::yield();
-    } while (!unit->updated() && m5::utility::millis() <= timeout_at);
-    // timeout
-    if (!unit->updated()) {
-        return 0;
-    }
-
-    //
-    uint32_t measured{};
-    auto start_at = m5::utility::millis();
-    timeout_at    = start_at + (times * (tm + measure_duration) * 2);
-
-    do {
-        unit->update();
-        measured += unit->updated() ? 1 : 0;
-        if (measured >= times) {
-            break;
-        }
-        std::this_thread::yield();
-
-    } while (measured < times && m5::utility::millis() <= timeout_at);
-    return (measured == times) ? m5::utility::millis() - start_at : 0;
-    //   return (measured == times) ? unit->updatedMillis() - start_at : 0;
-}
-
-auto rng = std::default_random_engine{};
 
 constexpr Refresh rate_table[] = {
     Refresh::Rate0_5Hz, Refresh::Rate1Hz,  Refresh::Rate2Hz,  Refresh::Rate4Hz,
@@ -102,7 +53,7 @@ constexpr struct {
 
 }  // namespace
 
-TEST_P(TestThermal2, Conversion)
+TEST_F(TestThermal2, Conversion)
 {
     SCOPED_TRACE(ustr);
 
@@ -116,7 +67,7 @@ TEST_P(TestThermal2, Conversion)
     }
 }
 
-TEST_P(TestThermal2, Settings)
+TEST_F(TestThermal2, Settings)
 {
     SCOPED_TRACE(ustr);
 
@@ -194,7 +145,7 @@ TEST_P(TestThermal2, Settings)
             EXPECT_EQ(rr, r) << (int)r;
         }
     }
-    // Noice filter
+    // Noise filter
     {
         for (uint8_t lv = 0; lv < 16; ++lv) {
             uint8_t v{};
@@ -218,8 +169,8 @@ TEST_P(TestThermal2, Settings)
         uint8_t w{}, h{}, prev_w{}, prev_h{};
         for (uint8_t ww = 0; ww < 16; ++ww) {
             for (uint8_t hh = 0; hh < 12; ++hh) {
-                EXPECT_TRUE(unit->writeTemeratureMonitorSize(ww, hh));
-                EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+                EXPECT_TRUE(unit->writeTemperatureMonitorSize(ww, hh));
+                EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
                 EXPECT_EQ(w, ww);
                 EXPECT_EQ(h, hh);
             }
@@ -227,26 +178,26 @@ TEST_P(TestThermal2, Settings)
         prev_w = w;
         prev_h = h;
 
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(16, h));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(16, h));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(w, 12));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(w, 12));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(16, 12));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(16, 12));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
-        EXPECT_FALSE(unit->writeTemeratureMonitorSize(255, 255));
-        EXPECT_TRUE(unit->readTemeratureMonitorSize(w, h));
+        EXPECT_FALSE(unit->writeTemperatureMonitorSize(255, 255));
+        EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
     }
 }
 
-TEST_P(TestThermal2, Alarm)
+TEST_F(TestThermal2, Alarm)
 {
     SCOPED_TRACE(ustr);
 
@@ -290,9 +241,9 @@ TEST_P(TestThermal2, Alarm)
                 auto s = m5::utility::formatString("HL:%u", hl);
                 SCOPED_TRACE(s);
 
-                uint8_t r = rng() & 0xFF;
-                uint8_t g = rng() & 0xFF;
-                uint8_t b = rng() & 0xFF;
+                uint8_t r = esp_random() & 0xFF;
+                uint8_t g = esp_random() & 0xFF;
+                uint8_t b = esp_random() & 0xFF;
                 uint32_t rgb{};
                 EXPECT_TRUE(unit->writeAlarmLED(hl, r, g, b));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
@@ -300,7 +251,7 @@ TEST_P(TestThermal2, Alarm)
                 EXPECT_EQ((rgb >> 8) & 0xFF, g);
                 EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-                uint32_t rgb24 = rng() & 0x00FFFFFF;
+                uint32_t rgb24 = esp_random() & 0x00FFFFFF;
                 EXPECT_TRUE(unit->writeAlarmLED(hl, rgb24));
                 EXPECT_TRUE(unit->readAlarmLED(hl, rgb));
                 EXPECT_EQ(rgb, rgb24);
@@ -353,7 +304,7 @@ TEST_P(TestThermal2, Alarm)
 
         uint32_t count{16};
         while (count--) {
-            uint8_t eb = rng() & 0xFF;
+            uint8_t eb = esp_random() & 0xFF;
             EXPECT_TRUE(unit->writeAlarmEnabled(eb));
             EXPECT_TRUE(unit->readAlarmEnabled(bits));
             EXPECT_EQ(bits, eb);
@@ -365,7 +316,7 @@ TEST_P(TestThermal2, Alarm)
     }
 }
 
-TEST_P(TestThermal2, Buzzer)
+TEST_F(TestThermal2, Buzzer)
 {
     SCOPED_TRACE(ustr);
     EXPECT_TRUE(unit->writeAlarmEnabled(0));
@@ -394,21 +345,32 @@ TEST_P(TestThermal2, Buzzer)
     EXPECT_EQ(f, 32767);
     EXPECT_EQ(d, 127);
 
+    // writeBuzzerDuty (duty only, freq unchanged)
+    EXPECT_TRUE(unit->writeBuzzerDuty(200));
+    EXPECT_TRUE(unit->readBuzzer(f, d));
+    EXPECT_EQ(f, 32767);
+    EXPECT_EQ(d, 200);
+
+    EXPECT_TRUE(unit->writeBuzzerDuty(0));
+    EXPECT_TRUE(unit->readBuzzer(f, d));
+    EXPECT_EQ(f, 32767);
+    EXPECT_EQ(d, 0);
+
     EXPECT_TRUE(unit->writeBuzzerControl(false));
     EXPECT_TRUE(unit->readBuzzerControl(enabled));
     EXPECT_FALSE(enabled);
 }
 
-TEST_P(TestThermal2, LED)
+TEST_F(TestThermal2, LED)
 {
     SCOPED_TRACE(ustr);
     EXPECT_TRUE(unit->writeAlarmEnabled(0));
 
     uint32_t count{8};
     while (count--) {
-        uint8_t r = rng() & 0xFF;
-        uint8_t g = rng() & 0xFF;
-        uint8_t b = rng() & 0xFF;
+        uint8_t r = esp_random() & 0xFF;
+        uint8_t g = esp_random() & 0xFF;
+        uint8_t b = esp_random() & 0xFF;
         uint32_t rgb{};
         EXPECT_TRUE(unit->writeLED(r, g, b));
         EXPECT_TRUE(unit->readLED(rgb));
@@ -416,18 +378,18 @@ TEST_P(TestThermal2, LED)
         EXPECT_EQ((rgb >> 8) & 0xFF, g);
         EXPECT_EQ((rgb >> 0) & 0xFF, b);
 
-        delay(100);
+        m5::utility::delay(100);
 
-        uint32_t rgb24 = rng() & 0x00FFFFFF;
+        uint32_t rgb24 = esp_random() & 0x00FFFFFF;
         EXPECT_TRUE(unit->writeLED(rgb24));
         EXPECT_TRUE(unit->readLED(rgb));
         EXPECT_EQ(rgb, rgb24);
 
-        delay(100);
+        m5::utility::delay(100);
     }
 }
 
-TEST_P(TestThermal2, Button)
+TEST_F(TestThermal2, Button)
 {
     SCOPED_TRACE(ustr);
 
@@ -441,11 +403,12 @@ TEST_P(TestThermal2, Button)
     EXPECT_FALSE(unit->isPressed());
     EXPECT_FALSE(unit->wasPressed());
     EXPECT_FALSE(unit->wasReleased());
+    EXPECT_FALSE(unit->wasClicked());
     EXPECT_FALSE(unit->wasHold());
     EXPECT_FALSE(unit->isHolding());
 }
 
-TEST_P(TestThermal2, Firmware)
+TEST_F(TestThermal2, Firmware)
 {
     SCOPED_TRACE(ustr);
 
@@ -454,7 +417,7 @@ TEST_P(TestThermal2, Firmware)
     EXPECT_NE(ver, 0);
 }
 
-TEST_P(TestThermal2, Single)
+TEST_F(TestThermal2, Single)
 {
     Data page0{}, page1{};
     SCOPED_TRACE(ustr);
@@ -476,10 +439,33 @@ TEST_P(TestThermal2, Single)
         EXPECT_TRUE(std::any_of(std::begin(page0.raw), std::end(page0.raw), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(page1.temp), std::end(page1.temp), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(page1.raw), std::end(page1.raw), [](const uint16_t v) { return v != 0; }));
+
+        // Data accessor methods
+        for (auto* page : {&page0, &page1}) {
+            EXPECT_TRUE(std::isfinite(page->medianTemperature()));
+            EXPECT_TRUE(std::isfinite(page->averageTemperature()));
+            EXPECT_TRUE(std::isfinite(page->mostDiffTemperature()));
+            EXPECT_TRUE(std::isfinite(page->lowestTemperature()));
+            EXPECT_TRUE(std::isfinite(page->highestTemperature()));
+
+            // Accessor consistency: raw_to_celsius(temp[N]) == accessorN()
+            EXPECT_FLOAT_EQ(page->medianTemperature(), raw_to_celsius(page->temp[0]));
+            EXPECT_FLOAT_EQ(page->averageTemperature(), raw_to_celsius(page->temp[1]));
+            EXPECT_FLOAT_EQ(page->mostDiffTemperature(), raw_to_celsius(page->temp[2]));
+            EXPECT_FLOAT_EQ(page->lowestTemperature(), raw_to_celsius(page->temp[4]));
+            EXPECT_FLOAT_EQ(page->highestTemperature(), raw_to_celsius(page->temp[6]));
+
+            // Pixel temperature accessor
+            EXPECT_TRUE(std::isfinite(page->temperature(0)));
+            EXPECT_FLOAT_EQ(page->temperature(0), raw_to_celsius(page->raw[0]));
+            EXPECT_FLOAT_EQ(page->temperature(383), raw_to_celsius(page->raw[383]));
+            // Out of range returns NaN
+            EXPECT_FALSE(std::isfinite(page->temperature(384)));
+        }
     }
 }
 
-TEST_P(TestThermal2, Periodic)
+TEST_F(TestThermal2, Periodic)
 {
     SCOPED_TRACE(ustr);
 
@@ -491,13 +477,21 @@ TEST_P(TestThermal2, Periodic)
     EXPECT_TRUE(unit->startPeriodicMeasurement(Refresh::Rate16Hz));
     EXPECT_TRUE(unit->inPeriodic());
 
-    auto elapsed = test_periodic(unit.get(), STORED_SIZE);
+    auto ad          = unit->asAdapter<m5::unit::AdapterI2C>(m5::unit::Adapter::Type::I2C);
+    bool is_bus      = ad && ad->implType() == m5::unit::AdapterI2C::ImplType::Bus;
+    uint32_t timeout = is_bus ? std::max<uint32_t>(unit->interval(), 500) * (STORED_SIZE + 1) * 4
+                              : unit->interval() * (STORED_SIZE + 1) * 2;
+    auto r           = collect_periodic_measurements(unit.get(), STORED_SIZE, timeout);
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
 
-    EXPECT_NE(elapsed, 0);
-    EXPECT_GE(elapsed, unit->interval() * STORED_SIZE);
+    EXPECT_FALSE(r.timed_out);
+    EXPECT_EQ(r.update_count, STORED_SIZE);
+    // Thermal2 transfers ~784 bytes per update, so median exceeds nominal interval.
+    // SoftwareI2C (Bus) has even larger overhead due to bit-banging.
+    uint32_t tolerance = is_bus ? 100 : 25;
+    EXPECT_LE(r.median(), unit->interval() + tolerance);
 
     EXPECT_EQ(unit->available(), STORED_SIZE);
     EXPECT_FALSE(unit->empty());
@@ -508,6 +502,10 @@ TEST_P(TestThermal2, Periodic)
         auto d = unit->oldest();
         EXPECT_TRUE(std::any_of(std::begin(d.temp), std::end(d.temp), [](const uint16_t v) { return v != 0; }));
         EXPECT_TRUE(std::any_of(std::begin(d.raw), std::end(d.raw), [](const uint16_t v) { return v != 0; }));
+
+        EXPECT_TRUE(std::isfinite(d.medianTemperature()));
+        EXPECT_TRUE(std::isfinite(d.averageTemperature()));
+        EXPECT_FLOAT_EQ(d.medianTemperature(), raw_to_celsius(d.temp[0]));
 
         EXPECT_FALSE(unit->empty());
         unit->discard();
@@ -522,9 +520,56 @@ TEST_P(TestThermal2, Periodic)
     EXPECT_FALSE(unit->full());
 }
 
-TEST_P(TestThermal2, I2CAddress)
+TEST_F(TestThermal2, BeginAppliesConfig)
 {
     SCOPED_TRACE(ustr);
+
+    // Verify that begin() applied config values.
+    // Note: firmware may enable auto_refresh automatically when periodic starts,
+    // so function_control may have additional bits set beyond what was configured.
+
+    // function_control: begin() writes enabled_function_led (0x02),
+    // but firmware adds enabled_function_auto_refresh (0x04) during periodic
+    uint8_t fc{};
+    EXPECT_TRUE(unit->readFunctionControl(fc));
+    EXPECT_TRUE(fc & thermal2::enabled_function_led);
+
+    // monitor_width/height: default is 15x11
+    uint8_t w{}, h{};
+    EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
+    EXPECT_EQ(w, 15);
+    EXPECT_EQ(h, 11);
+
+    // writeFunctionControl requires stopping periodic measurement first
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    uint8_t new_fc = thermal2::enabled_function_buzzer | thermal2::enabled_function_led;
+    EXPECT_TRUE(unit->writeFunctionControl(new_fc));
+    EXPECT_TRUE(unit->readFunctionControl(fc));
+    EXPECT_EQ(fc, new_fc);
+
+    EXPECT_TRUE(unit->writeTemperatureMonitorSize(8, 6));
+    EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
+    EXPECT_EQ(w, 8);
+    EXPECT_EQ(h, 6);
+
+    // Restore defaults
+    EXPECT_TRUE(unit->writeFunctionControl(thermal2::enabled_function_led));
+    EXPECT_TRUE(unit->writeTemperatureMonitorSize(15, 11));
+
+    // Restart periodic for subsequent tests
+    EXPECT_TRUE(unit->startPeriodicMeasurement());
+}
+
+TEST_F(TestThermal2, I2CAddress)
+{
+    SCOPED_TRACE(ustr);
+
+    // Read current address
+    uint8_t addr{};
+    EXPECT_TRUE(unit->readI2CAddress(addr));
+    EXPECT_EQ(addr, +UnitThermal2::DEFAULT_ADDRESS);
 
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid

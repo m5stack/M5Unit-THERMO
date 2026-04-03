@@ -1,6 +1,6 @@
 var unit___thermal2_8hpp =
 [
-    [ "m5::unit::thermal2::Data", "structm5_1_1unit_1_1thermal2_1_1_data.html", null ],
+    [ "m5::unit::thermal2::Data", "structm5_1_1unit_1_1thermal2_1_1_data.html", "structm5_1_1unit_1_1thermal2_1_1_data" ],
     [ "m5::unit::UnitThermal2", "classm5_1_1unit_1_1_unit_thermal2.html", "classm5_1_1unit_1_1_unit_thermal2" ],
     [ "m5::unit::UnitThermal2::config_t", "structm5_1_1unit_1_1_unit_thermal2_1_1config__t.html", "structm5_1_1unit_1_1_unit_thermal2_1_1config__t" ],
     [ "Refresh", "unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61", [

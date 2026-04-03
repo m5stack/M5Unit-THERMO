@@ -28,7 +28,7 @@ var classm5_1_1unit_1_1_unit_n_c_i_r2 =
     [ "stopPeriodicMeasurement", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#a693a9ceefc641252e0ec92bfbc7367ec", null ],
     [ "temperature", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#ab4e57171604dd04a409f40ee399650f5", null ],
     [ "wasPressed", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#a23eacb5d269ea2b0ef190e81fac9c73e", null ],
-    [ "wasReleased", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#a33fd84534b1ea9397190fb9554525c60", null ],
+    [ "wasReleased", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#afbc5aa889d3df7c989dab0dbc8ac290d", null ],
     [ "writeAlarmBuzzer", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#aa8faa47cb1f70176330953c5c47c701c", null ],
     [ "writeAlarmBuzzer", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#a9cad388eb24003c8b10efc5cd5f90871", null ],
     [ "writeAlarmLED", "classm5_1_1unit_1_1_unit_n_c_i_r2.html#a2eba705caf17c89bc1d5841b50294f45", null ],

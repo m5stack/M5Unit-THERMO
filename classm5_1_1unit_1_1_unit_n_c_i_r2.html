@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.3.0 git rev:4c4f8b5</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.3.1 git rev:c2bfb11</span>
    </div>
   </td>
  </tr>
@@ -105,7 +105,7 @@ $(function(){initNavTree('classm5_1_1unit_1_1_unit_n_c_i_r2.html',''); initResiz
 </div><!--header-->
 <div class="contents">
 
-<p>Unit NCIR2.  
+<p>MLX90614-based non-contact IR thermometer with STM32 MCU (NCIR2, SKU:U150)  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="unit___n_c_i_r2_8hpp_source.html">unit_NCIR2.hpp</a>&gt;</code></p>
@@ -139,11 +139,11 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update</b> (c
 <tr><td colspan="2"><div class="groupHeader">Settings for begin</div></td></tr>
 <tr class="memitem:a48018fd2d74510043f8d4dfa44736da6" id="r_a48018fd2d74510043f8d4dfa44736da6"><td class="memItemLeft" align="right" valign="top"><a id="a48018fd2d74510043f8d4dfa44736da6" name="a48018fd2d74510043f8d4dfa44736da6"></a>
 <a class="el" href="structm5_1_1unit_1_1_unit_n_c_i_r2_1_1config__t.html">config_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> ()</td></tr>
-<tr class="memdesc:a48018fd2d74510043f8d4dfa44736da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the configration. <br /></td></tr>
+<tr class="memdesc:a48018fd2d74510043f8d4dfa44736da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the configuration. <br /></td></tr>
 <tr class="separator:a48018fd2d74510043f8d4dfa44736da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac99b21e6ce67fd75e1a4ea343c1cd5a" id="r_aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="memItemLeft" align="right" valign="top"><a id="aac99b21e6ce67fd75e1a4ea343c1cd5a" name="aac99b21e6ce67fd75e1a4ea343c1cd5a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a class="el" href="structm5_1_1unit_1_1_unit_n_c_i_r2_1_1config__t.html">config_t</a> &amp;cfg)</td></tr>
-<tr class="memdesc:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the configration. <br /></td></tr>
+<tr class="memdesc:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the configuration. <br /></td></tr>
 <tr class="separator:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Measurement data by periodic</div></td></tr>
 <tr class="memitem:ab4e57171604dd04a409f40ee399650f5" id="r_ab4e57171604dd04a409f40ee399650f5"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4e57171604dd04a409f40ee399650f5">temperature</a> () const</td></tr>
@@ -225,7 +225,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="memdesc:a61695c356320d41b43c85d53a0577edb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the buzzer settings.  <br /></td></tr>
 <tr class="separator:a61695c356320d41b43c85d53a0577edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a644dde2458ae4c933cca4043450d16d3" id="r_a644dde2458ae4c933cca4043450d16d3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a644dde2458ae4c933cca4043450d16d3">readBuzzer</a> (uint16_t &amp;freq, float &amp;duty)</td></tr>
-<tr class="memdesc:a644dde2458ae4c933cca4043450d16d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the buzzer settings.  <br /></td></tr>
+<tr class="memdesc:a644dde2458ae4c933cca4043450d16d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the buzzer settings.  <br /></td></tr>
 <tr class="separator:a644dde2458ae4c933cca4043450d16d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1dcb57278e24cd12d307d77629235129" id="r_a1dcb57278e24cd12d307d77629235129"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1dcb57278e24cd12d307d77629235129">writeBuzzer</a> (const uint16_t freq, const uint8_t rawDuty)</td></tr>
 <tr class="memdesc:a1dcb57278e24cd12d307d77629235129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the buzzer settings.  <br /></td></tr>
@@ -268,9 +268,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="memitem:a23eacb5d269ea2b0ef190e81fac9c73e" id="r_a23eacb5d269ea2b0ef190e81fac9c73e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23eacb5d269ea2b0ef190e81fac9c73e">wasPressed</a> () const</td></tr>
 <tr class="memdesc:a23eacb5d269ea2b0ef190e81fac9c73e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button pressed?  <br /></td></tr>
 <tr class="separator:a23eacb5d269ea2b0ef190e81fac9c73e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33fd84534b1ea9397190fb9554525c60" id="r_a33fd84534b1ea9397190fb9554525c60"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33fd84534b1ea9397190fb9554525c60">wasReleased</a> ()</td></tr>
-<tr class="memdesc:a33fd84534b1ea9397190fb9554525c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button released?  <br /></td></tr>
-<tr class="separator:a33fd84534b1ea9397190fb9554525c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbc5aa889d3df7c989dab0dbc8ac290d" id="r_afbc5aa889d3df7c989dab0dbc8ac290d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afbc5aa889d3df7c989dab0dbc8ac290d">wasReleased</a> () const</td></tr>
+<tr class="memdesc:afbc5aa889d3df7c989dab0dbc8ac290d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button released?  <br /></td></tr>
+<tr class="separator:afbc5aa889d3df7c989dab0dbc8ac290d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">I2C Address</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><dl class="section warning"><dt>Warning</dt><dd>Handling warning </dd></dl>
 </div></td></tr>
@@ -312,7 +312,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <tr class="separator:aa2f5a75e127b91139defad50dedb47b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Unit NCIR2. </p>
+<div class="textblock"><p>MLX90614-based non-contact IR thermometer with STM32 MCU (NCIR2, SKU:U150) </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a776ee8b510978a355b7c847cda380135" name="a776ee8b510978a355b7c847cda380135"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a776ee8b510978a355b7c847cda380135">&#9670;&#160;</a></span>celsius()</h2>
@@ -443,7 +443,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <p>Measurement single shot. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">d</td><td>Measuerd data </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">d</td><td>Measured data </td></tr>
   </table>
   </dd>
 </dl>
@@ -678,7 +678,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
       </table>
 </div><div class="memdoc">
 
-<p>Write the buzzer settings. </p>
+<p>Read the buzzer settings. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency </td></tr>
@@ -739,7 +739,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <p>Read the Buzzer control. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">enabled</td><td>True:enabled False;disabled </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">enabled</td><td>True:enabled False: disabled </td></tr>
   </table>
   </dd>
 </dl>
@@ -765,7 +765,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <p>Read the Chip temperature. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">d</td><td>Measuerd data </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">d</td><td>Measured data </td></tr>
   </table>
   </dd>
 </dl>
@@ -848,7 +848,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True if released </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
 
 </div>
 </div>
@@ -1023,8 +1023,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 
 </div>
 </div>
-<a id="a33fd84534b1ea9397190fb9554525c60" name="a33fd84534b1ea9397190fb9554525c60"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33fd84534b1ea9397190fb9554525c60">&#9670;&#160;</a></span>wasReleased()</h2>
+<a id="afbc5aa889d3df7c989dab0dbc8ac290d" name="afbc5aa889d3df7c989dab0dbc8ac290d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbc5aa889d3df7c989dab0dbc8ac290d">&#9670;&#160;</a></span>wasReleased()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1036,7 +1036,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
           <td class="memname">bool m5::unit::UnitNCIR2::wasReleased </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -1393,7 +1393,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <p>Write the Buzzer control. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">enabled</td><td>True:enabled False;disabled </td></tr>
+    <tr><td class="paramname">enabled</td><td>True:enabled False: disabled </td></tr>
   </table>
   </dd>
 </dl>

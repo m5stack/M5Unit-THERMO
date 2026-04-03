@@ -1,4 +1,12 @@
 var searchData=
 [
-  ['pwmctrl_0',['pwmCtrl',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a2f0c540e42b2df1ccfd4f27946d98752',1,'m5::unit::mlx90614::EEPROM']]]
+  ['objectcelsius1_0',['objectCelsius1',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a982fa589f16e59e5fe6d68ef8065fe0f',1,'m5::unit::mlx90614::Data::objectCelsius1()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a51429ff750589951b5ae5b51165b1aed',1,'m5::unit::UnitMLX90614::objectCelsius1()']]],
+  ['objectcelsius2_1',['objectCelsius2',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#ac766d396d4abc30392a60681769ee636',1,'m5::unit::mlx90614::Data::objectCelsius2()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a7a8e730f27e5f1ab375723c1b113d349',1,'m5::unit::UnitMLX90614::objectCelsius2()']]],
+  ['objectfahrenheit1_2',['objectFahrenheit1',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a8d9b012afcd0d2a9f1137c6a72d5dea5',1,'m5::unit::mlx90614::Data::objectFahrenheit1()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a1c39b5ce4e16baf168fcb1318ed5eb0b',1,'m5::unit::UnitMLX90614::objectFahrenheit1()']]],
+  ['objectfahrenheit2_3',['objectFahrenheit2',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a18b593a590b790ff0597f5b61a00ae43',1,'m5::unit::mlx90614::Data::objectFahrenheit2()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ac845832b08a103cfa6288bff0f66f895',1,'m5::unit::UnitMLX90614::objectFahrenheit2()']]],
+  ['objectkelvin1_4',['objectKelvin1',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a9a1f154b152bc553f2f9825daee4b58d',1,'m5::unit::mlx90614::Data::objectKelvin1()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a76a80099504c6159d9383c67bcbeb033',1,'m5::unit::UnitMLX90614::objectKelvin1()']]],
+  ['objectkelvin2_5',['objectKelvin2',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a351df1e67548122fa70be3977c3d8542',1,'m5::unit::mlx90614::Data::objectKelvin2()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ac3a9c2509b1d416455e304683f5402f4',1,'m5::unit::UnitMLX90614::objectKelvin2()']]],
+  ['objecttemperature1_6',['objectTemperature1',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a382c01fc0389271dfad676f2fa4c17fd',1,'m5::unit::mlx90614::Data::objectTemperature1()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ae132a6db7454bfc9a6815eeda7464e87',1,'m5::unit::UnitMLX90614::objectTemperature1()']]],
+  ['objecttemperature2_7',['objectTemperature2',['../structm5_1_1unit_1_1mlx90614_1_1_data.html#a3bf63834390f35ca000c79fe3ef8200f',1,'m5::unit::mlx90614::Data::objectTemperature2()'],['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a2e9a92dd6cc01f8ffd1071cf1582c60d',1,'m5::unit::UnitMLX90614::objectTemperature2()']]],
+  ['output_8',['Output',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb',1,'m5::unit::mlx90614']]]
 ];

@@ -80,6 +80,7 @@ jobs:
           - AtomS3
           - AtomS3R
           - NanoC6
+          - NanoH2
           - StickCPlus
           - StickCPlus2
           - StickS3
@@ -172,6 +173,10 @@ jobs:
           - board: NanoC6
             example: SimpleDisplay
           - board: NanoC6
+            example: SmoothDraw
+          - board: NanoH2
+            example: SimpleDisplay
+          - board: NanoH2
             example: SmoothDraw
           - board: StickCPlus
             example: SimpleDisplay

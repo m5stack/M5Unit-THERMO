@@ -12,6 +12,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
+#include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
 #include <inttypes.h>
 
 namespace {
@@ -1007,9 +1008,7 @@ void setup(void)
         }
     }
 
-    auto board       = M5.getBoard();
-    auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-    auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
+    auto board = M5.getBoard();
 
     // SmoothDraw requires a separate FreeRTOS draw task (xTaskCreatePinnedToCore).
     // NessoN1 (ESP32-C6) is single-core, so the draw task and main loop contend for
@@ -1031,17 +1030,12 @@ void setup(void)
     tcfg.rate = m5::unit::thermal2::Refresh::Rate32Hz;
     thermal2.config(tcfg);
 
-    M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-    Wire.end();
-    Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
-    if (!Units.add(thermal2, Wire) || !Units.begin()) {
+    // Board-aware connection: NanoC6/NanoH2 -> M5.Ex_I2C, others -> Wire
+    if (!m5::unit::wiring::addI2C(Units, thermal2) || !Units.begin()) {
         M5_LOGE("Failed to begin");
-        display.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     // Noise filter strength can be specified from 0~15.

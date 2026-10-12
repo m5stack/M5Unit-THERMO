@@ -884,11 +884,11 @@ void drawTask(void*)
     display.startWrite();
     for (;;) {
         ++framecount;
-        uint32_t msec = millis();
+        uint32_t msec = m5::utility::millis();
         uint8_t sec   = msec / 1000;
         if (prev_sec != sec) {
             prev_sec = sec;
-            Serial.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
+            M5.Log.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
             framecount              = 0;
             draw_param.update_count = 0;
             m5::utility::delay(1);
@@ -1187,3 +1187,36 @@ void loop(void)
         idx_recv = idx_recv_next;
     }
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+// Single-core SoCs: run loop() back-to-back, but every ~2 s yield a 5 ms slice so the IDLE task
+// runs and feeds the task watchdog (default 5 s).
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS{2000};
+    constexpr TickType_t FEED_SLEEP_TICKS{pdMS_TO_TICKS(5)};
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

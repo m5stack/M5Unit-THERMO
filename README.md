@@ -54,6 +54,18 @@ See also the [ViaPaHub](examples/UnitUnified/ViaPaHub) example (UnitNCIR / UnitN
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
 
+### For ESP-IDF settings
+
+> **NOTE:** The ESP-IDF native build (`idf.py`) targets ESP-IDF **5.1 or later** (5.x and 6.x).
+
+Each example covers a fixed set of units, so the examples need no Kconfig choice. Build them directly:
+
+```sh
+cd examples/UnitUnified/UnitNCIR/PlotToSerial
+idf.py set-target esp32s3               # or esp32 / esp32c5 / esp32c6 / esp32h2 / esp32p4 / ...
+idf.py build flash monitor
+```
+
 ### Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-THERMO/)
 

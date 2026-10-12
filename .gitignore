@@ -37,8 +37,19 @@ docs/html/
 # PlatformIO
 .pio/
 
+# ESP-IDF
+build/
+managed_components/
+dependencies.lock
+sdkconfig
+sdkconfig.old
+
 # IDE
 .vscode/
+.clangd
+
+# clangd index cache
+.cache/
 
 # macOS
 .DS_Store

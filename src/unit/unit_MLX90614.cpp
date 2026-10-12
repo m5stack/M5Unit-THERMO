@@ -10,6 +10,7 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
+#include <cmath>
 #include <driver/gpio.h>
 
 using namespace m5::utility::mmh3;

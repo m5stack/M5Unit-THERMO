@@ -40,6 +40,17 @@ See also examples using conventional methods here.
 The MLX90614 has PWM and SMBus as operating modes.  
 This library currently supports only SMBus mode (protocol derived from I2C).
 
+## Support via [PaHub](https://docs.m5stack.com/en/unit/Unit-PaHub%20v2.1)
+
+|Unit|Support|Note|
+|---|---|---|
+|UnitNCIR|OK||
+|UnitNCIR2|OK||
+|UnitThermal2|OK||
+
+UnitNCIR and UnitNCIR2 use the same address (0x5A), so connect them to different PaHub channels to use them together.
+See also the [ViaPaHub](examples/UnitUnified/ViaPaHub) example (UnitNCIR / UnitNCIR2 / UnitThermal2 on one PaHub) and [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
+
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
 

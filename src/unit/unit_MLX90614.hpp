@@ -22,7 +22,8 @@ namespace unit {
   @class m5::unit::UnitMLX90614
   @brief Base class of the UnitMLX90614 series
   @details It can be used to measure the surface temperature of a human body or other object.
-  Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
+  Only SMBus mode is supported, so the settings that only affect the PWM output (writeOutput(),
+  writeObjectMinMax(), writeAmbientMinMax() and the PWMCTRL register) do not change the SMBus readings
   @todo In the future, PWM mode will be supported to allow various configurations
 */
 class UnitMLX90614 : public Component, public PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data> {
@@ -493,6 +494,7 @@ protected:
 
     M5_UNIT_COMPONENT_PERIODIC_MEASUREMENT_ADAPTER_HPP_BUILDER(UnitMLX90614, mlx90614::Data);
 
+    // Override for dual zone (xBx / xCx) parts
     virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir);
     virtual bool has_dual_sensors() const
     {
@@ -507,7 +509,9 @@ private:
 
 /*!
   @class UnitMLX90614BAA
-  @brief MLX90614BAA dual IR sensor unit (NCIR, SKU:U028)
+  @brief MLX90614 single zone unit (NCIR, SKU:U028)
+  @details MLX90614ESF-BAA: 3V supply, single zone (one thermopile), so object 2 is not measured.
+  objectTemperature2() and the other object 2 accessors return NaN
  */
 class UnitMLX90614BAA : public UnitMLX90614 {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMLX90614BAA, 0x5A);
@@ -515,13 +519,6 @@ class UnitMLX90614BAA : public UnitMLX90614 {
 public:
     explicit UnitMLX90614BAA(const uint8_t addr = DEFAULT_ADDRESS) : UnitMLX90614(addr)
     {
-    }
-
-protected:
-    virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir) override;
-    inline virtual bool has_dual_sensors() const override
-    {
-        return true;
     }
 };
 

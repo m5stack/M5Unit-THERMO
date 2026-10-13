@@ -77,17 +77,13 @@ struct PWMCtrl {
     uint16_t value{};
 };
 
-// [IIR][FIR]
+// [IIR][FIR] settling time (ms), datasheet Table 9
 // FIR 000...011 are NOT RECOMMENDED
-// For MLX90614A Series
+// For MLX90614xAx (single zone). The second letter of the option code (MLX90614ESF-xYx) is the number of
+// thermopiles: A single zone, B dual zone, C gradient compensated (xBx / xCx take longer)
 constexpr uint32_t interval_tableA[8][4] = {
     {300, 370, 540, 860}, {700, 880, 1300, 2000}, {1100, 1400, 2000, 3300}, {1500, 1900, 2800, 4500},
     {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
-};
-// For MLX90614B,D Series
-constexpr uint32_t interval_tableBD[8][4] = {
-    {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
-    {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
 };
 
 }  // namespace
@@ -684,20 +680,13 @@ uint32_t UnitMLX90614::get_interval(const mlx90614::IIR iir, const mlx90614::FIR
 {
     auto i = m5::stl::to_underlying(iir);
     auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableA[i][f - 4];  // A series as default
+    return (f < 4) ? 0 : interval_tableA[i][f - 4];
 }
 
 // class UnitMLX90614BAA
 const char UnitMLX90614BAA::name[] = "UnitMLX90614BAA";
 const types::uid_t UnitMLX90614BAA::uid{"UnitMLX90614BAA"_mmh3};
 const types::attr_t UnitMLX90614BAA::attr{attribute::AccessI2C};
-
-uint32_t UnitMLX90614BAA::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
-{
-    auto i = m5::stl::to_underlying(iir);
-    auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
-}
 
 }  // namespace unit
 }  // namespace m5

@@ -143,7 +143,7 @@ struct Data {
         return objectCelsius1() * 9.0f / 5.0f + 32.f;
     }
 
-    //! @brief Gets object2 temperature in Kelvin (dual sensor only)
+    //! @brief Gets object2 temperature in Kelvin (dual zone only, NaN on single zone)
     inline float objectKelvin2() const
     {
         return ((raw[2] & 0x8000) == 0) ? raw[2] * 0.02f : std::numeric_limits<float>::quiet_NaN();
@@ -153,12 +153,12 @@ struct Data {
     {
         return objectCelsius2();
     }
-    //! @brief Gets object2 temperature in Celsius (dual sensor only)
+    //! @brief Gets object2 temperature in Celsius (dual zone only, NaN on single zone)
     inline float objectCelsius2() const
     {
         return objectKelvin2() - 273.15f;
     }
-    //! @brief Gets object2 temperature in Fahrenheit (dual sensor only)
+    //! @brief Gets object2 temperature in Fahrenheit (dual zone only, NaN on single zone)
     inline float objectFahrenheit2() const
     {
         return objectCelsius2() * 9.0f / 5.0f + 32.f;

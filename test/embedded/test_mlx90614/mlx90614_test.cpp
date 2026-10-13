@@ -66,16 +66,17 @@ constexpr Gain gain_table[] = {
 constexpr IRSensor irs_table[] = {IRSensor::Single, IRSensor::Dual};
 constexpr bool pos_table[]     = {true, false};
 
-constexpr uint32_t interval_tableBD[8][4] = {
-    {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
-    {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
+// MLX90614xAx (single zone), datasheet Table 9
+constexpr uint32_t interval_tableA[8][4] = {
+    {300, 370, 540, 860}, {700, 880, 1300, 2000}, {1100, 1400, 2000, 3300}, {1500, 1900, 2800, 4500},
+    {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
 };
 
 uint32_t get_interval(const IIR iir, const FIR fir)
 {
     auto i = m5::stl::to_underlying(iir);
     auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
+    return (f < 4) ? 0 : interval_tableA[i][f - 4];
 }
 
 inline float random_float(float min_val, float max_val)
@@ -425,10 +426,11 @@ TEST_F(TestMLX90614BAA, Periodic)
         const auto iir = pair.iir;
         const auto fir = pair.fir;
 
-        EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, IRSensor::Dual));
+        EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, IRSensor::Single));
         EXPECT_TRUE(unit->inPeriodic());
 
-        auto tm        = get_interval(iir, fir);
+        auto tm = get_interval(iir, fir);
+        EXPECT_EQ(unit->interval(), tm);  // Single zone (xAx) table
         uint32_t cycle = std::max<uint32_t>(tm ? tm : 1, unit->interval());
         uint32_t timeout =
             is_bus ? std::max<uint32_t>(cycle, 500) * (STORED_SIZE + 1) * 4 : cycle * (STORED_SIZE + 1) * 2;
@@ -455,18 +457,19 @@ TEST_F(TestMLX90614BAA, Periodic)
             EXPECT_FLOAT_EQ(unit->ambientTemperature(), unit->oldest().ambientTemperature());
             EXPECT_TRUE(std::isfinite(unit->objectTemperature1()));
             EXPECT_FLOAT_EQ(unit->objectTemperature1(), unit->oldest().objectTemperature1());
-            EXPECT_TRUE(std::isfinite(unit->objectTemperature2()));
-            EXPECT_FLOAT_EQ(unit->objectTemperature2(), unit->oldest().objectTemperature2());
+            // Single zone: object 2 is not measured
+            EXPECT_FALSE(std::isfinite(unit->objectTemperature2()));
+            EXPECT_FALSE(std::isfinite(unit->oldest().objectTemperature2()));
 
             EXPECT_FLOAT_EQ(unit->ambientCelsius(), unit->ambientTemperature());
             EXPECT_FLOAT_EQ(unit->objectCelsius1(), unit->objectTemperature1());
-            EXPECT_FLOAT_EQ(unit->objectCelsius2(), unit->objectTemperature2());
             EXPECT_TRUE(std::isfinite(unit->ambientKelvin()));
             EXPECT_TRUE(std::isfinite(unit->ambientFahrenheit()));
             EXPECT_TRUE(std::isfinite(unit->objectKelvin1()));
             EXPECT_TRUE(std::isfinite(unit->objectFahrenheit1()));
-            EXPECT_TRUE(std::isfinite(unit->objectKelvin2()));
-            EXPECT_TRUE(std::isfinite(unit->objectFahrenheit2()));
+            EXPECT_FALSE(std::isfinite(unit->objectCelsius2()));
+            EXPECT_FALSE(std::isfinite(unit->objectKelvin2()));
+            EXPECT_FALSE(std::isfinite(unit->objectFahrenheit2()));
 
             EXPECT_FALSE(unit->empty());
             unit->discard();
@@ -497,6 +500,45 @@ TEST_F(TestMLX90614BAA, Periodic)
 
     // Restore EEPROM only; next test's begin() → wakeup() applies via POR
     restore_setting();
+    restore_config();
+}
+
+TEST_F(TestMLX90614BAA, DualSettingDoesNotEnableObject2)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    auto ad     = unit->asAdapter<m5::unit::AdapterI2C>(m5::unit::Adapter::Type::I2C);
+    bool is_bus = ad && ad->implType() == m5::unit::AdapterI2C::ImplType::Bus;
+
+    // The library does not read object 2 on a single zone part, even if IRSensor::Dual is written
+    EXPECT_TRUE(unit->startPeriodicMeasurement(IIR::Filter100, FIR::Filter128, Gain::Coeff12_5, IRSensor::Dual));
+    EXPECT_TRUE(unit->inPeriodic());
+    const uint32_t tm{get_interval(IIR::Filter100, FIR::Filter128)};
+    EXPECT_EQ(unit->interval(), tm);
+
+    const uint32_t timeout{is_bus ? std::max<uint32_t>(tm, 500) * (STORED_SIZE + 1) * 4 : tm * (STORED_SIZE + 1) * 2};
+    auto r = collect_periodic_measurements(unit.get(), STORED_SIZE, timeout);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    IRSensor irs{};
+    EXPECT_TRUE(unit->readIRSensor(irs));
+    EXPECT_EQ(irs, IRSensor::Dual);
+
+    EXPECT_FALSE(r.timed_out);
+    EXPECT_EQ(unit->available(), STORED_SIZE);
+    while (unit->available()) {
+        EXPECT_TRUE(std::isfinite(unit->ambientTemperature()));
+        EXPECT_TRUE(std::isfinite(unit->objectTemperature1()));
+        EXPECT_FALSE(std::isfinite(unit->objectTemperature2()));
+        unit->discard();
+    }
+
+    // Restore EEPROM only; next test's begin() → wakeup() applies via POR
     restore_config();
 }
 

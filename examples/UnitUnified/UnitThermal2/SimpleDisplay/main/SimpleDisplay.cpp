@@ -99,7 +99,8 @@ public:
     {
         float lowest_temp  = d.lowestTemperature();
         float highest_temp = d.highestTemperature();
-        float temp_diff    = highest_temp - lowest_temp;
+        // At least one raw LSB (1/128 C), so a uniform frame does not divide by zero
+        const float temp_diff{std::max(highest_temp - lowest_temp, 1.0f / 128)};
 
         for (int idx = 0; idx < 384; ++idx) {
             int y     = idx >> 4;
@@ -182,7 +183,7 @@ bool calculate_heatmap_size(uint32_t& ow, uint32_t& oh, const uint32_t w, const 
 constexpr float low_alarm_temp{0.0f};
 constexpr float high_alarm_temp{50.0f};
 
-static uint32_t text_color_table[] = {0x00000000, 0x00808080u, 0x00008000u, 0x00FFCF00u, 0x0000CFFFu};
+static const uint32_t text_color_table[] = {0x00000000, 0x00808080u, 0x00008000u, 0x00FFCF00u, 0x0000CFFFu};
 LGFX_Sprite text{};
 }  // namespace
 
@@ -230,9 +231,9 @@ void setup()
     }
     uint32_t w{}, h{};
     auto right_text = calculate_heatmap_size(w, h, lcd.width(), lcd.height(), lcd.fontWidth(), lcd.fontHeight());
+    text_x          = right_text ? w : 0;
+    text_y          = right_text ? 0 : h;
     M5_LOGI("WH:%u,%u %u,%u %d", w, h, text_x, text_y, right_text);
-    text_x         = right_text ? w : 0;
-    text_y         = right_text ? 0 : h;
     bool use_psram = (M5.getBoard() == m5::board_t::board_M5Tab5);
     view           = new HeatmapView(w, h, use_psram);
 

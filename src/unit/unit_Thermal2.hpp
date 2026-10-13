@@ -478,6 +478,7 @@ public:
 protected:
     bool read_function_control_bit(const uint8_t bit, bool& enabled);
     bool write_function_control_bit(const uint8_t bit, const bool enabled);
+    bool write_function_control(const uint8_t value, const bool verify);
 
     bool request_data();
     bool read_data_status(uint8_t s[2]);  // [0]:data refresh ctrl, [1]subpage information

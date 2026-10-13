@@ -121,12 +121,20 @@ public:
       @note bit0: buzzer enable. / bit1: neopixel enable. / bit2: auto refresh enable
      */
     bool readFunctionControl(uint8_t& value);
-    //! @brief Read the buzzer enabled
+    /*!
+      @brief Read the buzzer enabled
+      @param[out] enabled True if enabled
+      @return True if successful
+     */
     inline bool readBuzzerEnabled(bool& enabled)
     {
         return read_function_control_bit(thermal2::enabled_function_buzzer, enabled);
     }
-    //! @brief Reads the LED enabled
+    /*!
+      @brief Read the LED enabled
+      @param[out] enabled True if enabled
+      @return True if successful
+     */
     inline bool readLEDEnabled(bool& enabled)
     {
         return read_function_control_bit(thermal2::enabled_function_led, enabled);
@@ -139,12 +147,20 @@ public:
       @warning During periodic detection runs, an error is returned
      */
     bool writeFunctionControl(const uint8_t value, const bool verify = true);
-    //! @brief Write the buzzer enable status
+    /*!
+      @brief Write the buzzer enabled
+      @param enabled Enable if true
+      @return True if successful
+     */
     inline bool writeBuzzerEnabled(const bool enabled)
     {
         return write_function_control_bit(thermal2::enabled_function_buzzer, enabled);
     }
-    //! @brief Write the LED enable status
+    /*!
+      @brief Write the LED enabled
+      @param enabled Enable if true
+      @return True if successful
+     */
     inline bool writeLEDEnabled(const bool enabled)
     {
         return write_function_control_bit(thermal2::enabled_function_led, enabled);
@@ -216,9 +232,10 @@ public:
     */
     bool readAlarmEnabled(uint8_t& enabled_bits);
     /*!
-      @brief Read the alarm control
-      @param[out] enabled_bits Enabled temperature alarm bits
+      @brief Write the alarm control
+      @param enabled_bits Enabled temperature alarm bits
       @return True if successful
+      @sa thermal2::enabled_low_temperature_low
     */
     bool writeAlarmEnabled(const uint8_t enabled_bits);
 
@@ -457,7 +474,6 @@ public:
      */
     bool readFirmwareVersion(uint16_t& ver);
 
-    ///@warning Handling warning
     ///@name I2C Address
     ///@{
     /*!

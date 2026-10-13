@@ -30,22 +30,22 @@ namespace thermal2 {
 ///@sa m5::unit::UnitThermal2::readButtonStatus
 ///@name Button status
 ///@{
-constexpr uint8_t button_is_pressed{0x01};
-constexpr uint8_t button_was_pressed{0x02};
-constexpr uint8_t button_was_released{0x04};
-constexpr uint8_t button_was_clicked{0x08};
-constexpr uint8_t button_was_hold{0x10};
+constexpr uint8_t button_is_pressed{0x01};    //!< Is pressed now
+constexpr uint8_t button_was_pressed{0x02};   //!< Was pressed
+constexpr uint8_t button_was_released{0x04};  //!< Was released
+constexpr uint8_t button_was_clicked{0x08};   //!< Was clicked
+constexpr uint8_t button_was_hold{0x10};      //!< Was held
 ///@}
 
 ///@sa m5::unit::UnitThermal2::readFunctionControl m5::unit::UnitThermal2::writeFunctionControl
 ///@name Function control
 ///@{
-constexpr uint8_t enabled_function_buzzer{0x01};
-constexpr uint8_t enabled_function_led{0x02};
-constexpr uint8_t enabled_function_auto_refresh{0x04};
+constexpr uint8_t enabled_function_buzzer{0x01};        //!< Buzzer enabled
+constexpr uint8_t enabled_function_led{0x02};           //!< LED enabled
+constexpr uint8_t enabled_function_auto_refresh{0x04};  //!< Auto refresh (periodic measurement) enabled
 ///@}
 
-///@sa m5::unit::UnitThermal2::readEnabledAlarm m5::unit::UnitThermal2::writeEnabledAlarm
+///@sa m5::unit::UnitThermal2::readAlarmEnabled m5::unit::UnitThermal2::writeAlarmEnabled
 ///@name Alarm enabled bits
 ///@{
 constexpr uint8_t enabled_low_temperature_low{0x01};    //!< Low temp reached low threshold
@@ -73,13 +73,21 @@ enum class Refresh : uint8_t {
     Rate64Hz,   //!< 64Hz
 };
 
-//! @brief Celsius to raw temperature value
+/*!
+  @brief Celsius to raw temperature value
+  @param f Celsius
+  @return Raw value ((f + 64) * 128, clamped to 0 - 65535)
+ */
 inline static uint16_t celsius_to_raw(const float f)
 {
     int i = std::round((f + 64) * 128);
     return static_cast<uint16_t>(std::max(std::min(i, static_cast<int>(std::numeric_limits<uint16_t>::max())), 0));
 }
-//! @brief Raw temperature value to celsius
+/*!
+  @brief Raw temperature value to celsius
+  @param u16 Raw value
+  @return Celsius
+ */
 inline static float raw_to_celsius(const uint16_t u16)
 {
     return u16 / 128.0f - 64;

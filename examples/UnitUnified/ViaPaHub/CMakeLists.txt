@@ -9,4 +9,4 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # fallback and also covers M5GFX/M5Unified. NOTE: if NDEBUG is defined (assertions disabled),
 # M5Utility logs are forced OFF regardless of these.
 idf_build_set_property(COMPILE_OPTIONS "-DM5_LOG_LEVEL=3" "-DCORE_DEBUG_LEVEL=3" APPEND)
-project(viapahub)
+project(unitthermo-viapahub)

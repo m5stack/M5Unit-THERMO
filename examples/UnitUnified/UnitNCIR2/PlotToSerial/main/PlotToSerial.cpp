@@ -26,7 +26,7 @@ constexpr float max_temp{50.0f};  // Upper bound (Celsius): LED turns Red
 
 void ring_buzzer(const uint16_t freq, const uint8_t duty, const uint32_t count = 1, const uint32_t interval = 50)
 {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         unit.writeBuzzer(freq, duty);
         unit.writeBuzzerControl(true);
         m5::utility::delay(interval);

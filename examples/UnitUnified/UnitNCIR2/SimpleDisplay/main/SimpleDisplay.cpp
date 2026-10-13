@@ -25,7 +25,7 @@ constexpr float high_temp{60.0f};
 class View {
 public:
     View(const float min_t, const float max_t, const float low, const float high, const LovyanGFX& lcd)
-        : _min(min_t), _max{max_t}, _low{low}, _high{high}
+        : _min{min_t}, _max{max_t}, _low{low}, _high{high}
     {
         _sprite.setPsram(false);
         _sprite.setColorDepth(4);  // 16 colors
@@ -163,7 +163,7 @@ View* view{};
 
 void ring_buzzer(const uint16_t freq, const uint8_t duty, const uint32_t count = 1, const uint32_t interval = 50)
 {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         unit.writeBuzzer(freq, duty);
         unit.writeBuzzerControl(true);
         m5::utility::delay(interval);
@@ -244,8 +244,10 @@ void loop()
             unit.stopPeriodicMeasurement();
 
             Data d{};
-            unit.measureSingleshot(d);
-            M5.Log.printf("Single:%.2f\n", d.celsius());
+            if (unit.measureSingleshot(d)) {
+                temp = d.celsius();
+                M5.Log.printf("Single:%.2f\n", temp);
+            }
         } else {
             ring_buzzer(2000, 204);
             unit.writeLED(8, 32, 8);

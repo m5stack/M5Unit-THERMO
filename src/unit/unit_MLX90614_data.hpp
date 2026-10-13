@@ -228,7 +228,7 @@ struct ConfigRegister {
     }
     //! @brief Gets the sign of Kt2 (bit 14)
     //! @return True if positive (bit 14 is 0)
-    inline bool positiveKf2() const
+    inline bool positiveKt2() const
     {
         return !(value & (1U << 14));
     }
@@ -271,7 +271,7 @@ struct ConfigRegister {
     }
     //! @brief Sets the sign of Kt2 (bit 14)
     //! @param pos Positive (bit 14 = 0) if true
-    inline void positiveKf2(const bool pos)
+    inline void positiveKt2(const bool pos)
     {
         value = static_cast<uint16_t>((value & ~(1U << 14)) | (static_cast<unsigned>(!pos) << 14));
     }

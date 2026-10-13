@@ -93,7 +93,7 @@ TEST(MLX90614Data, ConfigRegister)
     EXPECT_FALSE(c.positiveKs());  // bit7 = 1
     EXPECT_EQ(c.fir(), FIR::Filter1024);
     EXPECT_EQ(c.gain(), Gain::Coeff12_5);
-    EXPECT_TRUE(c.positiveKf2());  // bit14 = 0
+    EXPECT_TRUE(c.positiveKt2());  // bit14 = 0
 
     // Gain [7] is a duplicate of Coeff100
     EXPECT_EQ(ConfigRegister{7U << 11}.gain(), Gain::Coeff100);
@@ -112,7 +112,7 @@ TEST(MLX90614Data, ConfigRegister)
     EXPECT_EQ(w.value, 0x9847);
     w.gain(Gain::Coeff1);
     EXPECT_EQ(w.value, 0x8047);
-    w.positiveKf2(false);
+    w.positiveKt2(false);
     EXPECT_EQ(w.value, 0xC047);
 
     EXPECT_EQ(w.iir(), IIR::Filter57);
@@ -121,7 +121,7 @@ TEST(MLX90614Data, ConfigRegister)
     EXPECT_TRUE(w.positiveKs());
     EXPECT_EQ(w.fir(), FIR::Filter8);
     EXPECT_EQ(w.gain(), Gain::Coeff1);
-    EXPECT_FALSE(w.positiveKf2());
+    EXPECT_FALSE(w.positiveKt2());
 }
 
 TEST(MLX90614Data, Data)

@@ -153,7 +153,7 @@ TEST_F(TestMLX90614BAA, Config)
     EXPECT_FALSE(unit->writeGain(Gain::Coeff1));
     EXPECT_FALSE(unit->writeIRSensor(IRSensor::Single));
     EXPECT_FALSE(unit->writePositiveKs(false));
-    EXPECT_FALSE(unit->writePositiveKf2(false));
+    EXPECT_FALSE(unit->writePositiveKt2(false));
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
@@ -210,11 +210,11 @@ TEST_F(TestMLX90614BAA, Config)
         EXPECT_EQ(v, pos);
     }
 
-    // PosKf2
+    // PosKt2
     for (auto&& pos : pos_table) {
-        EXPECT_TRUE(unit->writePositiveKf2(pos, false));
+        EXPECT_TRUE(unit->writePositiveKt2(pos, false));
         bool v{};
-        EXPECT_TRUE(unit->readPositiveKf2(v));
+        EXPECT_TRUE(unit->readPositiveKt2(v));
         EXPECT_EQ(v, pos);
     }
 

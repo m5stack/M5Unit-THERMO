@@ -133,8 +133,8 @@ bool UnitMLX90614::begin()
     M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
     ConfigRegister c{_eeprom.config};
-    M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosK:%u PosKf2:%u", c.iir(), c.output(), c.fir(), c.gain(),
-                c.irSensor(), c.positiveKs(), c.positiveKf2());
+    M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosKs:%u PosKt2:%u", c.iir(), c.output(), c.fir(), c.gain(),
+                c.irSensor(), c.positiveKs(), c.positiveKt2());
 
     return _cfg.start_periodic ? writeEmissivity(_cfg.emissivity, false) &&
                                      startPeriodicMeasurement(_cfg.iir, _cfg.fir, _cfg.gain, _cfg.irs)
@@ -338,21 +338,21 @@ bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
     return false;
 }
 
-bool UnitMLX90614::readPositiveKf2(bool& pos)
+bool UnitMLX90614::readPositiveKt2(bool& pos)
 {
     ConfigRegister c{};
     if (readConfig(c.value)) {
-        pos = c.positiveKf2();
+        pos = c.positiveKt2();
         return true;
     }
     return false;
 }
 
-bool UnitMLX90614::writePositiveKf2(const bool pos, const bool apply)
+bool UnitMLX90614::writePositiveKt2(const bool pos, const bool apply)
 {
     ConfigRegister c{};
     if (readConfig(c.value)) {
-        c.positiveKf2(pos);
+        c.positiveKt2(pos);
         return writeConfig(c.value, apply);
     }
     return false;

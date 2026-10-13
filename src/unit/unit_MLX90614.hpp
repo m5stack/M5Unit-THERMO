@@ -21,8 +21,8 @@ namespace unit {
 /*!
   @class m5::unit::UnitMLX90614
   @brief Base class of the UnitMLX90614 series
-  @brief It can be used to measure the surface temperature of a human body or other object
-  @details Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
+  @details It can be used to measure the surface temperature of a human body or other object.
+  Currently only SMBus mode is supported. This has limited functionality and some settings are ignored
   @todo In the future, PWM mode will be supported to allow various configurations
 */
 class UnitMLX90614 : public Component, public PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data> {
@@ -291,7 +291,7 @@ public:
       @return True if successful
       @warning This is a factory calibration value. Altering it invalidates calibration.
      */
-    bool readPositiveKf2(bool& pos);
+    bool readPositiveKt2(bool& pos);
     /*!
       @brief Write the sign of Kt2 (Config Register1 bit14)
       @param pos Positive if true
@@ -300,7 +300,18 @@ public:
       @warning This is a factory calibration value. Altering it invalidates calibration.
       @warning During periodic detection runs, an error is returned
      */
-    bool writePositiveKf2(const bool pos, const bool apply = true);
+    bool writePositiveKt2(const bool pos, const bool apply = true);
+
+    //! @deprecated Use readPositiveKt2 instead
+    [[deprecated("Use readPositiveKt2")]] inline bool readPositiveKf2(bool& pos)
+    {
+        return readPositiveKt2(pos);
+    }
+    //! @deprecated Use writePositiveKt2 instead
+    [[deprecated("Use writePositiveKt2")]] inline bool writePositiveKf2(const bool pos, const bool apply = true)
+    {
+        return writePositiveKt2(pos, apply);
+    }
     ///@}
 
     ///@note If apply is false, a POR or call applySettings() is required to enable the setting
@@ -328,6 +339,7 @@ public:
       @param toMax Maximum raw value
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning During periodic detection runs, an error is returned
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeObjectMinMax(const T toMin, const T toMax, const bool apply = true)
@@ -341,6 +353,7 @@ public:
       @param apply Settings take effect immediately if true
       @return True if successful
       @note Valid range between -273.15f and 382.2f
+      @warning During periodic detection runs, an error is returned
      */
     bool writeObjectMinMax(const float toMin, const float toMax, const bool apply = true);
     /*!
@@ -363,6 +376,7 @@ public:
       @param taMax Maximum raw value
       @param apply Settings take effect immediately if true
       @return True if successful
+      @warning During periodic detection runs, an error is returned
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeAmbientMinMax(const T taMin, const T taMax, const bool apply = true)
@@ -375,7 +389,8 @@ public:
       @param taMax Maximum celsius
       @param apply Settings take effect immediately if true
       @return True if successful
-      @note Valid range between -38.2f and 124.8f
+      @note Valid range between -38.2f and 125.0f
+      @warning During periodic detection runs, an error is returned
      */
     bool writeAmbientMinMax(const float taMin, const float taMax, const bool apply = true);
     ///@}
@@ -418,7 +433,6 @@ public:
     bool writeEmissivity(const float emiss, const bool apply = true);
     ///@}
 
-    ///@warning Handling warning
     ///@name I2C Address
     ///@{
     /*!
@@ -504,14 +518,14 @@ public:
     }
 
 protected:
-    virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir);
-    inline virtual bool has_dual_sensors() const
+    virtual uint32_t get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir) override;
+    inline virtual bool has_dual_sensors() const override
     {
         return true;
     }
 };
 
-///@cond 0
+///@cond
 namespace mlx90614 {
 namespace command {
 // Category bits

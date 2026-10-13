@@ -106,7 +106,10 @@ public:
     {
         return PeriodicMeasurementAdapter<UnitNCIR2, ncir2::Data>::startPeriodicMeasurement(interval);
     }
-    //! @brief Start periodic measurement in the current settings
+    /*!
+      @brief Start periodic measurement in the current settings
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitNCIR2, ncir2::Data>::startPeriodicMeasurement();

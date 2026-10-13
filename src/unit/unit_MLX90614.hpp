@@ -162,7 +162,10 @@ public:
     {
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement(iir, fir, gain, irs);
     }
-    //! @brief Start periodic measurement in the current settings
+    /*!
+      @brief Start periodic measurement in the current settings
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitMLX90614, mlx90614::Data>::startPeriodicMeasurement();

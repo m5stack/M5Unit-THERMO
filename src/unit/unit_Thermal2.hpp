@@ -82,7 +82,10 @@ public:
     {
         return PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data>::startPeriodicMeasurement(rate);
     }
-    //! @brief Start periodic measurement in the current settings
+    /*!
+      @brief Start periodic measurement in the current settings
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data>::startPeriodicMeasurement();

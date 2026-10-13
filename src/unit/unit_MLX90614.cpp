@@ -20,25 +20,6 @@ using namespace m5::unit::mlx90614::command;
 
 namespace {
 
-struct Flag {
-    // EEPROM access still in progress if true
-    inline bool EEBusy() const
-    {
-        return value & (1U << 7);
-    }
-    // EEPROM double error has occurred if true
-    inline bool EEDead() const
-    {
-        return value & (1U << 5);
-    }
-    // POR initialization routine has completed (Low active)
-    inline bool initialized() const
-    {
-        return value & (1U << 4);
-    }
-    uint16_t value{};
-};
-
 struct PWMCtrl {
     inline explicit PWMCtrl(const uint16_t v = 0) : value{v}
     {
@@ -72,7 +53,8 @@ struct PWMCtrl {
     inline float period() const
     {
         // ms
-        return 1.024f * ((mode() == Mode::Single) ? 1.f : 2.f) * (((value >> 9) & 0x7F) ? ((value >> 9) & 0x7F) : 128);
+        const uint16_t p{period_raw()};
+        return 1.024f * ((mode() == Mode::Single) ? 1.f : 2.f) * (p ? p : 128);
     }
     uint16_t value{};
 };
@@ -142,9 +124,9 @@ void UnitMLX90614::update(const bool force)
     _updated = false;
     if (inPeriodic()) {
         elapsed_time_t at{m5::utility::millis()};
-        if (force || !_latest || at >= _latest + _interval) {
+        if (force || !_latest || m5::utility::hasElapsed(_latest, _interval, at)) {
             Data d{};
-            _updated = read_measurement(d, _eeprom.config);
+            _updated = read_measurement(d);
             if (_updated) {
                 _latest = at;
                 _data->push_back(d);
@@ -260,10 +242,9 @@ bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
 
 bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 {
-    // WARNING
-    // datasheet says...
+    // Datasheet: FIR settings 0-3 (Filter8 to Filter64) are not recommended
     if (m5::stl::to_underlying(fir) < 4) {
-        M5_LIB_LOGW("Settings below FIR::Filter64 are not recommended");
+        M5_LIB_LOGW("FIR::Filter64 or below is not recommended");
     }
 
     ConfigRegister c{};
@@ -610,7 +591,7 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
     if (readRegister(reg, rbuf + 3, 3, 0, stopbit)) {
         uint8_t crc = crc8.update(rbuf, 5);
         if (crc == rbuf[5]) {
-            v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
+            v = m5::types::little_uint16_t{rbuf[3], rbuf[4]}.get();
             return true;
         }
         // M5_LIB_LOGE("CRC Error %02X/%02X", crc, rbuf[5]);
@@ -669,7 +650,7 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
     return false;
 }
 
-bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
+bool UnitMLX90614::read_measurement(mlx90614::Data& d)
 {
     std::fill(d.raw.begin(), d.raw.end(), 0x8000 /* invalid value */);
     return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&

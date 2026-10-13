@@ -485,7 +485,7 @@ protected:
     bool write_object_minmax(const uint16_t toMin, const uint16_t toMax, const bool apply = true);
     bool write_ambient_minmax(const uint8_t taMin, const uint8_t taMax, const bool apply = true);
     bool write_emissivity(const uint16_t emiss, const bool apply = true);
-    bool read_measurement(mlx90614::Data& d, const uint16_t config);
+    bool read_measurement(mlx90614::Data& d);
 
     bool start_periodic_measurement(const mlx90614::IIR iir, const mlx90614::FIR fir, const mlx90614::Gain gain,
                                     const mlx90614::IRSensor irs);

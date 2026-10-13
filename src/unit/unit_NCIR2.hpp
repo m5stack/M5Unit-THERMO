@@ -10,48 +10,13 @@
 #ifndef M5_UNIT_THERMO_UNIT_NCIR2_HPP
 #define M5_UNIT_THERMO_UNIT_NCIR2_HPP
 
+#include "unit_NCIR2_data.hpp"
 #include <M5UnitComponent.hpp>
 #include <m5_utility/container/circular_buffer.hpp>
 #include <limits>  // NaN
-#include <array>
 
 namespace m5 {
 namespace unit {
-
-/*!
-  @namespace ncir2
-  @brief For UnitNCIR2
- */
-namespace ncir2 {
-/*!
-  @struct Data
-  @brief Measurement data group
-  @note Valid to the second decimal place
- */
-struct Data {
-    std::array<uint8_t, 2> raw{0x00, 0x80};  // Raw [0]:low byte [1]:high byte
-    //! @brief Raw int16
-    inline int16_t value() const
-    {
-        return (raw[1] << 8 | raw[0]);
-    }
-    //! @brief Temperature(Celsius)
-    inline float temperature() const
-    {
-        return value() * 0.01f;
-    }
-    //! @brief Celsius
-    inline float celsius() const
-    {
-        return temperature();
-    }
-    //! @brief Fahrenheit
-    inline float fahrenheit() const
-    {
-        return celsius() * 9.0f / 5.0f + 32.f;
-    }
-};
-}  // namespace ncir2
 
 /*!
   @class m5::unit::UnitNCIR2

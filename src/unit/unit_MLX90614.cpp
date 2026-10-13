@@ -77,71 +77,6 @@ struct PWMCtrl {
     uint16_t value{};
 };
 
-struct Config {
-    inline explicit Config(const uint16_t v = 0) : value{v}
-    {
-    }
-    inline IIR iir() const
-    {
-        return static_cast<IIR>(value & 0x07);
-    }
-    inline Output output() const
-    {
-        return static_cast<Output>((value >> 4) & 0x03);
-    }
-    inline FIR fir() const
-    {
-        return static_cast<FIR>((value >> 8) & 0x07);
-    }
-    inline Gain gain() const
-    {
-        uint8_t g = (value >> 11) & 0x07;
-        return static_cast<Gain>(g > 6 ? 6 : g);  // [7] duplicate of Coeff100
-    }
-    inline IRSensor irSensor() const
-    {
-        return static_cast<IRSensor>((value >> 6) & 0x01);
-    }
-    inline bool positiveKs() const
-    {
-        return !(value & (1U << 7));  // bit7: 0=positive, 1=negative
-    }
-    inline bool positiveKf2() const
-    {
-        return !(value & (1U << 14));  // bit14: 0=positive, 1=negative
-    }
-    //
-    inline void iir(const IIR iir)
-    {
-        value = (value & ~0x07) | m5::stl::to_underlying(iir);
-    }
-    inline void output(const Output o)
-    {
-        value = (value & ~(0x03 << 4)) | (m5::stl::to_underlying(o) << 4);
-    }
-    inline void fir(const FIR fir)
-    {
-        value = (value & ~(0x07 << 8)) | (m5::stl::to_underlying(fir) << 8);
-    }
-    inline void gain(const Gain gain)
-    {
-        value = (value & ~(0x07 << 11)) | (m5::stl::to_underlying(gain) << 11);
-    }
-    inline void irSensor(const IRSensor irs)
-    {
-        value = (value & ~(1U << 6)) | (m5::stl::to_underlying(irs) << 6);
-    }
-    inline void positiveKs(const bool pos)
-    {
-        value = (value & ~(1U << 7)) | ((uint16_t)(!pos) << 7);  // bit7: 0=positive, 1=negative
-    }
-    inline void positiveKf2(const bool pos)
-    {
-        value = (value & ~(1U << 14)) | ((uint16_t)(!pos) << 14);  // bit14: 0=positive, 1=negative
-    }
-    uint16_t value{};
-};
-
 // [IIR][FIR]
 // FIR 000...011 are NOT RECOMMENDED
 // For MLX90614A Series
@@ -154,38 +89,6 @@ constexpr uint32_t interval_tableBD[8][4] = {
     {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
     {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
 };
-
-inline float toRaw_to_celsius(const uint16_t t)
-{
-    return t * 0.01f - 273.15f;
-}
-
-inline uint16_t celsius_to_toRaw(const float c)
-{
-    float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
-    return static_cast<uint16_t>(100 * (v + 0.005f + 273.15f));
-}
-
-inline float taRaw_to_celsius(const uint8_t t)
-{
-    return t * 64.0f / 100.f - 38.2f;
-}
-
-inline uint8_t celsius_to_taRaw(const float c)
-{
-    float v = std::fmax(std::fmin(c, 125.f), -38.2f);
-    return static_cast<uint8_t>(100 * (v + 0.32f + 38.2f) / 64.0f);
-}
-
-inline float raw_to_emissivity(const uint16_t e)
-{
-    return e / 65535.f;
-}
-
-inline uint16_t emissivity_to_raw(const float e)
-{
-    return static_cast<uint16_t>(std::round(65535.f * e));
-}
 
 }  // namespace
 
@@ -229,7 +132,7 @@ bool UnitMLX90614::begin()
     pc.value = _eeprom.pwmCtrl;
     M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
-    Config c{_eeprom.config};
+    ConfigRegister c{_eeprom.config};
     M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosK:%u PosKf2:%u", c.iir(), c.output(), c.fir(), c.gain(),
                 c.irSensor(), c.positiveKs(), c.positiveKf2());
 
@@ -257,7 +160,7 @@ void UnitMLX90614::update(const bool force)
 bool UnitMLX90614::start_periodic_measurement(const mlx90614::IIR iir, const mlx90614::FIR fir,
                                               const mlx90614::Gain gain, const mlx90614::IRSensor irs)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.iir(iir);
         c.fir(fir);
@@ -274,7 +177,7 @@ bool UnitMLX90614::start_periodic_measurement()
         return false;
     }
 
-    Config c(_eeprom.config);
+    ConfigRegister c(_eeprom.config);
     _interval = get_interval(c.iir(), c.fir());
     _periodic = true;
     _latest   = 0;
@@ -311,7 +214,7 @@ bool UnitMLX90614::writeConfig(const uint16_t v, const bool apply)
 
 bool UnitMLX90614::readOutput(mlx90614::Output& o)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         o = c.output();
         return true;
@@ -321,7 +224,7 @@ bool UnitMLX90614::readOutput(mlx90614::Output& o)
 
 bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.output(o);
         return writeConfig(c.value, apply);
@@ -331,7 +234,7 @@ bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool apply)
 
 bool UnitMLX90614::readIIR(mlx90614::IIR& iir)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         iir = c.iir();
         return true;
@@ -341,7 +244,7 @@ bool UnitMLX90614::readIIR(mlx90614::IIR& iir)
 
 bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.iir(iir);
         return writeConfig(c.value, apply);
@@ -351,7 +254,7 @@ bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool apply)
 
 bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         fir = c.fir();
         return true;
@@ -367,7 +270,7 @@ bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
         M5_LIB_LOGW("Settings below FIR::Filter64 are not recommended");
     }
 
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.fir(fir);
         return writeConfig(c.value, apply);
@@ -377,7 +280,7 @@ bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 
 bool UnitMLX90614::readGain(mlx90614::Gain& gain)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         gain = c.gain();
         return true;
@@ -387,7 +290,7 @@ bool UnitMLX90614::readGain(mlx90614::Gain& gain)
 
 bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.gain(gain);
         return writeConfig(c.value, apply);
@@ -397,7 +300,7 @@ bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool apply)
 
 bool UnitMLX90614::readIRSensor(mlx90614::IRSensor& irs)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         irs = c.irSensor();
         return true;
@@ -407,7 +310,7 @@ bool UnitMLX90614::readIRSensor(mlx90614::IRSensor& irs)
 
 bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.irSensor(irs);
         return writeConfig(c.value, apply);
@@ -417,7 +320,7 @@ bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool apply)
 
 bool UnitMLX90614::readPositiveKs(bool& pos)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         pos = c.positiveKs();
         return true;
@@ -427,7 +330,7 @@ bool UnitMLX90614::readPositiveKs(bool& pos)
 
 bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.positiveKs(pos);
         return writeConfig(c.value, apply);
@@ -437,7 +340,7 @@ bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
 
 bool UnitMLX90614::readPositiveKf2(bool& pos)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         pos = c.positiveKf2();
         return true;
@@ -447,7 +350,7 @@ bool UnitMLX90614::readPositiveKf2(bool& pos)
 
 bool UnitMLX90614::writePositiveKf2(const bool pos, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.positiveKf2(pos);
         return writeConfig(c.value, apply);

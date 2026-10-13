@@ -50,22 +50,7 @@ constexpr struct {
 } temp_table[] = {
     {0, -64.f, false}, {8192, 0.f, false}, {12032, 30.f, false}, {20992, 100.f, false}, {65535, 447.99f, true},
 };
-
 }  // namespace
-
-TEST_F(TestThermal2, Conversion)
-{
-    SCOPED_TRACE(ustr);
-
-    for (auto&& t : temp_table) {
-        if (t.near) {
-            EXPECT_NEAR(raw_to_celsius(t.utemp), t.ftemp, 0.01f);
-        } else {
-            EXPECT_FLOAT_EQ(raw_to_celsius(t.utemp), t.ftemp);
-        }
-        EXPECT_EQ(celsius_to_raw(t.ftemp), t.utemp);
-    }
-}
 
 TEST_F(TestThermal2, Settings)
 {

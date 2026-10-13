@@ -14,6 +14,7 @@
 #include <M5Utility.h>
 #include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
 #include <inttypes.h>
+#include <limits>
 
 namespace {
 auto& display = M5.Display;
@@ -743,7 +744,7 @@ public:
 };
 
 class hist_ui_t : public ui_base_t {
-    uint16_t* _histgram    = nullptr;
+    uint16_t* _histogram   = nullptr;
     uint16_t* _prev_hist_x = nullptr;
     bool* _prev_hist_line  = nullptr;
 
@@ -754,12 +755,12 @@ public:
         if (!isInvalidated() && !ui_base_t::draw(param)) return false;
         if (isInvalidated()) {
             int hist_len = _client_rect.h;
-            if (_histgram) {
-                free(_histgram);
+            if (_histogram) {
+                free(_histogram);
             }
 
-            _histgram = (typeof(_histgram))malloc(hist_len * sizeof(_histgram[0]));
-            memset(_histgram, 0, hist_len * sizeof(_histgram[0]));
+            _histogram = (typeof(_histogram))malloc(hist_len * sizeof(_histogram[0]));
+            memset(_histogram, 0, hist_len * sizeof(_histogram[0]));
             if (_prev_hist_x) {
                 free(_prev_hist_x);
             }
@@ -776,7 +777,7 @@ public:
         int hist_max = _client_rect.h - 1;
         for (int idx = 0; idx < frame_width * frame_height; ++idx) {
             int hist_idx = (param->frame->pixel_raw[idx] - param->temp_lowest) * _client_rect.h / param->temp_diff;
-            ++_histgram[(hist_idx < 0) ? 0 : ((hist_idx > hist_max) ? hist_max : hist_idx)];
+            ++_histogram[(hist_idx < 0) ? 0 : ((hist_idx > hist_max) ? hist_max : hist_idx)];
         }
         int step_index = 0;
         while ((param->temp_diff >> 3) > _client_rect.h * step_table[step_index]) {
@@ -820,8 +821,8 @@ public:
             }
 
             if (i >= 0) {
-                int x           = ((_histgram[i] * _client_rect.w * _client_rect.h) >> 13);
-                _histgram[i]    = 0;
+                int x           = ((_histogram[i] * _client_rect.w * _client_rect.h) >> 13);
+                _histogram[i]   = 0;
                 x               = (x < 0) ? 0 : (x > _client_rect.w) ? _client_rect.w : x;
                 int px          = _prev_hist_x[i];
                 _prev_hist_x[i] = x;
@@ -878,14 +879,14 @@ void drawTask(void*)
 
     uint8_t prev_color_table_idx = 0;
     uint8_t prev_sec             = UINT8_MAX;
-    uint32_t prev_msec           = UINT32_MAX;
-    uint32_t framecount          = 0;
+    m5::utility::elapsed_time_t prev_msec{std::numeric_limits<m5::utility::elapsed_time_t>::max()};
+    uint32_t framecount = 0;
 
     display.startWrite();
     for (;;) {
         ++framecount;
-        uint32_t msec = m5::utility::millis();
-        uint8_t sec   = msec / 1000;
+        const m5::utility::elapsed_time_t msec{m5::utility::millis()};
+        uint8_t sec = msec / 1000;
         if (prev_sec != sec) {
             prev_sec = sec;
             M5.Log.printf("fps: %" PRIu32 " : %u\n", framecount, draw_param.update_count);
@@ -1019,10 +1020,7 @@ void setup(void)
             "SmoothDraw is not supported on NessoN1 (ESP32-C6 single-core).\n"
             " The dual-task architecture conflicts with single-core FreeRTOS.\n"
             " Use SimpleDisplay example instead");
-        display.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
 
     // Refresh rate (must be set before begin)
@@ -1061,22 +1059,6 @@ void loop(void)
     bool marker_change = M5.BtnB.wasClicked();
     bool layout_change = M5.BtnC.wasClicked() || M5.BtnA.wasHold();
 
-    if (M5.Touch.isEnabled()) {
-        auto dt = M5.Touch.getDetail();
-        if (dt.y < display.height() && dt.wasClicked()) {
-            switch (dt.x * 3 / display.width()) {
-                case 0:
-                    color_change = true;
-                    break;
-                case 1:
-                    marker_change = true;
-                    break;
-                default:
-                    layout_change = true;
-                    break;
-            }
-        }
-    }
     if (color_change) {
         color_map_table_idx = (color_map_table_idx + 1) % color_map_table_len;
     }

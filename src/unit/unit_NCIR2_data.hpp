@@ -30,7 +30,7 @@ namespace ncir2 {
   @note Valid to the second decimal place
  */
 struct Data {
-    std::array<uint8_t, 2> raw{0x00, 0x80};  // Raw [0]:low byte [1]:high byte
+    std::array<uint8_t, 2> raw{0x00, 0x80};  //!< Raw [0]:low byte [1]:high byte
     //! @brief Raw int16
     inline int16_t value() const
     {

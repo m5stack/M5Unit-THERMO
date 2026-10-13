@@ -151,12 +151,14 @@ public:
       @brief Write the emissivity
       @param raw Raw emissivity
       @return True if successful
+      @note Reconnect (power-cycle) the unit after writing the emissivity for it to take effect
     */
     bool writeEmissivity(const uint16_t raw);
     /*!
       @brief Write the emissivity
-      @param e Emissivity
+      @param e Emissivity (0.1 - 1.0)
       @return True if successful
+      @note Reconnect (power-cycle) the unit after writing the emissivity for it to take effect
     */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeEmissivity(const T e)
@@ -232,7 +234,7 @@ public:
     /*!
       @brief Read the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] interval Interval(ms) [1 - 5000]
       @param[out] rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
@@ -241,16 +243,16 @@ public:
     /*!
       @brief Read the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] interval Interval(ms) [1 - 5000]
-      @param[out] duty Duty
+      @param[out] duty Duty (0.0 - 1.0)
       @return True if successful
      */
     bool readAlarmBuzzer(const bool highlow, uint16_t& freq, uint16_t& interval, float& duty);
     /*!
       @brief Write the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param interval Interval(ms) [1 - 5000]
       @param rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
@@ -259,9 +261,9 @@ public:
     /*!
       @brief Write the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param interval Interval(ms) [1 - 5000]
-      @param duty Duty
+      @param duty Duty (0.0 - 1.0)
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
@@ -275,30 +277,30 @@ public:
     ///@{
     /*!
       @brief Read the buzzer settings
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
      */
     bool readBuzzer(uint16_t& freq, uint8_t& rawDuty);
     /*!
       @brief Read the buzzer settings
-      @param[out] freq Frequency
-      @param[out] duty Duty
+      @param[out] freq Frequency (Hz)
+      @param[out] duty Duty (0.0 - 1.0)
       @return True if successful
      */
     bool readBuzzer(uint16_t& freq, float& duty);
 
     /*!
       @brief Write the buzzer settings
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
      */
     bool writeBuzzer(const uint16_t freq, const uint8_t rawDuty);
     /*!
       @brief Write the buzzer settings
-      @param freq Frequency
-      @param duty Duty
+      @param freq Frequency (Hz)
+      @param duty Duty (0.0 - 1.0)
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
@@ -413,14 +415,12 @@ public:
      */
     bool readFirmwareVersion(uint8_t& ver);
 
-    ///@warning Handling warning
     ///@name I2C Address
     ///@{
     /*!
       @brief Change device I2C address
       @param i2c_address I2C address
       @return True if successful
-
     */
     bool changeI2CAddress(const uint8_t i2c_address);
     /*!

@@ -22,6 +22,7 @@ on:
       - 'unit_ncir_env.ini'
       - 'unit_ncir2_env.ini'
       - 'unit_thermal2_env.ini'
+      - 'via_pahub_env.ini'
   pull_request:
     paths:
       - 'src/**.cpp'
@@ -38,6 +39,7 @@ on:
       - 'unit_ncir_env.ini'
       - 'unit_ncir2_env.ini'
       - 'unit_thermal2_env.ini'
+      - 'via_pahub_env.ini'
   workflow_dispatch:
 
 defaults:
@@ -59,164 +61,56 @@ jobs:
       max-parallel: 20
       
       matrix:
-        example:
-          - PlotToSerial
-          - SimpleDisplay
-          - SmoothDraw
-
+        # Every unit is I2C (addI2C); each unit's own code is built on every representative board
         unit:
           - UnitNCIR
           - UnitNCIR2
           - UnitThermal2
 
+        example:
+          - PlotToSerial
+
         board:
+          # Reduced from 19 to 5 boards: one per compile config (chip arch x platform).
+          # The other boards differ only in the variant header, so the library code compiles the same.
           - Core
-          - Core2
+#          - Core2  # ESP32: represented by Core
           - CoreS3
-          - Fire
-          - StampS3
-          - Dial
-          - Atom
-          - AtomS3
-          - AtomS3R
+#          - Fire  # ESP32: represented by Core
+#          - StampS3  # ESP32-S3: represented by CoreS3
+#          - Dial  # ESP32-S3: represented by CoreS3
+#          - Atom  # ESP32: represented by Core
+#          - AtomS3  # ESP32-S3: represented by CoreS3
+#          - AtomS3R  # ESP32-S3: represented by CoreS3
           - NanoC6
           - NanoH2
-          - StickCPlus
-          - StickCPlus2
-          - StickS3
-          - Paper
-          - CoreInk
-          - Cardputer
+#          - StickCPlus  # ESP32: represented by Core
+#          - StickCPlus2  # ESP32: represented by Core
+#          - StickS3  # ESP32-S3: represented by CoreS3
+#          - Paper  # ESP32: represented by Core
+#          - CoreInk  # ESP32: represented by Core
+#          - Cardputer  # ESP32-S3: represented by CoreS3
           - Tab5
-          - NessoN1
+#          - NessoN1  # ESP32-C6: represented by NanoC6
 
         framework:
           - Arduino
 
         espressif32:
           - latest
-#          - '5_4_0'
-#          - '4_4_0'
 
-#        exclude:
-#          - board: CoreS3
-#            espressif32: '5_4_0'
-#          - board: CoreS3
-#            espressif32: '4_4_0'
-#          - board: StampS3
-#            espressif32: '5_4_0'
-#          - board: StampS3
-#            espressif32: '4_4_0'
-#          - board: AtomS3
-#            espressif32: '5_4_0'
-#          - board: AtomS3
-#            espressif32: '4_4_0'
-#          - board: Dial
-#            espressif32: '5_4_0'
-#          - board: Dial
-#            espressif32: '4_4_0'
-#          - board: NanoC6
-#            espressif32: '5_4_0'
-#          - board: NanoC6
-#            espressif32: '4_4_0'
-#          - board: StickCPlus
-#            espressif32: '5_4_0'
-#          - board: StickCPlus
-#            espressif32: '4_4_0'
-#          - board: Paper
-#            espressif32: '5_4_0'
-#          - board: Paper
-#            espressif32: '4_4_0'
-
-        # ViaPaHub (NCIR / NCIR2 / Thermal2 via PaHub2) is a single example without a unit directory
         include:
-          - example: ViaPaHub
-            board: Core
-            framework: Arduino
-            espressif32: latest
-
-        exclude:
-          # UnitNCIR has no SimpleDisplay/SmoothDraw examples
-          - unit: UnitNCIR
-            example: SimpleDisplay
-          - unit: UnitNCIR
-            example: SmoothDraw
-          # UnitNCIR2 has no SmoothDraw example
-          - unit: UnitNCIR2
-            example: SmoothDraw
-          # SimpleDisplay/SmoothDraw: Core only (env exists only for Core)
-          - board: Core2
-            example: SimpleDisplay
-          - board: Core2
-            example: SmoothDraw
-          - board: CoreS3
-            example: SimpleDisplay
-          - board: CoreS3
-            example: SmoothDraw
-          - board: Fire
-            example: SimpleDisplay
-          - board: Fire
-            example: SmoothDraw
-          - board: StampS3
-            example: SimpleDisplay
-          - board: StampS3
-            example: SmoothDraw
-          - board: Dial
-            example: SimpleDisplay
-          - board: Dial
-            example: SmoothDraw
-          - board: Atom
-            example: SimpleDisplay
-          - board: Atom
-            example: SmoothDraw
-          - board: AtomS3
-            example: SimpleDisplay
-          - board: AtomS3
-            example: SmoothDraw
-          - board: AtomS3R
-            example: SimpleDisplay
-          - board: AtomS3R
-            example: SmoothDraw
-          - board: NanoC6
-            example: SimpleDisplay
-          - board: NanoC6
-            example: SmoothDraw
-          - board: NanoH2
-            example: SimpleDisplay
-          - board: NanoH2
-            example: SmoothDraw
-          - board: StickCPlus
-            example: SimpleDisplay
-          - board: StickCPlus
-            example: SmoothDraw
-          - board: StickCPlus2
-            example: SimpleDisplay
-          - board: StickCPlus2
-            example: SmoothDraw
-          - board: StickS3
-            example: SimpleDisplay
-          - board: StickS3
-            example: SmoothDraw
-          - board: Paper
-            example: SimpleDisplay
-          - board: Paper
-            example: SmoothDraw
-          - board: CoreInk
-            example: SimpleDisplay
-          - board: CoreInk
-            example: SmoothDraw
-          - board: Cardputer
-            example: SimpleDisplay
-          - board: Cardputer
-            example: SmoothDraw
-          - board: Tab5
-            example: SimpleDisplay
-          - board: Tab5
-            example: SmoothDraw
-          - board: NessoN1
-            example: SimpleDisplay
-          - board: NessoN1
-            example: SmoothDraw
+          # The display examples only add M5GFX drawing code on top of PlotToSerial; their envs exist for Core only
+          - {unit: UnitNCIR2, example: SimpleDisplay, board: Core, framework: Arduino, espressif32: latest}
+          - {unit: UnitThermal2, example: SimpleDisplay, board: Core, framework: Arduino, espressif32: latest}
+          - {unit: UnitThermal2, example: SmoothDraw, board: Core, framework: Arduino, espressif32: latest}
+          # ViaPaHub (NCIR / NCIR2 / Thermal2 via PaHub2) goes through UnitPaHub (M5Unit-HUB),
+          # so it is built on every representative board
+          - {example: ViaPaHub, board: Core, framework: Arduino, espressif32: latest}
+          - {example: ViaPaHub, board: CoreS3, framework: Arduino, espressif32: latest}
+          - {example: ViaPaHub, board: NanoC6, framework: Arduino, espressif32: latest}
+          - {example: ViaPaHub, board: NanoH2, framework: Arduino, espressif32: latest}
+          - {example: ViaPaHub, board: Tab5, framework: Arduino, espressif32: latest}
 
     steps:
       - name: Checkout

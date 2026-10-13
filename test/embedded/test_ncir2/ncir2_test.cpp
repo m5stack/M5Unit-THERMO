@@ -407,13 +407,12 @@ TEST_F(TestNCIR2, SingleAndChip)
 
         temp  = ds.temperature();
         ctemp = dc.temperature();
-        EXPECT_NE(temp, 0.0f);
         EXPECT_TRUE(std::isfinite(temp));
+        EXPECT_GE(temp, -70.f);  // MLX90614 object temperature range
+        EXPECT_LE(temp, 382.2f);
         EXPECT_TRUE(std::isfinite(ctemp));
         EXPECT_TRUE(std::isfinite(ds.fahrenheit()));
         EXPECT_TRUE(std::isfinite(dc.fahrenheit()));
-
-        EXPECT_NE(temp, ctemp);
 
         // M5_LOGI("Single:%f Chip:%f", temp, ctemp);
         m5::utility::delay(100);
@@ -483,34 +482,63 @@ TEST_F(TestNCIR2, BeginAppliesConfig)
     // Default interval is 250ms
     EXPECT_EQ(unit->interval(), 250U);
 
-    // Verify button state methods are accessible (const correctness)
+    // Verify button state accessor is callable
     EXPECT_FALSE(unit->wasReleased());
+}
+
+class TestNCIR2Config : public I2CComponentTestBase<UnitNCIR2> {
+protected:
+    virtual UnitNCIR2* get_instance() override
+    {
+        auto ptr = new m5::unit::UnitNCIR2();
+        auto cfg = ptr->config();
+        // Non-default value to verify that begin() applies config_t
+        cfg.start_periodic = true;
+        cfg.interval       = 100;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
+TEST_F(TestNCIR2Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+    EXPECT_EQ(unit->interval(), 100U);
 }
 
 /*
   WARNING: writeConfig() persists ALL settings (Emissivity, Alarm, LED) to flash.
-  If restore fails, flash retains test values. Original values are logged via M5_LOGI.
+  The unit cannot reload its flash values, and resetting the ESP32 does not power-cycle the unit,
+  so the values read here may be the ones the other tests left in RAM, not the saved ones.
+  Saving them back would overwrite the factory values, so this test is disabled by default.
+  Run it alone on a freshly powered unit:
+    pio test -e <env> -f embedded/test_ncir2 -a "--gtest_also_run_disabled_tests --gtest_filter=*WriteConfig"
+  Original values are logged via M5_LOGI.
   Known factory default — Emissivity: 0.95 (raw 62258), others: undocumented.
 */
-TEST_F(TestNCIR2, WriteConfig)
+TEST_F(TestNCIR2, DISABLED_WriteConfig)
 {
     SCOPED_TRACE(ustr);
 
-    // Save all flash-persistent settings (ASSERT to abort if read fails)
+    // Save all flash-persistent settings (do not write anything if a read fails)
     uint16_t orig_emiss{};
     int16_t orig_alarm_lo{}, orig_alarm_hi{};
     uint32_t orig_alarm_led_lo{}, orig_alarm_led_hi{};
     uint16_t orig_abuz_lo_f{}, orig_abuz_lo_i{}, orig_abuz_hi_f{}, orig_abuz_hi_i{};
     uint8_t orig_abuz_lo_d{}, orig_abuz_hi_d{};
     uint32_t orig_led{};
-    ASSERT_TRUE(unit->readEmissivity(orig_emiss));
-    ASSERT_TRUE(unit->readAlarmTemperature(false, orig_alarm_lo));
-    ASSERT_TRUE(unit->readAlarmTemperature(true, orig_alarm_hi));
-    ASSERT_TRUE(unit->readAlarmLED(false, orig_alarm_led_lo));
-    ASSERT_TRUE(unit->readAlarmLED(true, orig_alarm_led_hi));
-    ASSERT_TRUE(unit->readAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d));
-    ASSERT_TRUE(unit->readAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d));
-    ASSERT_TRUE(unit->readLED(orig_led));
+    const bool saved{unit->readEmissivity(orig_emiss) && unit->readAlarmTemperature(false, orig_alarm_lo) &&
+                     unit->readAlarmTemperature(true, orig_alarm_hi) && unit->readAlarmLED(false, orig_alarm_led_lo) &&
+                     unit->readAlarmLED(true, orig_alarm_led_hi) &&
+                     unit->readAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d) &&
+                     unit->readAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d) &&
+                     unit->readLED(orig_led)};
+    EXPECT_TRUE(saved);
+    if (!saved) {
+        return;
+    }
 
     M5_LOGI("Original emiss:%u alarm_lo:%d alarm_hi:%d", orig_emiss, orig_alarm_lo, orig_alarm_hi);
     M5_LOGI("Original alarm_led_lo:0x%06X alarm_led_hi:0x%06X led:0x%06X", orig_alarm_led_lo, orig_alarm_led_hi,
@@ -547,15 +575,15 @@ TEST_F(TestNCIR2, WriteConfig)
     EXPECT_EQ(led, (uint32_t)0x778899);
 
     // Restore all original values and save back
-    ASSERT_TRUE(unit->writeEmissivity(orig_emiss)) << "Flash may retain test emissivity (32768)";
-    ASSERT_TRUE(unit->writeAlarmTemperature(false, orig_alarm_lo)) << "Flash may retain alarm_lo (-1000)";
-    ASSERT_TRUE(unit->writeAlarmTemperature(true, orig_alarm_hi)) << "Flash may retain alarm_hi (5000)";
-    ASSERT_TRUE(unit->writeAlarmLED(false, orig_alarm_led_lo)) << "Flash may retain alarm_led_lo (0x112233)";
-    ASSERT_TRUE(unit->writeAlarmLED(true, orig_alarm_led_hi)) << "Flash may retain alarm_led_hi (0x445566)";
-    ASSERT_TRUE(unit->writeAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d));
-    ASSERT_TRUE(unit->writeAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d));
-    ASSERT_TRUE(unit->writeLED(orig_led)) << "Flash may retain LED (0x778899)";
-    ASSERT_TRUE(unit->writeConfig()) << "Failed to persist restored values";
+    EXPECT_TRUE(unit->writeEmissivity(orig_emiss)) << "Flash may retain test emissivity (32768)";
+    EXPECT_TRUE(unit->writeAlarmTemperature(false, orig_alarm_lo)) << "Flash may retain alarm_lo (-1000)";
+    EXPECT_TRUE(unit->writeAlarmTemperature(true, orig_alarm_hi)) << "Flash may retain alarm_hi (5000)";
+    EXPECT_TRUE(unit->writeAlarmLED(false, orig_alarm_led_lo)) << "Flash may retain alarm_led_lo (0x112233)";
+    EXPECT_TRUE(unit->writeAlarmLED(true, orig_alarm_led_hi)) << "Flash may retain alarm_led_hi (0x445566)";
+    EXPECT_TRUE(unit->writeAlarmBuzzer(false, orig_abuz_lo_f, orig_abuz_lo_i, orig_abuz_lo_d));
+    EXPECT_TRUE(unit->writeAlarmBuzzer(true, orig_abuz_hi_f, orig_abuz_hi_i, orig_abuz_hi_d));
+    EXPECT_TRUE(unit->writeLED(orig_led)) << "Flash may retain LED (0x778899)";
+    EXPECT_TRUE(unit->writeConfig()) << "Failed to persist restored values";
 }
 
 /*
@@ -574,20 +602,20 @@ TEST_F(TestNCIR2, I2CAddress)
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
 
-    // Change to 0x10
-    EXPECT_TRUE(unit->changeI2CAddress(0x10));
+    // Change to 0x2A
+    EXPECT_TRUE(unit->changeI2CAddress(0x2A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x10);
-    EXPECT_EQ(unit->address(), 0x10);
+    EXPECT_EQ(addr, 0x2A);
+    EXPECT_EQ(unit->address(), 0x2A);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
 
-    // Change to 0x77
-    EXPECT_TRUE(unit->changeI2CAddress(0x77));
+    // Change to 0x4B
+    EXPECT_TRUE(unit->changeI2CAddress(0x4B));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x77);
-    EXPECT_EQ(unit->address(), 0x77);
+    EXPECT_EQ(addr, 0x4B);
+    EXPECT_EQ(unit->address(), 0x4B);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);

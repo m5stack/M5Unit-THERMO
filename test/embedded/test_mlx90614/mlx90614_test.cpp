@@ -39,7 +39,7 @@ protected:
     // Next test's begin() → wakeup() triggers POR which loads EEPROM→RAM.
     void restore_config()
     {
-        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4, OUT:TO12 FIR:7,Gain:3,IRS:0 PosK:1 PosKf2:0
+        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4 OUT:TO1_TO2 IRS:Single Ks:negative FIR:7 Gain:3 Kt2:positive
         EXPECT_TRUE(unit->writeConfig(c, false));
     }
     void restore_setting()
@@ -496,7 +496,8 @@ TEST_F(TestMLX90614BAA, Periodic)
     };
 
     for (auto&& pair : test_pairs) {
-        auto s = m5::utility::formatString("IIR:%u FIR:%u", pair.iir, pair.fir);
+        auto s = m5::utility::formatString("IIR:%u FIR:%u", m5::stl::to_underlying(pair.iir),
+                                           m5::stl::to_underlying(pair.fir));
         SCOPED_TRACE(s);
         const auto iir = pair.iir;
         const auto fir = pair.fir;
@@ -605,6 +606,39 @@ TEST_F(TestMLX90614BAA, BeginAppliesConfig)
     EXPECT_NEAR(emiss, 1.0f, 0.001f);
 }
 
+class TestMLX90614BAAConfig : public TestMLX90614BAA {
+protected:
+    virtual UnitMLX90614BAA* get_instance() override
+    {
+        auto ptr = TestMLX90614BAA::get_instance();
+        auto cfg = ptr->config();
+        // Non-default values to verify that begin() applies config_t
+        // (Gain and emissivity are left as is because they are factory calibrated)
+        cfg.start_periodic = true;
+        cfg.iir            = mlx90614::IIR::Filter80;
+        cfg.fir            = mlx90614::FIR::Filter512;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
+TEST_F(TestMLX90614BAAConfig, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+
+    mlx90614::IIR iir{};
+    mlx90614::FIR fir{};
+    EXPECT_TRUE(unit->readIIR(iir));
+    EXPECT_TRUE(unit->readFIR(fir));
+    EXPECT_EQ(iir, mlx90614::IIR::Filter80);
+    EXPECT_EQ(fir, mlx90614::FIR::Filter512);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    restore_config();
+}
+
 TEST_F(TestMLX90614BAA, ChangeAddress)
 {
     SCOPED_TRACE(ustr);
@@ -617,20 +651,20 @@ TEST_F(TestMLX90614BAA, ChangeAddress)
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
 
-    // Change to 0x10
-    EXPECT_TRUE(unit->changeI2CAddress(0x10));
+    // Change to 0x2A
+    EXPECT_TRUE(unit->changeI2CAddress(0x2A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x10);
-    EXPECT_EQ(unit->address(), 0x10);
+    EXPECT_EQ(addr, 0x2A);
+    EXPECT_EQ(unit->address(), 0x2A);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
 
-    // Change to 0x77
-    EXPECT_TRUE(unit->changeI2CAddress(0x77));
+    // Change to 0x4B
+    EXPECT_TRUE(unit->changeI2CAddress(0x4B));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x77);
-    EXPECT_EQ(unit->address(), 0x77);
+    EXPECT_EQ(addr, 0x4B);
+    EXPECT_EQ(unit->address(), 0x4B);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);

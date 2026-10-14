@@ -70,7 +70,7 @@ public:
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    //! @brief Sets the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -511,7 +511,7 @@ private:
 };
 
 /*!
-  @class UnitMLX90614BAA
+  @class m5::unit::UnitMLX90614BAA
   @brief MLX90614 single zone unit (NCIR, SKU:U028)
   @details MLX90614ESF-BAA: 3V supply, single zone (one thermopile), so object 2 is not measured.
   objectTemperature2() and the other object 2 accessors return NaN

@@ -64,7 +64,7 @@ public:
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    //! @brief Sets the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;

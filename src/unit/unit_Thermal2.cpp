@@ -11,6 +11,7 @@
 #include <M5Utility.hpp>
 #include <algorithm>
 #include <array>
+#include <cstddef>
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -19,6 +20,11 @@ using namespace m5::unit::thermal2::command;
 
 namespace {
 constexpr uint16_t DEVICE_ID{0x9064};
+
+// read_data() reads the 16 bytes of temp[] and the 768 bytes of raw[] in one go
+using ThermalData = m5::unit::thermal2::Data;
+static_assert(offsetof(ThermalData, raw) == offsetof(ThermalData, temp) + sizeof(ThermalData::temp),
+              "raw[] must follow temp[] directly");
 
 #if defined(ARDUINO)
 #if defined(I2C_BUFFER_LENGTH)

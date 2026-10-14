@@ -117,6 +117,8 @@ public:
     /*!
       @brief Stop periodic measurement
       @return True if successful
+      @note This only stops the periodic reading on the host side. The unit firmware keeps measuring,
+      so the temperature alarm (LED / buzzer) stays active
     */
     inline bool stopPeriodicMeasurement()
     {
@@ -131,6 +133,8 @@ public:
       @param[out] d Measured data
       @return True if successful
       @note Valid to the second decimal place
+      @note Reads the latest value that the unit firmware measures continuously.
+      The temperature alarm (LED / buzzer) stays active while periodic measurement is stopped
       @warning During periodic detection runs, an error is returned
     */
     bool measureSingleshot(ncir2::Data& d);

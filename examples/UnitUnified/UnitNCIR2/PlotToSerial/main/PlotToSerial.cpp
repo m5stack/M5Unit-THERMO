@@ -126,9 +126,10 @@ void loop()
             unit.stopPeriodicMeasurement();
 
             Data d{};
-            unit.measureSingleshot(d);
-            temp = d.temperature();
-            M5.Log.printf("Single:%.2f\n", temp);
+            if (unit.measureSingleshot(d)) {
+                temp = d.temperature();
+                M5.Log.printf("Single:%.2f\n", temp);
+            }
         } else {
             ring_buzzer(2000, 204);
 

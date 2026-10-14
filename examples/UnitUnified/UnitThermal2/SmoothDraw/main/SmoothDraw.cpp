@@ -894,7 +894,7 @@ void drawTask(void*)
             draw_param.update_count = 0;
             m5::utility::delay(1);
         }
-        int limit_delay = 17 - (msec - prev_msec);
+        int limit_delay = 17 - static_cast<int>(m5::utility::elapsedSince(prev_msec, msec));
         prev_msec       = msec;
         if (limit_delay > 0) {
             m5::utility::delay(limit_delay);

@@ -37,12 +37,12 @@ docs/html/
 # PlatformIO
 .pio/
 
-# ESP-IDF
+# ESP-IDF (idf.py) build artifacts
 build/
 managed_components/
-dependencies.lock
 sdkconfig
 sdkconfig.old
+dependencies.lock
 
 # IDE
 .vscode/

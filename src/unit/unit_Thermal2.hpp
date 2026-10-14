@@ -269,12 +269,13 @@ public:
       @brief Write the alarm temperature threshold
       @param highlow Target False:low True:high
       @param celsius Temperature
-      @return True if successful
+      @return True if successful (false if celsius is not finite)
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeAlarmTemperature(const bool highlow, const T celsius)
     {
-        return writeAlarmTemperature(highlow, thermal2::celsius_to_raw(static_cast<float>(celsius)));
+        return std::isfinite(celsius) &&
+               writeAlarmTemperature(highlow, thermal2::celsius_to_raw(static_cast<float>(celsius)));
     }
 
     /*!

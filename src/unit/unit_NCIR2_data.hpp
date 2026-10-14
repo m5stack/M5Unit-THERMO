@@ -16,6 +16,8 @@
 #include <array>
 #include <cstdint>
 
+#include <m5_utility/types.hpp>
+
 namespace m5 {
 namespace unit {
 
@@ -30,11 +32,11 @@ namespace ncir2 {
   @note Valid to the second decimal place
  */
 struct Data {
-    std::array<uint8_t, 2> raw{0x00, 0x80};  //!< Raw [0]:low byte [1]:high byte
+    std::array<uint8_t, 2> raw{0x00, 0x80};  //!< Raw [0]:low byte [1]:high byte (default 0x8000: no data)
     //! @brief Raw int16
     inline int16_t value() const
     {
-        return (raw[1] << 8 | raw[0]);
+        return m5::types::little_int16_t{raw[0], raw[1]}.get();
     }
     //! @brief Temperature(Celsius)
     inline float temperature() const

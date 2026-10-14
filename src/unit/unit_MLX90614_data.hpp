@@ -13,11 +13,12 @@
 #ifndef M5_UNIT_THERMO_UNIT_MLX90614_DATA_HPP
 #define M5_UNIT_THERMO_UNIT_MLX90614_DATA_HPP
 
-#include <m5_utility/stl/extension.hpp>
 #include <array>
 #include <cmath>
 #include <cstdint>
 #include <limits>  // NaN
+
+#include <m5_utility/stl/extension.hpp>
 
 namespace m5 {
 namespace unit {
@@ -170,13 +171,14 @@ struct Data {
   @brief EEPROM structure values
  */
 struct EEPROM {
-    uint16_t toMax{}, toMin{},  //!< Max,Min of the Object Temperature
-        pwmCtrl{},              //!< Pulse Width Modulation control
-        taRange{},              //!< Range of the Ambient Temperature (H/L)
-        emissivity{},           //!< Emissivity
-        config{},               //!< Configuration
-        addr{},                 //!< I2C address(Using low byte)
-        id[4]{};                //!< Unique ID
+    uint16_t toMax{};       //!< Max of the Object Temperature
+    uint16_t toMin{};       //!< Min of the Object Temperature
+    uint16_t pwmCtrl{};     //!< Pulse Width Modulation control
+    uint16_t taRange{};     //!< Range of the Ambient Temperature (H/L)
+    uint16_t emissivity{};  //!< Emissivity
+    uint16_t config{};      //!< Configuration
+    uint16_t addr{};        //!< I2C address(Using low byte)
+    uint16_t id[4]{};       //!< Unique ID
 };
 
 /*!

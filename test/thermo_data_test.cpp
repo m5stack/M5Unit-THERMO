@@ -8,6 +8,7 @@
   Placed directly under test/, so they run on the host (test_native) and on the boards (test_<Unit>_<Board>)
 */
 #include <cmath>
+#include <limits>
 #include <random>
 
 #include <gtest/gtest.h>
@@ -195,6 +196,9 @@ TEST(Thermal2Data, Conversion)
     // Out of range values are clamped
     EXPECT_EQ(celsius_to_raw(-100.f), 0);
     EXPECT_EQ(celsius_to_raw(500.f), 65535);
+    EXPECT_EQ(celsius_to_raw(-1e9f), 0);
+    EXPECT_EQ(celsius_to_raw(1e9f), 65535);
+    EXPECT_EQ(celsius_to_raw(std::numeric_limits<float>::quiet_NaN()), 65535);
 }
 
 TEST(Thermal2Data, Data)

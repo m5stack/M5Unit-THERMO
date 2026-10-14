@@ -76,19 +76,20 @@ enum class Refresh : uint8_t {
 /*!
   @brief Celsius to raw temperature value
   @param f Celsius
-  @return Raw value ((f + 64) * 128, clamped to 0 - 65535)
+  @return Raw value ((f + 64) * 128, clamped to 0 - 65535; NaN gives 65535)
  */
-inline static uint16_t celsius_to_raw(const float f)
+inline uint16_t celsius_to_raw(const float f)
 {
-    int i = std::round((f + 64) * 128);
-    return static_cast<uint16_t>(std::max(std::min(i, static_cast<int>(std::numeric_limits<uint16_t>::max())), 0));
+    // Clamp in float before converting, so that NaN or a huge value does not overflow the integer conversion
+    const float v{std::fmax(std::fmin((f + 64) * 128, 65535.f), 0.f)};
+    return static_cast<uint16_t>(std::round(v));
 }
 /*!
   @brief Raw temperature value to celsius
   @param u16 Raw value
   @return Celsius
  */
-inline static float raw_to_celsius(const uint16_t u16)
+inline float raw_to_celsius(const uint16_t u16)
 {
     return u16 / 128.0f - 64;
 }

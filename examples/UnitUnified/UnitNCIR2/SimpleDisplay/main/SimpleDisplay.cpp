@@ -206,8 +206,7 @@ void setup()
     unit.writeAlarmTemperature(true, high_temp);
     unit.writeAlarmLED(true, 32, 8, 8);
     unit.writeAlarmBuzzer(true, 2000, 100, 204);
-
-    unit.writeConfig();
+    // Not saved to the unit's flash (writeConfig()), so the settings last until the unit is powered off
 
     //
     view = new View(min_temp, max_temp, low_temp, high_temp, lcd);

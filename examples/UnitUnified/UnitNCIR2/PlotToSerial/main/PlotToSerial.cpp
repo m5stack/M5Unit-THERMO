@@ -84,7 +84,7 @@ void setup()
     unit.writeLED(0, 0, 0);
     unit.writeAlarmBuzzer(false, 0, 5000, 0);
     unit.writeAlarmBuzzer(true, 0, 5000, 0);
-    unit.writeConfig();
+    // Not saved to the unit's flash (writeConfig()), so the settings last until the unit is powered off
 
     ring_buzzer(4000, 204);
 

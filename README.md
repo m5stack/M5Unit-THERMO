@@ -6,9 +6,9 @@ Library for THERMO using [M5UnitUnified](https://github.com/m5stack/M5UnitUnifie
 M5UnitUnified is a library for unified handling of various M5 units products.
 
 ### SKU:U028
-NCIR featured with built-in infrared MLX90614 sensor, It can be used to measure the surface temperature of a human body or other object.
+Unit NCIR is a single-point infrared temperature measurement sensor. It features a built-in infrared sensor MLX90614, capable of measuring the surface temperature of the human body or other objects.
 
-Unlike most temperature sensors, this sensor measures infrared light bouncing off of remote objects so it can sense temperature without having to touch them physically.
+Unlike most contact-type sensors, this sensor detects temperature by measuring infrared light emitted from distant objects, without physical contact.
 
 ### SKU:U150
 Unit NCIR2 is a non-contact infrared single-point temperature measurement unit equipped with a data processing MCU (STM32). It features a temperature measurement range of -70°C to 380°C, with functions such as high/low temperature alarms, RGB LED indicator, and a built-in buzzer.
@@ -18,13 +18,12 @@ Unit Thermal2 is a thermal imaging acquisition unit equipped with a data process
 
 
 ## Related Link
-See also examples using conventional methods here.
 
 - [Unit NCIR & Datasheet](https://docs.m5stack.com/en/unit/ncir)
 - [Unit NCIR2 & Datasheet](https://docs.m5stack.com/en/unit/NCIR2)
 - [Unit Thermal2 & Datasheet](https://docs.m5stack.com/en/unit/Thermal2)
 
-### Required Libraries:
+## Required Libraries
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
@@ -66,7 +65,7 @@ idf.py set-target esp32s3               # or esp32 / esp32c5 / esp32c6 / esp32h2
 idf.py build flash monitor
 ```
 
-### Doxygen document
+## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-THERMO/)
 
 If you want to generate documents on your local machine, execute the following command
@@ -78,9 +77,8 @@ bash docs/doxy.sh
 It will output it under docs/html  
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
-#### Required
+### Required
 - [Doxygen](https://www.doxygen.nl/)
-- [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
 
 

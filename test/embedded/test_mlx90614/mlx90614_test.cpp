@@ -578,7 +578,7 @@ protected:
         auto ptr = TestMLX90614BAA::get_instance();
         auto cfg = ptr->config();
         // Non-default values to verify that begin() applies config_t
-        // (Gain and emissivity are left as is because they are factory calibrated)
+        // (Gain and emissivity are left at the defaults because they are factory calibrated)
         cfg.start_periodic = true;
         cfg.iir            = mlx90614::IIR::Filter80;
         cfg.fir            = mlx90614::FIR::Filter512;
@@ -634,11 +634,11 @@ TEST_F(TestMLX90614BAA, ChangeAddress)
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
 
-    // Change to 0x52
-    EXPECT_TRUE(unit->changeI2CAddress(0x52));
+    // Change to 0x3A
+    EXPECT_TRUE(unit->changeI2CAddress(0x3A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x52);
-    EXPECT_EQ(unit->address(), 0x52);
+    EXPECT_EQ(addr, 0x3A);
+    EXPECT_EQ(unit->address(), 0x3A);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);

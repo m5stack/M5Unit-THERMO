@@ -2,7 +2,8 @@
 # Upstream: https://github.com/m5stack/M5Unit-THERMO
 #
 # The public headers pull in both M5UnitUnified and M5Utility,
-# because the periodic measurement data is held in m5::container::CircularBuffer.
+# because the periodic measurement data is held in m5::container::CircularBuffer
+# and the data headers (src/unit/*_data.hpp) use M5Utility types.
 # driver is only used by src/unit/unit_MLX90614.cpp (driver/gpio.h).
 file(GLOB_RECURSE SRCS "src/*.cpp")
 idf_component_register(

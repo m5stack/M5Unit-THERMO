@@ -20,6 +20,13 @@ using namespace m5::unit::thermal2::command;
 
 namespace {
 constexpr uint16_t DEVICE_ID{0x9064};
+// Writing a bit back to BUTTON_STATUS_REG clears it
+constexpr uint8_t CLEAR_BUTTON_FLAGS{m5::unit::thermal2::button_was_pressed | m5::unit::thermal2::button_was_released |
+                                     m5::unit::thermal2::button_was_clicked | m5::unit::thermal2::button_was_hold};
+// If the host was reset in the middle of a read, the unit returns the rest of that data first
+// and recovers after about 0.5 s, so the detection is retried for up to about 1 s
+constexpr uint_fast8_t DETECT_RETRY{10};
+constexpr uint32_t DETECT_RETRY_INTERVAL_MS{100};
 
 // read_data() reads the 16 bytes of temp[] and the 768 bytes of raw[] in one go
 using ThermalData = m5::unit::thermal2::Data;
@@ -81,18 +88,32 @@ bool UnitThermal2::begin()
         }
     }
 
-    // Detect
+    // Detect (see DETECT_RETRY)
     uint16_t id{};
     uint16_t ver{};
-    if (!read_register16BE(DEVICE_ID_REG, id) || !readFirmwareVersion(ver) || (id != DEVICE_ID) || ver == 0) {
+    bool detected{};
+    for (uint_fast8_t retry = 0; retry < DETECT_RETRY; ++retry) {
+        id = ver = 0;
+        if (read_register16BE(DEVICE_ID_REG, id) && readFirmwareVersion(ver) && id == DEVICE_ID && ver != 0) {
+            detected = true;
+            break;
+        }
+        M5_LIB_LOGW("Detect retry %u (%04X,%04X)", retry, id, ver);
+        if (retry + 1 < DETECT_RETRY) {
+            m5::utility::delay(DETECT_RETRY_INTERVAL_MS);
+        }
+    }
+    if (!detected) {
         M5_LIB_LOGE("Cannot detect %s %04X,%04X", deviceName(), id, ver);
         return false;
     }
 
     _button_interval = _cfg.button_interval;
 
-    return writeRegister8(BUTTON_STATUS_REG, 1) && writeFunctionControl(_cfg.function_control) && writeBuzzer(0, 0) &&
-           writeLED(0, 0, 0) && writeTemperatureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
+    // Clear the latched button flags (was pressed / released / clicked / hold) left from before begin
+    return writeRegister8(BUTTON_STATUS_REG, CLEAR_BUTTON_FLAGS) && writeFunctionControl(_cfg.function_control) &&
+           writeBuzzer(0, 0) && writeLED(0, 0, 0) &&
+           writeTemperatureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
            (_cfg.start_periodic ? startPeriodicMeasurement(_cfg.rate) : true);
 }
 

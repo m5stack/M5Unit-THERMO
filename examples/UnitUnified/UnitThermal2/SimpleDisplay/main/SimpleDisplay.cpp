@@ -272,7 +272,7 @@ void loop()
     }
 
     // Button (toggle  periodic <-> single)
-    if (unit.wasPressed()) {
+    if (unit.wasClicked()) {
         static bool single{};
         single = !single;
 

@@ -6,13 +6,14 @@
 /*
   Simple display example using M5UnitUnified for UnitThermal2
 */
+#include <algorithm>
+#include <cmath>
+
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
 #include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
-#include <algorithm>
-#include <cmath>
 
 using namespace m5::unit::thermal2;
 

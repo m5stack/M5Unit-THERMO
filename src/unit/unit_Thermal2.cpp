@@ -128,6 +128,14 @@ void UnitThermal2::update(const bool force)
             Data d{};
             uint8_t ds[2]{};
             _updated = read_data_status(ds) && ds[0] && read_data(d);
+            // Zero median and average (-64 C, out of the -40 to 300 C range) is not a measurement. The unit returns
+            // zeros for a read past the end of its registers, which can follow a host reset during a read. Drop it and
+            // request the next frame (best effort)
+            if (_updated && d.median_temperature == 0 && d.average_temperature == 0) {
+                M5_LIB_LOGW("Dropped an all zero frame");
+                request_data();
+                _updated = false;
+            }
             if (_updated) {
                 _latest   = m5::utility::millis();
                 d.subpage = ds[1];

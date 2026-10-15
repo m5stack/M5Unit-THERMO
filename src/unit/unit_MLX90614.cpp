@@ -68,6 +68,31 @@ constexpr uint32_t interval_tableA[8][4] = {
     {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
 };
 
+// The ESP-IDF drivers keep the controller attached to SDA/SCL across end(), so the pins are detached from it
+// (releasePins) for the GPIO manipulation. The other backends hand the pins back on end() and take them again on
+// begin()
+bool uses_pin_release(const m5::unit::AdapterI2C& ad)
+{
+#if defined(ESP_PLATFORM) && __has_include(<driver/i2c_master.h>)
+    return ad.implType() == m5::unit::AdapterI2C::ImplType::ESPIDFMasterBus;
+#elif defined(ESP_PLATFORM)
+    return ad.implType() == m5::unit::AdapterI2C::ImplType::ESPIDFLegacyBus;
+#else
+    (void)ad;
+    return false;
+#endif
+}
+
+bool release_bus(m5::unit::AdapterI2C& ad)
+{
+    return uses_pin_release(ad) ? ad.releasePins() : ad.end();
+}
+
+bool restore_bus(m5::unit::AdapterI2C& ad)
+{
+    return uses_pin_release(ad) ? ad.restorePins() : ad.begin();
+}
+
 }  // namespace
 
 namespace m5 {
@@ -502,11 +527,17 @@ bool UnitMLX90614::sleep()
         return false;
     }
 
+    if (_bus_released) {
+        M5_LIB_LOGE("Already sleeping");
+        return false;
+    }
+
     // Slave W, reg, PEC
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
     buf[2] = crc8.update(buf, 2);
-    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ad->end() /* Keep peripheral settings */) {
+    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && release_bus(*ad)) {
+        _bus_released = true;
         /*
           datasheet says:
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
@@ -533,7 +564,19 @@ bool UnitMLX90614::wakeup()
         M5_LIB_LOGE("SCL or SDA pin cannot be detected %d,%d", scl, sda);
         return false;
     }
-    ad->end();  // Release I2C bus before GPIO manipulation (safe to call even if not begun)
+    // Release I2C bus before GPIO manipulation (already released if sleep() holds SCL low)
+    if (!_bus_released) {
+        // Via a hub (PaHub etc.), route the parent channels to this unit first.
+        // The hub is an analog switch, so the GPIO wakeup request passes through it
+        if (!selectChannel(channel())) {
+            M5_LIB_LOGE("Failed to select the channel");
+            return false;
+        }
+        if (!release_bus(*ad)) {
+            M5_LIB_LOGE("Failed to release the bus");
+            return false;
+        }
+    }
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
     // GPIO_MODE_INPUT_OUTPUT_OD is required (not OUTPUT_OD alone): the input buffer
@@ -555,9 +598,11 @@ bool UnitMLX90614::wakeup()
     gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT_OUTPUT_OD);
     gpio_set_level((gpio_num_t)sda, 1);
 
-    if (!ad->begin()) {  // restart Wire (no-op for BusImpl)
+    if (!restore_bus(*ad)) {  // restart Wire (no-op for BusImpl) or reattach the pins to the ESP-IDF driver
+        M5_LIB_LOGE("Failed to restore the bus");
         return false;
     }
+    _bus_released = false;
     // Verify device is responsive after wakeup (retry for SoftwareI2C NO_ACK)
     uint16_t dummy{};
     for (uint_fast8_t retry = 0; retry < 3; ++retry) {
@@ -583,6 +628,10 @@ bool UnitMLX90614::read_eeprom(mlx90614::EEPROM& e)
 
 bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool stopbit)
 {
+    // The bus is released while sleeping (Arduino Wire would block forever on its lock after end())
+    if (_bus_released) {
+        return false;
+    }
     // Slave W, reg, Slave R (for CRC), Low, High, PEC( Packet error code)
     uint8_t rbuf[6]{(uint8_t)(address() << 1), reg, (uint8_t)((address() << 1) | 0x01)};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
@@ -603,6 +652,10 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
 
 bool UnitMLX90614::write_register16(const uint8_t reg, const uint16_t val)
 {
+    // The bus is released while sleeping (see read_register16)
+    if (_bus_released) {
+        return false;
+    }
     // Slave W, reg, Low, High, PEC
     uint8_t buf[5]{
         (uint8_t)(address() << 1),

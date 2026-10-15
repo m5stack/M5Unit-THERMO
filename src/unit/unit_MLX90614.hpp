@@ -458,14 +458,19 @@ public:
     /*!
       @brief Sleep
       @return True if successful
-      @warning Temporarily releases the I2C bus via end(), which affects all devices sharing the same bus
+      @warning Releases the I2C bus (releasePins() when the unit is added through the ESP-IDF I2C bus adapter,
+      end() otherwise) and holds SCL low until wakeup(). Via a hub, SCL of the root bus is held low
+      @warning Until wakeup(), the functions of this unit that access the device fail (periodic measurement yields
+      no data), and no other unit on the same root bus, including other hub channels, may be accessed
+      (also through UnitUnified::update()). With Arduino Wire, any access to the released bus blocks forever
      */
     bool sleep();
     /*!
       @brief Wakeup
       @return True if successful
-      @warning Temporarily releases the I2C bus via end() for GPIO manipulation (SDA low >33ms),
-      then reinitializes via begin(). All devices sharing the same bus are affected during this period (~600ms)
+      @warning Releases the I2C bus unless sleep() has already released it, drives SDA low >33ms with GPIO,
+      then reinitializes the bus (begin(), or restorePins() for the ESP-IDF I2C bus adapter).
+      All devices sharing the same bus are affected during this period (~600ms)
      */
     bool wakeup();
     /*!
@@ -508,6 +513,7 @@ private:
     std::unique_ptr<m5::container::CircularBuffer<mlx90614::Data>> _data{};
     mlx90614::EEPROM _eeprom{};
     config_t _cfg{};
+    bool _bus_released{};  // sleep() left the bus released (SCL held low)
 };
 
 /*!

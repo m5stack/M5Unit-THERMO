@@ -79,6 +79,19 @@ void dump(const Data& d)
     }
 }
 
+void draw_values(const Data& d)
+{
+    lcd.startWrite();
+    lcd.fillRect(8, 8, 8 * 10, 16 * 3, TFT_BLACK);
+    lcd.setCursor(8, 8 + 16 * 0);
+    lcd.printf("Avg:%.2f", d.averageTemperature());
+    lcd.setCursor(8, 8 + 16 * 1);
+    lcd.printf("Hi:%.2f", d.highestTemperature());
+    lcd.setCursor(8, 8 + 16 * 2);
+    lcd.printf("Lo:%.2f", d.lowestTemperature());
+    lcd.endWrite();
+}
+
 }  // namespace
 
 void setup()
@@ -106,7 +119,9 @@ void setup()
     unit.writeBuzzerControl(false);
     unit.writeLED(2, 2, 10);
 
+    lcd.setFont(&fonts::AsciiFont8x16);
     lcd.fillScreen(TFT_DARKGREEN);
+    lcd.fillRect(8, 8, 8 * 10, 16 * 3, TFT_BLACK);
 }
 
 void loop()
@@ -117,6 +132,7 @@ void loop()
     // Periodic
     if (unit.updated()) {
         dump(unit.oldest());
+        draw_values(unit.oldest());
     }
 
     // Button on UnitThermal2 (toggle  periodic <-> single)
@@ -136,6 +152,7 @@ void loop()
                 unit.writeLED(2, 10, 2);
                 dump(page0);
                 dump(page1);
+                draw_values(page1);
             }
         } else {
             unit.writeLED(2, 2, 10);

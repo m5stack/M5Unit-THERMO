@@ -58,6 +58,17 @@ uint32_t HSV_to_RGB(const float h, const float s, const float v)
            static_cast<uint8_t>((b + m) * 255);
 }
 
+void draw_values(const float temp, const float chip)
+{
+    lcd.startWrite();
+    lcd.fillRect(8, 8, 8 * 10, 16 * 2, TFT_BLACK);
+    lcd.setCursor(8, 8 + 16 * 0);
+    lcd.printf("T:%.2f", temp);
+    lcd.setCursor(8, 8 + 16 * 1);
+    lcd.printf("C:%.2f", chip);
+    lcd.endWrite();
+}
+
 }  // namespace
 
 void setup()
@@ -88,12 +99,14 @@ void setup()
 
     ring_buzzer(4000, 204);
 
+    lcd.setFont(&fonts::AsciiFont8x16);
     lcd.fillScreen(TFT_DARKGREEN);
+    lcd.fillRect(8, 8, 8 * 10, 16 * 2, TFT_BLACK);
 }
 
 void loop()
 {
-    static float ptemp{}, temp{};
+    static float ptemp{}, temp{}, chip{};
 
     M5.update();
     Units.update();
@@ -103,7 +116,9 @@ void loop()
         temp = unit.temperature();
         Data ctemp{};
         unit.readChipTemperature(ctemp);
-        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, ctemp.temperature());
+        chip = ctemp.temperature();
+        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, chip);
+        draw_values(temp, chip);
     }
 
     // Button
@@ -129,6 +144,7 @@ void loop()
             if (unit.measureSingleshot(d)) {
                 temp = d.temperature();
                 M5.Log.printf("Single:%.2f\n", temp);
+                draw_values(temp, chip);
             }
         } else {
             ring_buzzer(2000, 204);

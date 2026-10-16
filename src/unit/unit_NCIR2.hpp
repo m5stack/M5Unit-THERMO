@@ -43,7 +43,7 @@ public:
         : Component(addr), _data{new m5::container::CircularBuffer<ncir2::Data>(1)}
     {
         auto ccfg  = component_config();
-        ccfg.clock = 100 * 1000U;
+        ccfg.clock = 400 * 1000U;
         component_config(ccfg);
     }
     virtual ~UnitNCIR2()

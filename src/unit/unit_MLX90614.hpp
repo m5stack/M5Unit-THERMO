@@ -52,6 +52,7 @@ public:
     explicit UnitMLX90614(const uint8_t addr = DEFAULT_ADDRESS)
         : Component(addr), _data{new m5::container::CircularBuffer<mlx90614::Data>(1)}
     {
+        // SMBus: 10 kHz to 100 kHz (MLX90614 datasheet 8.4.7 Timing specification)
         auto ccfg  = component_config();
         ccfg.clock = 100 * 1000U;
         component_config(ccfg);

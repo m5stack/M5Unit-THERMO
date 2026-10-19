@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.3.1 git rev:c2bfb11</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.4.0 git rev:7cce598</span>
    </div>
   </td>
  </tr>
@@ -115,7 +115,7 @@ Inheritance diagram for m5::unit::UnitMLX90614:</div>
  <div class="center">
   <img src="classm5_1_1unit_1_1_unit_m_l_x90614.png" usemap="#m5::unit::UnitMLX90614_map" alt=""/>
   <map id="m5::unit::UnitMLX90614_map" name="m5::unit::UnitMLX90614_map">
-<area href="classm5_1_1unit_1_1_unit_m_l_x90614_b_a_a.html" title="MLX90614BAA dual IR sensor unit (NCIR, SKU:U028)" alt="m5::unit::UnitMLX90614BAA" shape="rect" coords="195,112,576,136"/>
+<area href="classm5_1_1unit_1_1_unit_m_l_x90614_b_a_a.html" title="MLX90614 single zone unit (NCIR, SKU:U028)" alt="m5::unit::UnitMLX90614BAA" shape="rect" coords="195,112,576,136"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -156,7 +156,7 @@ const <a class="el" href="structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html">mlx
 <tr class="separator:a35cb652afdd0414379a19e847c080b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae156c3a561e214c98e4dd798257cb139" id="r_ae156c3a561e214c98e4dd798257cb139"><td class="memItemLeft" align="right" valign="top"><a id="ae156c3a561e214c98e4dd798257cb139" name="ae156c3a561e214c98e4dd798257cb139"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a class="el" href="structm5_1_1unit_1_1_unit_m_l_x90614_1_1config__t.html">config_t</a> &amp;cfg)</td></tr>
-<tr class="memdesc:ae156c3a561e214c98e4dd798257cb139"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the configuration. <br /></td></tr>
+<tr class="memdesc:ae156c3a561e214c98e4dd798257cb139"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the configuration. <br /></td></tr>
 <tr class="separator:ae156c3a561e214c98e4dd798257cb139"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Measurement data by periodic</div></td></tr>
 <tr class="memitem:a1689a5fced9250c241138847d8d7ff85" id="r_a1689a5fced9250c241138847d8d7ff85"><td class="memItemLeft" align="right" valign="top"><a id="a1689a5fced9250c241138847d8d7ff85" name="a1689a5fced9250c241138847d8d7ff85"></a>
@@ -208,12 +208,11 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>objectFahrenheit2</b
 <tr class="memdesc:ac845832b08a103cfa6288bff0f66f895"><td class="mdescLeft">&#160;</td><td class="mdescRight">Oldest object 2 temperature (Fahrenheit) <br /></td></tr>
 <tr class="separator:ac845832b08a103cfa6288bff0f66f895"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Periodic measurement</div></td></tr>
-<tr class="memitem:a3565dd00566d3498d16d0d0c68f09e15" id="r_a3565dd00566d3498d16d0d0c68f09e15"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3565dd00566d3498d16d0d0c68f09e15">startPeriodicMeasurement</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
+<tr class="memitem:a3565dd00566d3498d16d0d0c68f09e15" id="r_a3565dd00566d3498d16d0d0c68f09e15"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3565dd00566d3498d16d0d0c68f09e15">startPeriodicMeasurement</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
 <tr class="memdesc:a3565dd00566d3498d16d0d0c68f09e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement.  <br /></td></tr>
 <tr class="separator:a3565dd00566d3498d16d0d0c68f09e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14e12c43f568ca8bb3429b6ac33c822b" id="r_a14e12c43f568ca8bb3429b6ac33c822b"><td class="memItemLeft" align="right" valign="top"><a id="a14e12c43f568ca8bb3429b6ac33c822b" name="a14e12c43f568ca8bb3429b6ac33c822b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurement</b> ()</td></tr>
-<tr class="memdesc:a14e12c43f568ca8bb3429b6ac33c822b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings. <br /></td></tr>
+<tr class="memitem:a14e12c43f568ca8bb3429b6ac33c822b" id="r_a14e12c43f568ca8bb3429b6ac33c822b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a14e12c43f568ca8bb3429b6ac33c822b">startPeriodicMeasurement</a> ()</td></tr>
+<tr class="memdesc:a14e12c43f568ca8bb3429b6ac33c822b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings.  <br /></td></tr>
 <tr class="separator:a14e12c43f568ca8bb3429b6ac33c822b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a248d85c83af8f35825c5e28c20793fb8" id="r_a248d85c83af8f35825c5e28c20793fb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a248d85c83af8f35825c5e28c20793fb8">stopPeriodicMeasurement</a> ()</td></tr>
 <tr class="memdesc:a248d85c83af8f35825c5e28c20793fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop periodic measurement.  <br /></td></tr>
@@ -230,34 +229,34 @@ When apply is true, the I2C bus is temporarily released and reinitializes (see <
 <tr class="memitem:a03f66756e4f682182d128d94de6d6d9c" id="r_a03f66756e4f682182d128d94de6d6d9c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03f66756e4f682182d128d94de6d6d9c">writeConfig</a> (const uint16_t v, const bool apply=true)</td></tr>
 <tr class="memdesc:a03f66756e4f682182d128d94de6d6d9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the configuration.  <br /></td></tr>
 <tr class="separator:a03f66756e4f682182d128d94de6d6d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a2e5a6297767bf12563418e14e7892d" id="r_a6a2e5a6297767bf12563418e14e7892d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a2e5a6297767bf12563418e14e7892d">readOutput</a> (<a class="el" href="unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> &amp;o)</td></tr>
+<tr class="memitem:a6a2e5a6297767bf12563418e14e7892d" id="r_a6a2e5a6297767bf12563418e14e7892d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a2e5a6297767bf12563418e14e7892d">readOutput</a> (<a class="el" href="unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> &amp;o)</td></tr>
 <tr class="memdesc:a6a2e5a6297767bf12563418e14e7892d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the Output.  <br /></td></tr>
 <tr class="separator:a6a2e5a6297767bf12563418e14e7892d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9155c19225d10535bac20e3f71813bb2" id="r_a9155c19225d10535bac20e3f71813bb2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9155c19225d10535bac20e3f71813bb2">writeOutput</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> o, const bool apply=true)</td></tr>
+<tr class="memitem:a9155c19225d10535bac20e3f71813bb2" id="r_a9155c19225d10535bac20e3f71813bb2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9155c19225d10535bac20e3f71813bb2">writeOutput</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> o, const bool apply=true)</td></tr>
 <tr class="memdesc:a9155c19225d10535bac20e3f71813bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the Output.  <br /></td></tr>
 <tr class="separator:a9155c19225d10535bac20e3f71813bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9964878b50b166c850ff5071cc2c77d1" id="r_a9964878b50b166c850ff5071cc2c77d1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9964878b50b166c850ff5071cc2c77d1">readIIR</a> (<a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> &amp;iir)</td></tr>
+<tr class="memitem:a9964878b50b166c850ff5071cc2c77d1" id="r_a9964878b50b166c850ff5071cc2c77d1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9964878b50b166c850ff5071cc2c77d1">readIIR</a> (<a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> &amp;iir)</td></tr>
 <tr class="memdesc:a9964878b50b166c850ff5071cc2c77d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the IIR.  <br /></td></tr>
 <tr class="separator:a9964878b50b166c850ff5071cc2c77d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af66ea2abdace4236239c0d5eca2751a3" id="r_af66ea2abdace4236239c0d5eca2751a3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af66ea2abdace4236239c0d5eca2751a3">writeIIR</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const bool apply=true)</td></tr>
+<tr class="memitem:af66ea2abdace4236239c0d5eca2751a3" id="r_af66ea2abdace4236239c0d5eca2751a3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af66ea2abdace4236239c0d5eca2751a3">writeIIR</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const bool apply=true)</td></tr>
 <tr class="memdesc:af66ea2abdace4236239c0d5eca2751a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the IIR.  <br /></td></tr>
 <tr class="separator:af66ea2abdace4236239c0d5eca2751a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af94a64fb6b183c85489c36cf2eba15a0" id="r_af94a64fb6b183c85489c36cf2eba15a0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af94a64fb6b183c85489c36cf2eba15a0">readFIR</a> (<a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> &amp;fir)</td></tr>
+<tr class="memitem:af94a64fb6b183c85489c36cf2eba15a0" id="r_af94a64fb6b183c85489c36cf2eba15a0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af94a64fb6b183c85489c36cf2eba15a0">readFIR</a> (<a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> &amp;fir)</td></tr>
 <tr class="memdesc:af94a64fb6b183c85489c36cf2eba15a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the FIR.  <br /></td></tr>
 <tr class="separator:af94a64fb6b183c85489c36cf2eba15a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a722cad952fe5a7696ae434bc09151a07" id="r_a722cad952fe5a7696ae434bc09151a07"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a722cad952fe5a7696ae434bc09151a07">writeFIR</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const bool apply=true)</td></tr>
+<tr class="memitem:a722cad952fe5a7696ae434bc09151a07" id="r_a722cad952fe5a7696ae434bc09151a07"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a722cad952fe5a7696ae434bc09151a07">writeFIR</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const bool apply=true)</td></tr>
 <tr class="memdesc:a722cad952fe5a7696ae434bc09151a07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the FIR.  <br /></td></tr>
 <tr class="separator:a722cad952fe5a7696ae434bc09151a07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bdc2446fad7a5432df52888dbe38b5a" id="r_a4bdc2446fad7a5432df52888dbe38b5a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4bdc2446fad7a5432df52888dbe38b5a">readGain</a> (<a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> &amp;gain)</td></tr>
+<tr class="memitem:a4bdc2446fad7a5432df52888dbe38b5a" id="r_a4bdc2446fad7a5432df52888dbe38b5a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4bdc2446fad7a5432df52888dbe38b5a">readGain</a> (<a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> &amp;gain)</td></tr>
 <tr class="memdesc:a4bdc2446fad7a5432df52888dbe38b5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the Gain.  <br /></td></tr>
 <tr class="separator:a4bdc2446fad7a5432df52888dbe38b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cb5c27972cddfaffeb8d0ea85410d10" id="r_a7cb5c27972cddfaffeb8d0ea85410d10"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7cb5c27972cddfaffeb8d0ea85410d10">writeGain</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const bool apply=true)</td></tr>
+<tr class="memitem:a7cb5c27972cddfaffeb8d0ea85410d10" id="r_a7cb5c27972cddfaffeb8d0ea85410d10"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7cb5c27972cddfaffeb8d0ea85410d10">writeGain</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const bool apply=true)</td></tr>
 <tr class="memdesc:a7cb5c27972cddfaffeb8d0ea85410d10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the Gain.  <br /></td></tr>
 <tr class="separator:a7cb5c27972cddfaffeb8d0ea85410d10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e" id="r_a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e">readIRSensor</a> (<a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> &amp;irs)</td></tr>
+<tr class="memitem:a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e" id="r_a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e">readIRSensor</a> (<a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> &amp;irs)</td></tr>
 <tr class="memdesc:a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the IRSensor mode.  <br /></td></tr>
 <tr class="separator:a8c0ca6d1f5ce9c3bd73fd33c4e5bda7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6af222c4bf7495504c4a7419d8e3987" id="r_aa6af222c4bf7495504c4a7419d8e3987"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6af222c4bf7495504c4a7419d8e3987">writeIRSensor</a> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs, const bool apply=true)</td></tr>
+<tr class="memitem:aa6af222c4bf7495504c4a7419d8e3987" id="r_aa6af222c4bf7495504c4a7419d8e3987"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6af222c4bf7495504c4a7419d8e3987">writeIRSensor</a> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs, const bool apply=true)</td></tr>
 <tr class="memdesc:aa6af222c4bf7495504c4a7419d8e3987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the IRSensor mode.  <br /></td></tr>
 <tr class="separator:aa6af222c4bf7495504c4a7419d8e3987"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2923572311a4a8cda92f5c6e7dbd0de0" id="r_a2923572311a4a8cda92f5c6e7dbd0de0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2923572311a4a8cda92f5c6e7dbd0de0">readPositiveKs</a> (bool &amp;pos)</td></tr>
@@ -266,11 +265,15 @@ When apply is true, the I2C bus is temporarily released and reinitializes (see <
 <tr class="memitem:afd34ee04b8d70c27cfd3edbb062dcbb3" id="r_afd34ee04b8d70c27cfd3edbb062dcbb3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd34ee04b8d70c27cfd3edbb062dcbb3">writePositiveKs</a> (const bool pos, const bool apply=true)</td></tr>
 <tr class="memdesc:afd34ee04b8d70c27cfd3edbb062dcbb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the sign of Ks (Config Register1 bit7)  <br /></td></tr>
 <tr class="separator:afd34ee04b8d70c27cfd3edbb062dcbb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a913c07108a07f8d8e73b8018228324dd" id="r_a913c07108a07f8d8e73b8018228324dd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a913c07108a07f8d8e73b8018228324dd">readPositiveKt2</a> (bool &amp;pos)</td></tr>
+<tr class="memdesc:a913c07108a07f8d8e73b8018228324dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the sign of Kt2 (Config Register1 bit14)  <br /></td></tr>
+<tr class="separator:a913c07108a07f8d8e73b8018228324dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a643cc73451c4e1fed98c28f5bc563eae" id="r_a643cc73451c4e1fed98c28f5bc563eae"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a643cc73451c4e1fed98c28f5bc563eae">writePositiveKt2</a> (const bool pos, const bool apply=true)</td></tr>
+<tr class="memdesc:a643cc73451c4e1fed98c28f5bc563eae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the sign of Kt2 (Config Register1 bit14)  <br /></td></tr>
+<tr class="separator:a643cc73451c4e1fed98c28f5bc563eae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf789a956664d5eeae40083606fb7d34" id="r_abf789a956664d5eeae40083606fb7d34"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf789a956664d5eeae40083606fb7d34">readPositiveKf2</a> (bool &amp;pos)</td></tr>
-<tr class="memdesc:abf789a956664d5eeae40083606fb7d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the sign of Kt2 (Config Register1 bit14)  <br /></td></tr>
 <tr class="separator:abf789a956664d5eeae40083606fb7d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac133d563d8b64d1bab3b95810ce4083e" id="r_ac133d563d8b64d1bab3b95810ce4083e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac133d563d8b64d1bab3b95810ce4083e">writePositiveKf2</a> (const bool pos, const bool apply=true)</td></tr>
-<tr class="memdesc:ac133d563d8b64d1bab3b95810ce4083e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the sign of Kt2 (Config Register1 bit14)  <br /></td></tr>
 <tr class="separator:ac133d563d8b64d1bab3b95810ce4083e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Settings(Temperature range)</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><dl class="section note"><dt>Note</dt><dd>If apply is false, a POR or call <a class="el" href="#a577500c087ff95910a566bed44207003" title="Apply EEPROM settings.">applySettings()</a> is required to enable the setting </dd></dl>
@@ -322,8 +325,6 @@ When apply is true, the I2C bus is temporarily released and reinitializes (see <
 <tr class="memdesc:ab00389107c3d3c789376038a18a69f9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the emissivity.  <br /></td></tr>
 <tr class="separator:ab00389107c3d3c789376038a18a69f9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">I2C Address</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="section warning"><dt>Warning</dt><dd>Handling warning </dd></dl>
-</div></td></tr>
 <tr class="memitem:aedccc4a804549aa8bc393afc25212a14" id="r_aedccc4a804549aa8bc393afc25212a14"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aedccc4a804549aa8bc393afc25212a14">changeI2CAddress</a> (const uint8_t i2c_address)</td></tr>
 <tr class="memdesc:aedccc4a804549aa8bc393afc25212a14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change device I2C address.  <br /></td></tr>
 <tr class="separator:aedccc4a804549aa8bc393afc25212a14"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -354,11 +355,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_ambient_minmax<
 <tr class="memitem:af70f51876d449c8beda4d8ccd5b67a3c" id="r_af70f51876d449c8beda4d8ccd5b67a3c"><td class="memItemLeft" align="right" valign="top"><a id="af70f51876d449c8beda4d8ccd5b67a3c" name="af70f51876d449c8beda4d8ccd5b67a3c"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_emissivity</b> (const uint16_t emiss, const bool apply=true)</td></tr>
 <tr class="separator:af70f51876d449c8beda4d8ccd5b67a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bb02660014a6021e1da6ed6ac2e326e" id="r_a9bb02660014a6021e1da6ed6ac2e326e"><td class="memItemLeft" align="right" valign="top"><a id="a9bb02660014a6021e1da6ed6ac2e326e" name="a9bb02660014a6021e1da6ed6ac2e326e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>read_measurement</b> (<a class="el" href="structm5_1_1unit_1_1mlx90614_1_1_data.html">mlx90614::Data</a> &amp;d, const uint16_t <a class="el" href="#a35cb652afdd0414379a19e847c080b01">config</a>)</td></tr>
-<tr class="separator:a9bb02660014a6021e1da6ed6ac2e326e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9e6a012ea560fafa1da93fe1d300aec" id="r_af9e6a012ea560fafa1da93fe1d300aec"><td class="memItemLeft" align="right" valign="top"><a id="af9e6a012ea560fafa1da93fe1d300aec" name="af9e6a012ea560fafa1da93fe1d300aec"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>read_measurement</b> (<a class="el" href="structm5_1_1unit_1_1mlx90614_1_1_data.html">mlx90614::Data</a> &amp;d)</td></tr>
+<tr class="separator:af9e6a012ea560fafa1da93fe1d300aec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc035210d7617ed321db837697a3810b" id="r_abc035210d7617ed321db837697a3810b"><td class="memItemLeft" align="right" valign="top"><a id="abc035210d7617ed321db837697a3810b" name="abc035210d7617ed321db837697a3810b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> gain, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> irs)</td></tr>
 <tr class="separator:abc035210d7617ed321db837697a3810b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add1886a426d84e2882c5171590986654" id="r_add1886a426d84e2882c5171590986654"><td class="memItemLeft" align="right" valign="top"><a id="add1886a426d84e2882c5171590986654" name="add1886a426d84e2882c5171590986654"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> ()</td></tr>
@@ -370,7 +371,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>stop_periodic_measure
 &#160;</td><td class="memItemRight" valign="bottom"><b>M5_UNIT_COMPONENT_PERIODIC_MEASUREMENT_ADAPTER_HPP_BUILDER</b> (<a class="el" href="classm5_1_1unit_1_1_unit_m_l_x90614.html">UnitMLX90614</a>, <a class="el" href="structm5_1_1unit_1_1mlx90614_1_1_data.html">mlx90614::Data</a>)</td></tr>
 <tr class="separator:ab81da3c21d26867d0bf445848f6691ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add4f4060269f397b6df7086d56d62629" id="r_add4f4060269f397b6df7086d56d62629"><td class="memItemLeft" align="right" valign="top"><a id="add4f4060269f397b6df7086d56d62629" name="add4f4060269f397b6df7086d56d62629"></a>
-virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_interval</b> (const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir)</td></tr>
+virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_interval</b> (const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> iir, const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> fir)</td></tr>
 <tr class="separator:add4f4060269f397b6df7086d56d62629"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab027a678b3fb032a7db45d61b08363f5" id="r_ab027a678b3fb032a7db45d61b08363f5"><td class="memItemLeft" align="right" valign="top"><a id="ab027a678b3fb032a7db45d61b08363f5" name="ab027a678b3fb032a7db45d61b08363f5"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sensors</b> () const</td></tr>
@@ -378,8 +379,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class of the <a class="el" href="classm5_1_1unit_1_1_unit_m_l_x90614.html" title="Base class of the UnitMLX90614 series.">UnitMLX90614</a> series. </p>
-<p>It can be used to measure the surface temperature of a human body or other object</p>
-<p>Currently only SMBus mode is supported. This has limited functionality and some settings are ignored </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo</a></b></dt><dd>In the future, PWM mode will be supported to allow various configurations </dd></dl>
+<p>It can be used to measure the surface temperature of a human body or other object. Only SMBus mode is supported, so the settings that only affect the PWM output (<a class="el" href="#a9155c19225d10535bac20e3f71813bb2" title="Write the Output.">writeOutput()</a>, <a class="el" href="#ac0a88f9819bdcdb252f729f8bf4339c6" title="Write the minimum and maximum temperatures of the measurement for the object.">writeObjectMinMax()</a>, <a class="el" href="#ad64d2ec570b420b3e4fb5eb13aa289e6" title="Write the minimum and maximum temperatures of the measurement for the ambient.">writeAmbientMinMax()</a> and the PWMCTRL register) do not change the SMBus readings </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo</a></b></dt><dd>In the future, PWM mode will be supported to allow various configurations </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a577500c087ff95910a566bed44207003" name="a577500c087ff95910a566bed44207003"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a577500c087ff95910a566bed44207003">&#9670;&#160;</a></span>applySettings()</h2>
@@ -587,7 +587,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readFIR </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fir</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fir</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -613,7 +613,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readGain </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>gain</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>gain</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -665,7 +665,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readIIR </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>iir</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>iir</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -691,7 +691,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readIRSensor </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>irs</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>irs</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -779,7 +779,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readOutput </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>o</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>o</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -801,6 +801,9 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::readPositiveKf2 </td>
@@ -809,17 +812,13 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-
-<p>Read the sign of Kt2 (Config Register1 bit14) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">pos</td><td>Positive if true </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>This is a factory calibration value. Altering it invalidates calibration. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated</a></b></dt><dd>Use readPositiveKt2 instead </dd></dl>
 
 </div>
 </div>
@@ -850,6 +849,33 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 
 </div>
 </div>
+<a id="a913c07108a07f8d8e73b8018228324dd" name="a913c07108a07f8d8e73b8018228324dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a913c07108a07f8d8e73b8018228324dd">&#9670;&#160;</a></span>readPositiveKt2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMLX90614::readPositiveKt2 </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;</td>          <td class="paramname"><span class="paramname"><em>pos</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read the sign of Kt2 (Config Register1 bit14) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">pos</td><td>Positive if true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a factory calibration value. Altering it invalidates calibration. </dd></dl>
+
+</div>
+</div>
 <a id="ab3135fdd3d68f3595544e76b578907c1" name="ab3135fdd3d68f3595544e76b578907c1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab3135fdd3d68f3595544e76b578907c1">&#9670;&#160;</a></span>sleep()</h2>
 
@@ -867,12 +893,14 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 
 <p>Sleep. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>Temporarily releases the I2C bus via end(), which affects all devices sharing the same bus </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Releases the I2C bus (releasePins() when the unit is added through the ESP-IDF I2C bus adapter, end() otherwise) and holds SCL low until <a class="el" href="#a62b13048473a663ebb844cc79b17ef32" title="Wakeup.">wakeup()</a>. Via a hub, SCL of the root bus is held low </dd>
+<dd>
+Until <a class="el" href="#a62b13048473a663ebb844cc79b17ef32" title="Wakeup.">wakeup()</a>, the functions of this unit that access the device fail (periodic measurement yields no data), and no other unit on the same root bus, including other hub channels, may be accessed (also through UnitUnified::update()). With Arduino Wire, any access to the released bus blocks forever </dd></dl>
 
 </div>
 </div>
-<a id="a3565dd00566d3498d16d0d0c68f09e15" name="a3565dd00566d3498d16d0d0c68f09e15"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3565dd00566d3498d16d0d0c68f09e15">&#9670;&#160;</a></span>startPeriodicMeasurement()</h2>
+<a id="a14e12c43f568ca8bb3429b6ac33c822b" name="a14e12c43f568ca8bb3429b6ac33c822b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14e12c43f568ca8bb3429b6ac33c822b">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -883,22 +911,50 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::startPeriodicMeasurement </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a></td>          <td class="paramname"><span class="paramname"><em>iir</em></span>, </td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start periodic measurement in the current settings. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
+<a id="a3565dd00566d3498d16d0d0c68f09e15" name="a3565dd00566d3498d16d0d0c68f09e15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3565dd00566d3498d16d0d0c68f09e15">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMLX90614::startPeriodicMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a></td>          <td class="paramname"><span class="paramname"><em>iir</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a></td>          <td class="paramname"><span class="paramname"><em>fir</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a></td>          <td class="paramname"><span class="paramname"><em>fir</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a></td>          <td class="paramname"><span class="paramname"><em>gain</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a></td>          <td class="paramname"><span class="paramname"><em>gain</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a></td>          <td class="paramname"><span class="paramname"><em>irs</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a></td>          <td class="paramname"><span class="paramname"><em>irs</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -967,7 +1023,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
 
 <p>Wakeup. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>Temporarily releases the I2C bus via end() for GPIO manipulation (SDA low &gt;33ms), then reinitializes via begin(). All devices sharing the same bus are affected during this period (~600ms) </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Releases the I2C bus unless <a class="el" href="#ab3135fdd3d68f3595544e76b578907c1" title="Sleep.">sleep()</a> has already released it, drives SDA low &gt;33ms with GPIO, then reinitializes the bus (begin(), or restorePins() for the ESP-IDF I2C bus adapter). All devices sharing the same bus are affected during this period (~600ms) </dd></dl>
 
 </div>
 </div>
@@ -1005,7 +1061,8 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_dual_sens
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Valid range between -38.2f and 124.8f </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Valid range between -38.2f and 125.0f </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>During periodic detection runs, an error is returned </dd></dl>
 
 </div>
 </div>
@@ -1053,6 +1110,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>During periodic detection runs, an error is returned </dd></dl>
 
 </div>
 </div>
@@ -1171,7 +1229,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writeFIR </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a></td>          <td class="paramname"><span class="paramname"><em>fir</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad2a638f294549b3a045046b315b9eccd">mlx90614::FIR</a></td>          <td class="paramname"><span class="paramname"><em>fir</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1203,7 +1261,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writeGain </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a></td>          <td class="paramname"><span class="paramname"><em>gain</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ad279b6e2590c843c925fade336453438">mlx90614::Gain</a></td>          <td class="paramname"><span class="paramname"><em>gain</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1237,7 +1295,7 @@ During periodic detection runs, an error is returned </dd></dl>
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writeIIR </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a></td>          <td class="paramname"><span class="paramname"><em>iir</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a65154499798ddceb295bf604725aa4ce">mlx90614::IIR</a></td>          <td class="paramname"><span class="paramname"><em>iir</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1269,7 +1327,7 @@ During periodic detection runs, an error is returned </dd></dl>
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writeIRSensor </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a></td>          <td class="paramname"><span class="paramname"><em>irs</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#a25b5a84ffc2e7a9876183a94be82adec">mlx90614::IRSensor</a></td>          <td class="paramname"><span class="paramname"><em>irs</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1329,6 +1387,7 @@ During periodic detection runs, an error is returned </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Valid range between -273.15f and 382.2f </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>During periodic detection runs, an error is returned </dd></dl>
 
 </div>
 </div>
@@ -1376,6 +1435,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>During periodic detection runs, an error is returned </dd></dl>
 
 </div>
 </div>
@@ -1388,7 +1448,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writeOutput </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a></td>          <td class="paramname"><span class="paramname"><em>o</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cb">mlx90614::Output</a></td>          <td class="paramname"><span class="paramname"><em>o</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1420,6 +1480,9 @@ During periodic detection runs, an error is returned </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool m5::unit::UnitMLX90614::writePositiveKf2 </td>
@@ -1432,20 +1495,13 @@ During periodic detection runs, an error is returned </dd></dl>
           <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>apply</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-
-<p>Write the sign of Kt2 (Config Register1 bit14) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">pos</td><td>Positive if true </td></tr>
-    <tr><td class="paramname">apply</td><td>Settings take effect immediately if true </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>This is a factory calibration value. Altering it invalidates calibration. </dd>
-<dd>
-During periodic detection runs, an error is returned </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000002">Deprecated</a></b></dt><dd>Use writePositiveKt2 instead </dd></dl>
 
 </div>
 </div>
@@ -1469,6 +1525,40 @@ During periodic detection runs, an error is returned </dd></dl>
 </div><div class="memdoc">
 
 <p>Write the sign of Ks (Config Register1 bit7) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pos</td><td>Positive if true </td></tr>
+    <tr><td class="paramname">apply</td><td>Settings take effect immediately if true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a factory calibration value. Altering it invalidates calibration. </dd>
+<dd>
+During periodic detection runs, an error is returned </dd></dl>
+
+</div>
+</div>
+<a id="a643cc73451c4e1fed98c28f5bc563eae" name="a643cc73451c4e1fed98c28f5bc563eae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a643cc73451c4e1fed98c28f5bc563eae">&#9670;&#160;</a></span>writePositiveKt2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMLX90614::writePositiveKt2 </td>
+          <td>(</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>pos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>apply</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Write the sign of Kt2 (Config Register1 bit14) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pos</td><td>Positive if true </td></tr>

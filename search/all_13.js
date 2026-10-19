@@ -28,7 +28,8 @@ var searchData=
   ['writeoutput_25',['writeOutput',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a9155c19225d10535bac20e3f71813bb2',1,'m5::unit::UnitMLX90614']]],
   ['writepositivekf2_26',['writePositiveKf2',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#ac133d563d8b64d1bab3b95810ce4083e',1,'m5::unit::UnitMLX90614']]],
   ['writepositiveks_27',['writePositiveKs',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#afd34ee04b8d70c27cfd3edbb062dcbb3',1,'m5::unit::UnitMLX90614']]],
-  ['writerefreshrate_28',['writeRefreshRate',['../classm5_1_1unit_1_1_unit_thermal2.html#a7b4ed1d53125d0accb1831d52436ef13',1,'m5::unit::UnitThermal2']]],
-  ['writetemeraturemonitorsize_29',['writeTemeratureMonitorSize',['../classm5_1_1unit_1_1_unit_thermal2.html#a3fde2f5e615aa8a2c68281a8f10473bb',1,'m5::unit::UnitThermal2']]],
-  ['writetemperaturemonitorsize_30',['writeTemperatureMonitorSize',['../classm5_1_1unit_1_1_unit_thermal2.html#a3857df741a8de951944385f04b4c9ea3',1,'m5::unit::UnitThermal2']]]
+  ['writepositivekt2_28',['writePositiveKt2',['../classm5_1_1unit_1_1_unit_m_l_x90614.html#a643cc73451c4e1fed98c28f5bc563eae',1,'m5::unit::UnitMLX90614']]],
+  ['writerefreshrate_29',['writeRefreshRate',['../classm5_1_1unit_1_1_unit_thermal2.html#a7b4ed1d53125d0accb1831d52436ef13',1,'m5::unit::UnitThermal2']]],
+  ['writetemeraturemonitorsize_30',['writeTemeratureMonitorSize',['../classm5_1_1unit_1_1_unit_thermal2.html#a3fde2f5e615aa8a2c68281a8f10473bb',1,'m5::unit::UnitThermal2']]],
+  ['writetemperaturemonitorsize_31',['writeTemperatureMonitorSize',['../classm5_1_1unit_1_1_unit_thermal2.html#a3857df741a8de951944385f04b4c9ea3',1,'m5::unit::UnitThermal2']]]
 ];

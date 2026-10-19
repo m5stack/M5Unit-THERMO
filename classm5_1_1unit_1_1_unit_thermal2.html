@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.3.1 git rev:c2bfb11</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.4.0 git rev:7cce598</span>
    </div>
   </td>
  </tr>
@@ -143,15 +143,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update</b> (c
 <tr class="separator:adbd9e3f01c7dfbd0fdbf296add8de09e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a611eb45ac9fe8a2657ca10b4d3bf58ba" id="r_a611eb45ac9fe8a2657ca10b4d3bf58ba"><td class="memItemLeft" align="right" valign="top"><a id="a611eb45ac9fe8a2657ca10b4d3bf58ba" name="a611eb45ac9fe8a2657ca10b4d3bf58ba"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a class="el" href="structm5_1_1unit_1_1_unit_thermal2_1_1config__t.html">config_t</a> &amp;cfg)</td></tr>
-<tr class="memdesc:a611eb45ac9fe8a2657ca10b4d3bf58ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the configuration. <br /></td></tr>
+<tr class="memdesc:a611eb45ac9fe8a2657ca10b4d3bf58ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the configuration. <br /></td></tr>
 <tr class="separator:a611eb45ac9fe8a2657ca10b4d3bf58ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Periodic measurement</div></td></tr>
-<tr class="memitem:a61d1e0ce05ff3b21a546d083a065c117" id="r_a61d1e0ce05ff3b21a546d083a065c117"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61d1e0ce05ff3b21a546d083a065c117">startPeriodicMeasurement</a> (const <a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
+<tr class="memitem:a61d1e0ce05ff3b21a546d083a065c117" id="r_a61d1e0ce05ff3b21a546d083a065c117"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61d1e0ce05ff3b21a546d083a065c117">startPeriodicMeasurement</a> (const <a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
 <tr class="memdesc:a61d1e0ce05ff3b21a546d083a065c117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement.  <br /></td></tr>
 <tr class="separator:a61d1e0ce05ff3b21a546d083a065c117"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5f015718308afb2139ce20813fa257b" id="r_ab5f015718308afb2139ce20813fa257b"><td class="memItemLeft" align="right" valign="top"><a id="ab5f015718308afb2139ce20813fa257b" name="ab5f015718308afb2139ce20813fa257b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurement</b> ()</td></tr>
-<tr class="memdesc:ab5f015718308afb2139ce20813fa257b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings. <br /></td></tr>
+<tr class="memitem:ab5f015718308afb2139ce20813fa257b" id="r_ab5f015718308afb2139ce20813fa257b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab5f015718308afb2139ce20813fa257b">startPeriodicMeasurement</a> ()</td></tr>
+<tr class="memdesc:ab5f015718308afb2139ce20813fa257b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings.  <br /></td></tr>
 <tr class="separator:ab5f015718308afb2139ce20813fa257b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ea2d1433a3ddba7cf403bcf473d8b5b" id="r_a8ea2d1433a3ddba7cf403bcf473d8b5b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ea2d1433a3ddba7cf403bcf473d8b5b">stopPeriodicMeasurement</a> ()</td></tr>
 <tr class="memdesc:a8ea2d1433a3ddba7cf403bcf473d8b5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop periodic measurement.  <br /></td></tr>
@@ -164,29 +163,25 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="memitem:aca933e9ef9a0ff44315d14e4a875fc60" id="r_aca933e9ef9a0ff44315d14e4a875fc60"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca933e9ef9a0ff44315d14e4a875fc60">readFunctionControl</a> (uint8_t &amp;value)</td></tr>
 <tr class="memdesc:aca933e9ef9a0ff44315d14e4a875fc60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the function control.  <br /></td></tr>
 <tr class="separator:aca933e9ef9a0ff44315d14e4a875fc60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae51157bcf8868a64767957f44d5ccda6" id="r_ae51157bcf8868a64767957f44d5ccda6"><td class="memItemLeft" align="right" valign="top"><a id="ae51157bcf8868a64767957f44d5ccda6" name="ae51157bcf8868a64767957f44d5ccda6"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>readBuzzerEnabled</b> (bool &amp;enabled)</td></tr>
-<tr class="memdesc:ae51157bcf8868a64767957f44d5ccda6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the buzzer enabled. <br /></td></tr>
+<tr class="memitem:ae51157bcf8868a64767957f44d5ccda6" id="r_ae51157bcf8868a64767957f44d5ccda6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae51157bcf8868a64767957f44d5ccda6">readBuzzerEnabled</a> (bool &amp;enabled)</td></tr>
+<tr class="memdesc:ae51157bcf8868a64767957f44d5ccda6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the buzzer enabled.  <br /></td></tr>
 <tr class="separator:ae51157bcf8868a64767957f44d5ccda6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a718296d5e372e11644ee86dbe5c3d609" id="r_a718296d5e372e11644ee86dbe5c3d609"><td class="memItemLeft" align="right" valign="top"><a id="a718296d5e372e11644ee86dbe5c3d609" name="a718296d5e372e11644ee86dbe5c3d609"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>readLEDEnabled</b> (bool &amp;enabled)</td></tr>
-<tr class="memdesc:a718296d5e372e11644ee86dbe5c3d609"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the LED enabled. <br /></td></tr>
+<tr class="memitem:a718296d5e372e11644ee86dbe5c3d609" id="r_a718296d5e372e11644ee86dbe5c3d609"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a718296d5e372e11644ee86dbe5c3d609">readLEDEnabled</a> (bool &amp;enabled)</td></tr>
+<tr class="memdesc:a718296d5e372e11644ee86dbe5c3d609"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the LED enabled.  <br /></td></tr>
 <tr class="separator:a718296d5e372e11644ee86dbe5c3d609"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acca5e264a3614a390c9f495929da9610" id="r_acca5e264a3614a390c9f495929da9610"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acca5e264a3614a390c9f495929da9610">writeFunctionControl</a> (const uint8_t value, const bool verify=true)</td></tr>
 <tr class="memdesc:acca5e264a3614a390c9f495929da9610"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the function control.  <br /></td></tr>
 <tr class="separator:acca5e264a3614a390c9f495929da9610"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73fa103f45b7921dda0ee6558de48739" id="r_a73fa103f45b7921dda0ee6558de48739"><td class="memItemLeft" align="right" valign="top"><a id="a73fa103f45b7921dda0ee6558de48739" name="a73fa103f45b7921dda0ee6558de48739"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeBuzzerEnabled</b> (const bool enabled)</td></tr>
-<tr class="memdesc:a73fa103f45b7921dda0ee6558de48739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the buzzer enable status. <br /></td></tr>
+<tr class="memitem:a73fa103f45b7921dda0ee6558de48739" id="r_a73fa103f45b7921dda0ee6558de48739"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73fa103f45b7921dda0ee6558de48739">writeBuzzerEnabled</a> (const bool enabled)</td></tr>
+<tr class="memdesc:a73fa103f45b7921dda0ee6558de48739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the buzzer enabled.  <br /></td></tr>
 <tr class="separator:a73fa103f45b7921dda0ee6558de48739"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa056ade319e8e7f0864fcbd062f98c32" id="r_aa056ade319e8e7f0864fcbd062f98c32"><td class="memItemLeft" align="right" valign="top"><a id="aa056ade319e8e7f0864fcbd062f98c32" name="aa056ade319e8e7f0864fcbd062f98c32"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeLEDEnabled</b> (const bool enabled)</td></tr>
-<tr class="memdesc:aa056ade319e8e7f0864fcbd062f98c32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the LED enable status. <br /></td></tr>
+<tr class="memitem:aa056ade319e8e7f0864fcbd062f98c32" id="r_aa056ade319e8e7f0864fcbd062f98c32"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa056ade319e8e7f0864fcbd062f98c32">writeLEDEnabled</a> (const bool enabled)</td></tr>
+<tr class="memdesc:aa056ade319e8e7f0864fcbd062f98c32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the LED enabled.  <br /></td></tr>
 <tr class="separator:aa056ade319e8e7f0864fcbd062f98c32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af82bd561fd1d34039f3f219f0f899af1" id="r_af82bd561fd1d34039f3f219f0f899af1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af82bd561fd1d34039f3f219f0f899af1">readRefreshRate</a> (<a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> &amp;rate)</td></tr>
+<tr class="memitem:af82bd561fd1d34039f3f219f0f899af1" id="r_af82bd561fd1d34039f3f219f0f899af1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af82bd561fd1d34039f3f219f0f899af1">readRefreshRate</a> (<a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> &amp;rate)</td></tr>
 <tr class="memdesc:af82bd561fd1d34039f3f219f0f899af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the refresh rate.  <br /></td></tr>
 <tr class="separator:af82bd561fd1d34039f3f219f0f899af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b4ed1d53125d0accb1831d52436ef13" id="r_a7b4ed1d53125d0accb1831d52436ef13"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b4ed1d53125d0accb1831d52436ef13">writeRefreshRate</a> (const <a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
+<tr class="memitem:a7b4ed1d53125d0accb1831d52436ef13" id="r_a7b4ed1d53125d0accb1831d52436ef13"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b4ed1d53125d0accb1831d52436ef13">writeRefreshRate</a> (const <a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
 <tr class="memdesc:a7b4ed1d53125d0accb1831d52436ef13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the refresh rate.  <br /></td></tr>
 <tr class="separator:a7b4ed1d53125d0accb1831d52436ef13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ab21cf3a35783523bfdbc631eb2a037" id="r_a2ab21cf3a35783523bfdbc631eb2a037"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ab21cf3a35783523bfdbc631eb2a037">readNoiseFilterLevel</a> (uint8_t &amp;level)</td></tr>
@@ -210,7 +205,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeLEDEnabled</b> (
 <tr class="memdesc:a9750b669f15a2455142a4ae3b179b546"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm control.  <br /></td></tr>
 <tr class="separator:a9750b669f15a2455142a4ae3b179b546"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76e381288ebcd53cea7350f739962124" id="r_a76e381288ebcd53cea7350f739962124"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a76e381288ebcd53cea7350f739962124">writeAlarmEnabled</a> (const uint8_t enabled_bits)</td></tr>
-<tr class="memdesc:a76e381288ebcd53cea7350f739962124"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm control.  <br /></td></tr>
+<tr class="memdesc:a76e381288ebcd53cea7350f739962124"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the alarm control.  <br /></td></tr>
 <tr class="separator:a76e381288ebcd53cea7350f739962124"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6aa24ae53ae3474ead8e9565c100c8b7" id="r_a6aa24ae53ae3474ead8e9565c100c8b7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aa24ae53ae3474ead8e9565c100c8b7">readAlarmTemperature</a> (const bool highlow, uint16_t &amp;raw)</td></tr>
 <tr class="memdesc:a6aa24ae53ae3474ead8e9565c100c8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the alarm temperature threshold.  <br /></td></tr>
@@ -293,8 +288,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>writeLEDEnabled</b> (
 <tr class="memdesc:ab8b3361cd486ee42a7124d3d55d9f926"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is button holding?  <br /></td></tr>
 <tr class="separator:ab8b3361cd486ee42a7124d3d55d9f926"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">I2C Address</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="section warning"><dt>Warning</dt><dd>Handling warning </dd></dl>
-</div></td></tr>
 <tr class="memitem:a08c5792c47d9c1279f6d4ded304feeb1" id="r_a08c5792c47d9c1279f6d4ded304feeb1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08c5792c47d9c1279f6d4ded304feeb1">changeI2CAddress</a> (const uint8_t i2c_address)</td></tr>
 <tr class="memdesc:a08c5792c47d9c1279f6d4ded304feeb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change device I2C address.  <br /></td></tr>
 <tr class="separator:a08c5792c47d9c1279f6d4ded304feeb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -310,6 +303,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>read_function_control
 <tr class="memitem:af369ba671d64204716f8a3894add7a40" id="r_af369ba671d64204716f8a3894add7a40"><td class="memItemLeft" align="right" valign="top"><a id="af369ba671d64204716f8a3894add7a40" name="af369ba671d64204716f8a3894add7a40"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_function_control_bit</b> (const uint8_t bit, const bool enabled)</td></tr>
 <tr class="separator:af369ba671d64204716f8a3894add7a40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fca67c6aadf4e3a10836fffba392abf" id="r_a2fca67c6aadf4e3a10836fffba392abf"><td class="memItemLeft" align="right" valign="top"><a id="a2fca67c6aadf4e3a10836fffba392abf" name="a2fca67c6aadf4e3a10836fffba392abf"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_function_control</b> (const uint8_t value, const bool verify)</td></tr>
+<tr class="separator:a2fca67c6aadf4e3a10836fffba392abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fb26ee40e371f2aa3e55affbcbf2e06" id="r_a8fb26ee40e371f2aa3e55affbcbf2e06"><td class="memItemLeft" align="right" valign="top"><a id="a8fb26ee40e371f2aa3e55affbcbf2e06" name="a8fb26ee40e371f2aa3e55affbcbf2e06"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>request_data</b> ()</td></tr>
 <tr class="separator:a8fb26ee40e371f2aa3e55affbcbf2e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,7 +316,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>read_data_status</b> 
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>read_data</b> (<a class="el" href="structm5_1_1unit_1_1thermal2_1_1_data.html">thermal2::Data</a> &amp;data)</td></tr>
 <tr class="separator:adc6137c7afdd018662962b9c51aaa64b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1598e68a7e96824d6b5189b6b6dffd8" id="r_aa1598e68a7e96824d6b5189b6b6dffd8"><td class="memItemLeft" align="right" valign="top"><a id="aa1598e68a7e96824d6b5189b6b6dffd8" name="aa1598e68a7e96824d6b5189b6b6dffd8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> (const <a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> (const <a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> rate)</td></tr>
 <tr class="separator:aa1598e68a7e96824d6b5189b6b6dffd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6dd8d10edf407bd0e73cc9250190b8e7" id="r_a6dd8d10edf407bd0e73cc9250190b8e7"><td class="memItemLeft" align="right" valign="top"><a id="a6dd8d10edf407bd0e73cc9250190b8e7" name="a6dd8d10edf407bd0e73cc9250190b8e7"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>start_periodic_measurement</b> ()</td></tr>
@@ -718,6 +714,40 @@ Blocked until end of measurement </dd></dl>
 
 </div>
 </div>
+<a id="ae51157bcf8868a64767957f44d5ccda6" name="ae51157bcf8868a64767957f44d5ccda6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae51157bcf8868a64767957f44d5ccda6">&#9670;&#160;</a></span>readBuzzerEnabled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitThermal2::readBuzzerEnabled </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read the buzzer enabled. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">enabled</td><td>True if enabled </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
 <a id="a8fca0ddfd516776bb0ba0b1f729fd95b" name="a8fca0ddfd516776bb0ba0b1f729fd95b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8fca0ddfd516776bb0ba0b1f729fd95b">&#9670;&#160;</a></span>readFirmwareVersion()</h2>
 
@@ -823,6 +853,40 @@ Blocked until end of measurement </dd></dl>
 
 </div>
 </div>
+<a id="a718296d5e372e11644ee86dbe5c3d609" name="a718296d5e372e11644ee86dbe5c3d609"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a718296d5e372e11644ee86dbe5c3d609">&#9670;&#160;</a></span>readLEDEnabled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitThermal2::readLEDEnabled </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read the LED enabled. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">enabled</td><td>True if enabled </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
 <a id="a2ab21cf3a35783523bfdbc631eb2a037" name="a2ab21cf3a35783523bfdbc631eb2a037"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2ab21cf3a35783523bfdbc631eb2a037">&#9670;&#160;</a></span>readNoiseFilterLevel()</h2>
 
@@ -859,7 +923,7 @@ Blocked until end of measurement </dd></dl>
         <tr>
           <td class="memname">bool m5::unit::UnitThermal2::readRefreshRate </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -902,7 +966,7 @@ Blocked until end of measurement </dd></dl>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated</a></b></dt><dd>Use readTemperatureMonitorSize instead </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated</a></b></dt><dd>Use readTemperatureMonitorSize instead </dd></dl>
 
 </div>
 </div>
@@ -937,8 +1001,8 @@ Blocked until end of measurement </dd></dl>
 
 </div>
 </div>
-<a id="a61d1e0ce05ff3b21a546d083a065c117" name="a61d1e0ce05ff3b21a546d083a065c117"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61d1e0ce05ff3b21a546d083a065c117">&#9670;&#160;</a></span>startPeriodicMeasurement()</h2>
+<a id="ab5f015718308afb2139ce20813fa257b" name="ab5f015718308afb2139ce20813fa257b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5f015718308afb2139ce20813fa257b">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -949,7 +1013,35 @@ Blocked until end of measurement </dd></dl>
         <tr>
           <td class="memname">bool m5::unit::UnitThermal2::startPeriodicMeasurement </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a></td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start periodic measurement in the current settings. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
+<a id="a61d1e0ce05ff3b21a546d083a065c117" name="a61d1e0ce05ff3b21a546d083a065c117"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61d1e0ce05ff3b21a546d083a065c117">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitThermal2::startPeriodicMeasurement </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a></td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1168,14 +1260,15 @@ Blocked until end of measurement </dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>Read the alarm control. </p>
+<p>Write the alarm control. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">enabled_bits</td><td>Enabled temperature alarm bits </td></tr>
+    <tr><td class="paramname">enabled_bits</td><td>Enabled temperature alarm bits </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="unit___thermal2__data_8hpp.html#a166330442cf5b6a840a7aeef303544e9" title="Low temp reached low threshold.">thermal2::enabled_low_temperature_low</a> </dd></dl>
 
 </div>
 </div>
@@ -1298,7 +1391,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful (false if celsius is not finite) </dd></dl>
 
 </div>
 </div>
@@ -1435,6 +1528,40 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 
 </div>
 </div>
+<a id="a73fa103f45b7921dda0ee6558de48739" name="a73fa103f45b7921dda0ee6558de48739"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73fa103f45b7921dda0ee6558de48739">&#9670;&#160;</a></span>writeBuzzerEnabled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitThermal2::writeBuzzerEnabled </td>
+          <td>(</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the buzzer enabled. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">enabled</td><td>Enable if true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
 <a id="acca5e264a3614a390c9f495929da9610" name="acca5e264a3614a390c9f495929da9610"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acca5e264a3614a390c9f495929da9610">&#9670;&#160;</a></span>writeFunctionControl()</h2>
 
@@ -1549,6 +1676,40 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 
 </div>
 </div>
+<a id="aa056ade319e8e7f0864fcbd062f98c32" name="aa056ade319e8e7f0864fcbd062f98c32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa056ade319e8e7f0864fcbd062f98c32">&#9670;&#160;</a></span>writeLEDEnabled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitThermal2::writeLEDEnabled </td>
+          <td>(</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the LED enabled. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">enabled</td><td>Enable if true </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
 <a id="a8e64071b96bd6645ea31cdf0025d28e4" name="a8e64071b96bd6645ea31cdf0025d28e4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8e64071b96bd6645ea31cdf0025d28e4">&#9670;&#160;</a></span>writeNoiseFilterLevel()</h2>
 
@@ -1585,7 +1746,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
         <tr>
           <td class="memname">bool m5::unit::UnitThermal2::writeRefreshRate </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="unit___thermal2_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a></td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="unit___thermal2__data_8hpp.html#ac4f81b0f2618f39590c2ca8b2363cb61">thermal2::Refresh</a></td>          <td class="paramname"><span class="paramname"><em>rate</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1629,7 +1790,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000002">Deprecated</a></b></dt><dd>Use writeTemperatureMonitorSize instead </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000004">Deprecated</a></b></dt><dd>Use writeTemperatureMonitorSize instead </dd></dl>
 
 </div>
 </div>

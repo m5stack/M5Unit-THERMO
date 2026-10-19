@@ -1,14 +1,17 @@
 var searchData=
 [
-  ['ta_5fto1_0',['TA_TO1',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba3d91280357320e35b6a716130e06d7b2',1,'m5::unit::mlx90614']]],
-  ['ta_5fto2_1',['TA_TO2',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba45ff1c306cf6f92786578547dbf63dde',1,'m5::unit::mlx90614']]],
+  ['ta_5fto1_0',['TA_TO1',['../unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba3d91280357320e35b6a716130e06d7b2',1,'m5::unit::mlx90614']]],
+  ['ta_5fto2_1',['TA_TO2',['../unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba45ff1c306cf6f92786578547dbf63dde',1,'m5::unit::mlx90614']]],
   ['tarange_2',['taRange',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a73e989123857993f2814fb61b63bd6fd',1,'m5::unit::mlx90614::EEPROM']]],
-  ['temp_3',['temp',['../structm5_1_1unit_1_1thermal2_1_1_data.html#ac1235e2299ef2559b3412df6c5179c56',1,'m5::unit::thermal2::Data']]],
-  ['temperature_4',['temperature',['../structm5_1_1unit_1_1ncir2_1_1_data.html#ac6ef76e89b3c737e3ffbc945b2915a14',1,'m5::unit::ncir2::Data::temperature()'],['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#ab4e57171604dd04a409f40ee399650f5',1,'m5::unit::UnitNCIR2::temperature()'],['../structm5_1_1unit_1_1thermal2_1_1_data.html#a65b5a114545828d917a80811b704f250',1,'m5::unit::thermal2::Data::temperature()']]],
-  ['thermal2_5',['thermal2',['../namespacethermal2.html',1,'']]],
-  ['thermo_6',['M5Unit-THERMO',['../index.html',1,'']]],
-  ['to1_5fto2_7',['TO1_TO2',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba23a2e437a01a3e8a75e54eae6915636a',1,'m5::unit::mlx90614']]],
-  ['to2_5fundefined_8',['TO2_Undefined',['../unit___m_l_x90614_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cbac93a4211fde8c725b22d9a82aeda62b3',1,'m5::unit::mlx90614']]],
-  ['todo_20list_9',['Todo List',['../todo.html',1,'']]],
-  ['tomin_10',['toMin',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a69b70007767196b84dfe3d20fd1ec158',1,'m5::unit::mlx90614::EEPROM']]]
+  ['taraw_5fto_5fcelsius_3',['taRaw_to_celsius',['../unit___m_l_x90614__data_8hpp.html#a0fa4bb909acce41081361c6bd4c93b52',1,'m5::unit::mlx90614']]],
+  ['temp_4',['temp',['../structm5_1_1unit_1_1thermal2_1_1_data.html#ac1235e2299ef2559b3412df6c5179c56',1,'m5::unit::thermal2::Data']]],
+  ['temperature_5',['temperature',['../classm5_1_1unit_1_1_unit_n_c_i_r2.html#ab4e57171604dd04a409f40ee399650f5',1,'m5::unit::UnitNCIR2::temperature()'],['../structm5_1_1unit_1_1ncir2_1_1_data.html#ac6ef76e89b3c737e3ffbc945b2915a14',1,'m5::unit::ncir2::Data::temperature()'],['../structm5_1_1unit_1_1thermal2_1_1_data.html#a65b5a114545828d917a80811b704f250',1,'m5::unit::thermal2::Data::temperature()']]],
+  ['thermal2_6',['thermal2',['../namespacethermal2.html',1,'']]],
+  ['thermo_7',['M5Unit-THERMO',['../index.html',1,'']]],
+  ['to1_5fto2_8',['TO1_TO2',['../unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cba23a2e437a01a3e8a75e54eae6915636a',1,'m5::unit::mlx90614']]],
+  ['to2_5fundefined_9',['TO2_Undefined',['../unit___m_l_x90614__data_8hpp.html#ae150ec5dcc7410c4032ee58802a9b9cbac93a4211fde8c725b22d9a82aeda62b3',1,'m5::unit::mlx90614']]],
+  ['todo_20list_10',['Todo List',['../todo.html',1,'']]],
+  ['tomax_11',['toMax',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#aae178547ffd778a37a992282f17533e7',1,'m5::unit::mlx90614::EEPROM']]],
+  ['tomin_12',['toMin',['../structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a69b70007767196b84dfe3d20fd1ec158',1,'m5::unit::mlx90614::EEPROM']]],
+  ['toraw_5fto_5fcelsius_13',['toRaw_to_celsius',['../unit___m_l_x90614__data_8hpp.html#ae75735f4ced4dc09bc8d0c9e960b8228',1,'m5::unit::mlx90614']]]
 ];

@@ -6,5 +6,6 @@ var structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m =
     [ "id", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#ab730a5b92f816528c2d7f904cff4de50", null ],
     [ "pwmCtrl", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a2f0c540e42b2df1ccfd4f27946d98752", null ],
     [ "taRange", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a73e989123857993f2814fb61b63bd6fd", null ],
+    [ "toMax", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#aae178547ffd778a37a992282f17533e7", null ],
     [ "toMin", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html#a69b70007767196b84dfe3d20fd1ec158", null ]
 ];

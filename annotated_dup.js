@@ -3,6 +3,7 @@ var annotated_dup =
     [ "m5", "namespacem5.html", [
       [ "unit", null, [
         [ "mlx90614", null, [
+          [ "ConfigRegister", "structm5_1_1unit_1_1mlx90614_1_1_config_register.html", "structm5_1_1unit_1_1mlx90614_1_1_config_register" ],
           [ "Data", "structm5_1_1unit_1_1mlx90614_1_1_data.html", "structm5_1_1unit_1_1mlx90614_1_1_data" ],
           [ "EEPROM", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m.html", "structm5_1_1unit_1_1mlx90614_1_1_e_e_p_r_o_m" ]
         ] ],

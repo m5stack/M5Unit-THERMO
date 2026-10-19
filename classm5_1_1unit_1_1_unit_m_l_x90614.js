@@ -33,6 +33,7 @@ var classm5_1_1unit_1_1_unit_m_l_x90614 =
     [ "readOutput", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a6a2e5a6297767bf12563418e14e7892d", null ],
     [ "readPositiveKf2", "classm5_1_1unit_1_1_unit_m_l_x90614.html#abf789a956664d5eeae40083606fb7d34", null ],
     [ "readPositiveKs", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a2923572311a4a8cda92f5c6e7dbd0de0", null ],
+    [ "readPositiveKt2", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a913c07108a07f8d8e73b8018228324dd", null ],
     [ "sleep", "classm5_1_1unit_1_1_unit_m_l_x90614.html#ab3135fdd3d68f3595544e76b578907c1", null ],
     [ "startPeriodicMeasurement", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a14e12c43f568ca8bb3429b6ac33c822b", null ],
     [ "startPeriodicMeasurement", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a3565dd00566d3498d16d0d0c68f09e15", null ],
@@ -51,5 +52,6 @@ var classm5_1_1unit_1_1_unit_m_l_x90614 =
     [ "writeObjectMinMax", "classm5_1_1unit_1_1_unit_m_l_x90614.html#ac0a88f9819bdcdb252f729f8bf4339c6", null ],
     [ "writeOutput", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a9155c19225d10535bac20e3f71813bb2", null ],
     [ "writePositiveKf2", "classm5_1_1unit_1_1_unit_m_l_x90614.html#ac133d563d8b64d1bab3b95810ce4083e", null ],
-    [ "writePositiveKs", "classm5_1_1unit_1_1_unit_m_l_x90614.html#afd34ee04b8d70c27cfd3edbb062dcbb3", null ]
+    [ "writePositiveKs", "classm5_1_1unit_1_1_unit_m_l_x90614.html#afd34ee04b8d70c27cfd3edbb062dcbb3", null ],
+    [ "writePositiveKt2", "classm5_1_1unit_1_1_unit_m_l_x90614.html#a643cc73451c4e1fed98c28f5bc563eae", null ]
 ];

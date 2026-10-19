@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.3.1 git rev:c2bfb11</span>
+   <div id="projectname">M5Unit-THERMO<span id="projectnumber">&#160;0.4.0 git rev:7cce598</span>
    </div>
   </td>
  </tr>
@@ -143,7 +143,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update</b> (c
 <tr class="separator:a48018fd2d74510043f8d4dfa44736da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac99b21e6ce67fd75e1a4ea343c1cd5a" id="r_aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="memItemLeft" align="right" valign="top"><a id="aac99b21e6ce67fd75e1a4ea343c1cd5a" name="aac99b21e6ce67fd75e1a4ea343c1cd5a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a class="el" href="structm5_1_1unit_1_1_unit_n_c_i_r2_1_1config__t.html">config_t</a> &amp;cfg)</td></tr>
-<tr class="memdesc:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the configuration. <br /></td></tr>
+<tr class="memdesc:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the configuration. <br /></td></tr>
 <tr class="separator:aac99b21e6ce67fd75e1a4ea343c1cd5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Measurement data by periodic</div></td></tr>
 <tr class="memitem:ab4e57171604dd04a409f40ee399650f5" id="r_ab4e57171604dd04a409f40ee399650f5"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4e57171604dd04a409f40ee399650f5">temperature</a> () const</td></tr>
@@ -159,9 +159,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a 
 <tr class="memitem:a9f3ced357a3d657822db276de72945c4" id="r_a9f3ced357a3d657822db276de72945c4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f3ced357a3d657822db276de72945c4">startPeriodicMeasurement</a> (const uint32_t interval)</td></tr>
 <tr class="memdesc:a9f3ced357a3d657822db276de72945c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement.  <br /></td></tr>
 <tr class="separator:a9f3ced357a3d657822db276de72945c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0428d8ed0f0b95e7872dccd8fb1cd476" id="r_a0428d8ed0f0b95e7872dccd8fb1cd476"><td class="memItemLeft" align="right" valign="top"><a id="a0428d8ed0f0b95e7872dccd8fb1cd476" name="a0428d8ed0f0b95e7872dccd8fb1cd476"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurement</b> ()</td></tr>
-<tr class="memdesc:a0428d8ed0f0b95e7872dccd8fb1cd476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings. <br /></td></tr>
+<tr class="memitem:a0428d8ed0f0b95e7872dccd8fb1cd476" id="r_a0428d8ed0f0b95e7872dccd8fb1cd476"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0428d8ed0f0b95e7872dccd8fb1cd476">startPeriodicMeasurement</a> ()</td></tr>
+<tr class="memdesc:a0428d8ed0f0b95e7872dccd8fb1cd476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start periodic measurement in the current settings.  <br /></td></tr>
 <tr class="separator:a0428d8ed0f0b95e7872dccd8fb1cd476"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a693a9ceefc641252e0ec92bfbc7367ec" id="r_a693a9ceefc641252e0ec92bfbc7367ec"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a693a9ceefc641252e0ec92bfbc7367ec">stopPeriodicMeasurement</a> ()</td></tr>
 <tr class="memdesc:a693a9ceefc641252e0ec92bfbc7367ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop periodic measurement.  <br /></td></tr>
@@ -272,8 +271,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>startPeriodicMeasurem
 <tr class="memdesc:afbc5aa889d3df7c989dab0dbc8ac290d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button released?  <br /></td></tr>
 <tr class="separator:afbc5aa889d3df7c989dab0dbc8ac290d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">I2C Address</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="section warning"><dt>Warning</dt><dd>Handling warning </dd></dl>
-</div></td></tr>
 <tr class="memitem:afbb3deae52a403f6fe8d7e8900c0ae35" id="r_afbb3deae52a403f6fe8d7e8900c0ae35"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afbb3deae52a403f6fe8d7e8900c0ae35">changeI2CAddress</a> (const uint8_t i2c_address)</td></tr>
 <tr class="memdesc:afbb3deae52a403f6fe8d7e8900c0ae35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change device I2C address.  <br /></td></tr>
 <tr class="separator:afbb3deae52a403f6fe8d7e8900c0ae35"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -448,7 +445,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Valid to the second decimal place </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Valid to the second decimal place </dd>
+<dd>
+Reads the latest value that the unit firmware measures continuously. The temperature alarm (LED / buzzer) stays active while periodic measurement is stopped </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>During periodic detection runs, an error is returned </dd></dl>
 
 </div>
@@ -486,9 +485,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">interval</td><td>Interval(ms) [1 - 5000] </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">duty</td><td>Duty </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">duty</td><td>Duty (0.0 - 1.0) </td></tr>
   </table>
   </dd>
 </dl>
@@ -529,7 +528,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">interval</td><td>Interval(ms) [1 - 5000] </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">rawDuty</td><td>Duty (0:0.0f 255:1.0f) </td></tr>
   </table>
@@ -681,8 +680,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <p>Read the buzzer settings. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">duty</td><td>Duty </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">duty</td><td>Duty (0.0 - 1.0) </td></tr>
   </table>
   </dd>
 </dl>
@@ -712,7 +711,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 <p>Read the buzzer settings. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">rawDuty</td><td>Duty (0:0.0f 255:1.0f) </td></tr>
   </table>
   </dd>
@@ -904,8 +903,36 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 
 </div>
 </div>
+<a id="a0428d8ed0f0b95e7872dccd8fb1cd476" name="a0428d8ed0f0b95e7872dccd8fb1cd476"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0428d8ed0f0b95e7872dccd8fb1cd476">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitNCIR2::startPeriodicMeasurement </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start periodic measurement in the current settings. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+
+</div>
+</div>
 <a id="a9f3ced357a3d657822db276de72945c4" name="a9f3ced357a3d657822db276de72945c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f3ced357a3d657822db276de72945c4">&#9670;&#160;</a></span>startPeriodicMeasurement()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f3ced357a3d657822db276de72945c4">&#9670;&#160;</a></span>startPeriodicMeasurement() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -963,6 +990,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>write_buzzer</b> (con
 
 <p>Stop periodic measurement. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This only stops the periodic reading on the host side. The unit firmware keeps measuring, so the temperature alarm (LED / buzzer) stays active </dd></dl>
 
 </div>
 </div>
@@ -1095,9 +1123,9 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
-    <tr><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramname">interval</td><td>Interval(ms) [1 - 5000] </td></tr>
-    <tr><td class="paramname">duty</td><td>Duty </td></tr>
+    <tr><td class="paramname">duty</td><td>Duty (0.0 - 1.0) </td></tr>
   </table>
   </dd>
 </dl>
@@ -1138,7 +1166,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">highlow</td><td>Target False:low True:high </td></tr>
-    <tr><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramname">interval</td><td>Interval(ms) [1 - 5000] </td></tr>
     <tr><td class="paramname">rawDuty</td><td>Duty (0:0.0f 255:1.0f) </td></tr>
   </table>
@@ -1335,8 +1363,8 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <p>Write the buzzer settings. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">freq</td><td>Frequency </td></tr>
-    <tr><td class="paramname">duty</td><td>Duty </td></tr>
+    <tr><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
+    <tr><td class="paramname">duty</td><td>Duty (0.0 - 1.0) </td></tr>
   </table>
   </dd>
 </dl>
@@ -1366,7 +1394,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <p>Write the buzzer settings. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">freq</td><td>Frequency </td></tr>
+    <tr><td class="paramname">freq</td><td>Frequency (Hz) </td></tr>
     <tr><td class="paramname">rawDuty</td><td>Duty (0:0.0f 255:1.0f) </td></tr>
   </table>
   </dd>
@@ -1449,11 +1477,12 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
 <p>Write the emissivity. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">e</td><td>Emissivity </td></tr>
+    <tr><td class="paramname">e</td><td>Emissivity (0.1 - 1.0) </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Reconnect (power-cycle) the unit after writing the emissivity for it to take effect </dd></dl>
 
 </div>
 </div>
@@ -1480,6 +1509,7 @@ template&lt;typename T , typename std::enable_if&lt; std::is_floating_point&lt; 
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Reconnect (power-cycle) the unit after writing the emissivity for it to take effect </dd></dl>
 
 </div>
 </div>

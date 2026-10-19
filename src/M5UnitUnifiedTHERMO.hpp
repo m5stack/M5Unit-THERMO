@@ -29,6 +29,7 @@ namespace m5 {
  */
 namespace unit {
 
+//! @brief UnitNCIR (SKU:U028), MLX90614 single zone
 using UnitNCIR = m5::unit::UnitMLX90614BAA;
 
 }  // namespace unit

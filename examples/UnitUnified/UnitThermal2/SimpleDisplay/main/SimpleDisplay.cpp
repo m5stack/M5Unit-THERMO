@@ -6,12 +6,14 @@
 /*
   Simple display example using M5UnitUnified for UnitThermal2
 */
+#include <algorithm>
+#include <cmath>
+
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
-#include <M5HAL.hpp>
-#include <cmath>
+#include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
 
 using namespace m5::unit::thermal2;
 
@@ -99,7 +101,8 @@ public:
     {
         float lowest_temp  = d.lowestTemperature();
         float highest_temp = d.highestTemperature();
-        float temp_diff    = highest_temp - lowest_temp;
+        // At least one raw LSB (1/128 C), so a uniform frame does not divide by zero
+        const float temp_diff{std::max(highest_temp - lowest_temp, 1.0f / 128)};
 
         for (int idx = 0; idx < 384; ++idx) {
             int y     = idx >> 4;
@@ -182,7 +185,7 @@ bool calculate_heatmap_size(uint32_t& ow, uint32_t& oh, const uint32_t w, const 
 constexpr float low_alarm_temp{0.0f};
 constexpr float high_alarm_temp{50.0f};
 
-static uint32_t text_color_table[] = {0x00000000, 0x00808080u, 0x00008000u, 0x00FFCF00u, 0x0000CFFFu};
+static const uint32_t text_color_table[] = {0x00000000, 0x00808080u, 0x00008000u, 0x00FFCF00u, 0x0000CFFFu};
 LGFX_Sprite text{};
 }  // namespace
 
@@ -203,48 +206,12 @@ void setup()
         }
     }
 
-    auto board = M5.getBoard();
-
-    // NessoN1: Arduino Wire (I2C_NUM_0) cannot be used for GROVE port.
-    //   Wire is used by M5Unified In_I2C for internal devices (IOExpander etc.).
-    //   Wire1 exists but is reserved for HatPort — cannot be used for GROVE.
-    //   Reconfiguring Wire to GROVE pins breaks In_I2C, causing ESP_ERR_INVALID_STATE in M5.update().
-    //   Solution: Use SoftwareI2C via M5HAL (bit-banging) for the GROVE port.
-    // NanoC6: Wire.begin() on GROVE pins conflicts with m5::I2C_Class registered by Ex_I2C.setPort()
-    //   on the same I2C_NUM_0, causing sporadic NACK errors.
-    //   Solution: Use M5.Ex_I2C (m5::I2C_Class) directly instead of Arduino Wire.
-    bool unit_ready{};
-    if (board == m5::board_t::board_ArduinoNessoN1) {
-        // NessoN1: GROVE is on port_b (GPIO 5/4), not port_a (which maps to Wire pins 8/10)
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
-        M5_LOGI("getPin(M5HAL): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        m5::hal::bus::I2CBusConfig i2c_cfg;
-        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
-        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
-        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
-        M5_LOGI("Bus:%d", i2c_bus.has_value());
-        unit_ready = Units.add(unit, i2c_bus ? i2c_bus.value() : nullptr) && Units.begin();
-    } else if (board == m5::board_t::board_M5NanoC6) {
-        // NanoC6: Use M5.Ex_I2C (m5::I2C_Class, not Arduino Wire)
-        M5_LOGI("Using M5.Ex_I2C");
-        unit_ready = Units.add(unit, M5.Ex_I2C) && Units.begin();
-    } else {
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        Wire.end();
-        Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
-        unit_ready = Units.add(unit, Wire) && Units.begin();
-    }
-    if (!unit_ready) {
+    // Board-aware connection: NessoN1 -> SoftwareI2C on GROVE, NanoC6/NanoH2 -> M5.Ex_I2C, others -> Wire
+    if (!m5::unit::wiring::addI2C(Units, unit) || !Units.begin()) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     //
@@ -266,10 +233,10 @@ void setup()
     }
     uint32_t w{}, h{};
     auto right_text = calculate_heatmap_size(w, h, lcd.width(), lcd.height(), lcd.fontWidth(), lcd.fontHeight());
+    text_x          = right_text ? w : 0;
+    text_y          = right_text ? 0 : h;
     M5_LOGI("WH:%u,%u %u,%u %d", w, h, text_x, text_y, right_text);
-    text_x         = right_text ? w : 0;
-    text_y         = right_text ? 0 : h;
-    bool use_psram = (board == m5::board_t::board_M5Tab5);
+    bool use_psram = (M5.getBoard() == m5::board_t::board_M5Tab5);
     view           = new HeatmapView(w, h, use_psram);
 
     text.setPsram(false);
@@ -306,7 +273,7 @@ void loop()
     }
 
     // Button (toggle  periodic <-> single)
-    if (unit.wasPressed()) {
+    if (unit.wasClicked()) {
         static bool single{};
         single = !single;
 
@@ -339,3 +306,36 @@ void loop()
         }
     }
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+// Single-core SoCs: run loop() back-to-back, but every ~2 s yield a 5 ms slice so the IDLE task
+// runs and feeds the task watchdog (default 5 s).
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS{2000};
+    constexpr TickType_t FEED_SLEEP_TICKS{pdMS_TO_TICKS(5)};
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

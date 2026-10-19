@@ -9,141 +9,12 @@
 */
 #ifndef M5_UNIT_THERMO_UNIT_THERMAL2_HPP
 #define M5_UNIT_THERMO_UNIT_THERMAL2_HPP
+#include "unit_Thermal2_data.hpp"
 #include <M5UnitComponent.hpp>
 #include <m5_utility/container/circular_buffer.hpp>
-#include <limits>  // NaN
-#include <cmath>
-#include <array>
 
 namespace m5 {
 namespace unit {
-/*!
-  @namespace thermal2
-  @brief For UnitThermal2
- */
-namespace thermal2 {
-
-///@sa m5::unit::UnitThermal2::readButtonStatus
-///@name Button status
-///@{
-constexpr uint8_t button_is_pressed{0x01};
-constexpr uint8_t button_was_pressed{0x02};
-constexpr uint8_t button_was_released{0x04};
-constexpr uint8_t button_was_clicked{0x08};
-constexpr uint8_t button_was_hold{0x10};
-///@}
-
-///@sa m5::unit::UnitThermal2::readFunctionControl m5::unit::UnitThermal2::writeFunctionControl
-///@name Function control
-///@{
-constexpr uint8_t enabled_function_buzzer{0x01};
-constexpr uint8_t enabled_function_led{0x02};
-constexpr uint8_t enabled_function_auto_refresh{0x04};
-///@}
-
-///@sa m5::unit::UnitThermal2::readEnabledAlarm m5::unit::UnitThermal2::writeEnabledAlarm
-///@name Alarm enabled bits
-///@{
-constexpr uint8_t enabled_low_temperature_low{0x01};    //!< Low temp reached low threshold
-constexpr uint8_t enabled_med_temperature_low{0x02};    //!< Med temp reached low threshold
-constexpr uint8_t enabled_ave_temperature_low{0x04};    //!< Ave temp reached low threshold
-constexpr uint8_t enabled_high_temperature_low{0x08};   //!< High temp reached low threshold
-constexpr uint8_t enabled_low_temperature_high{0x10};   //!< Low temp reached high threshold
-constexpr uint8_t enabled_med_temperature_high{0x20};   //!< Med temp reached high threshold
-constexpr uint8_t enabled_ave_temperature_high{0x40};   //!< Ave temp reached high threshold
-constexpr uint8_t enabled_high_temperature_high{0x80};  //!< High temp reached high threshold
-///@}
-
-/*!
-  @enum Refresh
-  @brief Refresh rate(Hz)
- */
-enum class Refresh : uint8_t {
-    Rate0_5Hz,  //!< 0.5Hz
-    Rate1Hz,    //!< 1Hz
-    Rate2Hz,    //!< 2Hz
-    Rate4Hz,    //!< 4Hz
-    Rate8Hz,    //!< 8Hz
-    Rate16Hz,   //!< 16Hz
-    Rate32Hz,   //!< 32Hz
-    Rate64Hz,   //!< 64Hz
-};
-
-//! @brief Celsius to raw temperature value
-inline static uint16_t celsius_to_raw(const float f)
-{
-    int i = std::round((f + 64) * 128);
-    return static_cast<uint16_t>(std::max(std::min(i, static_cast<int>(std::numeric_limits<uint16_t>::max())), 0));
-}
-//! @brief Raw temperature value to celsius
-inline static float raw_to_celsius(const uint16_t u16)
-{
-    return u16 / 128.0f - 64;
-}
-
-#pragma pack(push)
-#pragma pack(1)
-/*!
-  @struct Data
-  @brief Measurement data group
- */
-struct Data {
-    uint8_t subpage{};  //!< Subpage 0:even 1:odd
-    union {
-        uint16_t temp[8]{};  //!< Temperature information
-        struct {
-            uint16_t median_temperature;     //!< Median temperature (raw)
-            uint16_t average_temperature;    //!< Average temperature (raw)
-            uint16_t most_diff_temperature;  //!< Most different temperature (raw)
-            uint8_t most_diff_x;             //!< Most different pixel X
-            uint8_t most_diff_y;             //!< Most different pixel Y
-            uint16_t lowest_temperature;     //!< Lowest temperature (raw)
-            uint8_t lowest_diff_x;           //!< Lowest pixel X
-            uint8_t lowest_diff_y;           //!< Lowest pixel Y
-            uint16_t highest_temperature;    //!< Highest temperature (raw)
-            uint8_t highest_diff_x;          //!< Highest pixel X
-            uint8_t highest_diff_y;          //!< Highest pixel Y
-        };
-    };
-    uint16_t raw[384]{};  //!< Raw pixel data (1/2)
-
-    //! @brief Gets median temperature in Celsius
-    inline float medianTemperature() const
-    {
-        return thermal2::raw_to_celsius(temp[0]);
-    }
-    //! @brief Gets average temperature in Celsius
-    inline float averageTemperature() const
-    {
-        return thermal2::raw_to_celsius(temp[1]);
-    }
-    //! @brief Gets most different temperature in Celsius
-    inline float mostDiffTemperature() const
-    {
-        return thermal2::raw_to_celsius(temp[2]);
-    }
-    //! @brief Gets lowest temperature in Celsius
-    inline float lowestTemperature() const
-    {
-        return thermal2::raw_to_celsius(temp[4]);
-    }
-    //! @brief Gets highest temperature in Celsius
-    inline float highestTemperature() const
-    {
-        return thermal2::raw_to_celsius(temp[6]);
-    }
-
-    //! @brief Gets pixel temperature in Celsius
-    //! @param idx Pixel index (0-383)
-    //! @return Temperature in Celsius, or NaN if idx is out of range
-    inline float temperature(const uint_fast16_t idx) const
-    {
-        return (idx < 384) ? thermal2::raw_to_celsius(raw[idx]) : std::numeric_limits<float>::quiet_NaN();
-    }
-};
-#pragma pack(pop)
-
-}  // namespace thermal2
 
 /*!
   @class m5::unit::UnitThermal2
@@ -193,7 +64,7 @@ public:
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    //! @brief Sets the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -211,7 +82,10 @@ public:
     {
         return PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data>::startPeriodicMeasurement(rate);
     }
-    //! @brief Start periodic measurement in the current settings
+    /*!
+      @brief Start periodic measurement in the current settings
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitThermal2, thermal2::Data>::startPeriodicMeasurement();
@@ -250,12 +124,20 @@ public:
       @note bit0: buzzer enable. / bit1: neopixel enable. / bit2: auto refresh enable
      */
     bool readFunctionControl(uint8_t& value);
-    //! @brief Read the buzzer enabled
+    /*!
+      @brief Read the buzzer enabled
+      @param[out] enabled True if enabled
+      @return True if successful
+     */
     inline bool readBuzzerEnabled(bool& enabled)
     {
         return read_function_control_bit(thermal2::enabled_function_buzzer, enabled);
     }
-    //! @brief Reads the LED enabled
+    /*!
+      @brief Read the LED enabled
+      @param[out] enabled True if enabled
+      @return True if successful
+     */
     inline bool readLEDEnabled(bool& enabled)
     {
         return read_function_control_bit(thermal2::enabled_function_led, enabled);
@@ -268,12 +150,20 @@ public:
       @warning During periodic detection runs, an error is returned
      */
     bool writeFunctionControl(const uint8_t value, const bool verify = true);
-    //! @brief Write the buzzer enable status
+    /*!
+      @brief Write the buzzer enabled
+      @param enabled Enable if true
+      @return True if successful
+     */
     inline bool writeBuzzerEnabled(const bool enabled)
     {
         return write_function_control_bit(thermal2::enabled_function_buzzer, enabled);
     }
-    //! @brief Write the LED enable status
+    /*!
+      @brief Write the LED enabled
+      @param enabled Enable if true
+      @return True if successful
+     */
     inline bool writeLEDEnabled(const bool enabled)
     {
         return write_function_control_bit(thermal2::enabled_function_led, enabled);
@@ -345,9 +235,10 @@ public:
     */
     bool readAlarmEnabled(uint8_t& enabled_bits);
     /*!
-      @brief Read the alarm control
-      @param[out] enabled_bits Enabled temperature alarm bits
+      @brief Write the alarm control
+      @param enabled_bits Enabled temperature alarm bits
       @return True if successful
+      @sa thermal2::enabled_low_temperature_low
     */
     bool writeAlarmEnabled(const uint8_t enabled_bits);
 
@@ -378,12 +269,13 @@ public:
       @brief Write the alarm temperature threshold
       @param highlow Target False:low True:high
       @param celsius Temperature
-      @return True if successful
+      @return True if successful (false if celsius is not finite)
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeAlarmTemperature(const bool highlow, const T celsius)
     {
-        return writeAlarmTemperature(highlow, thermal2::celsius_to_raw(static_cast<float>(celsius)));
+        return std::isfinite(celsius) &&
+               writeAlarmTemperature(highlow, thermal2::celsius_to_raw(static_cast<float>(celsius)));
     }
 
     /*!
@@ -586,7 +478,6 @@ public:
      */
     bool readFirmwareVersion(uint16_t& ver);
 
-    ///@warning Handling warning
     ///@name I2C Address
     ///@{
     /*!
@@ -607,6 +498,7 @@ public:
 protected:
     bool read_function_control_bit(const uint8_t bit, bool& enabled);
     bool write_function_control_bit(const uint8_t bit, const bool enabled);
+    bool write_function_control(const uint8_t value, const bool verify);
 
     bool request_data();
     bool read_data_status(uint8_t s[2]);  // [0]:data refresh ctrl, [1]subpage information

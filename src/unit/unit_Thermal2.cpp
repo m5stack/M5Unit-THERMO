@@ -9,7 +9,9 @@
 */
 #include "unit_Thermal2.hpp"
 #include <M5Utility.hpp>
+#include <algorithm>
 #include <array>
+#include <cstddef>
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -18,6 +20,18 @@ using namespace m5::unit::thermal2::command;
 
 namespace {
 constexpr uint16_t DEVICE_ID{0x9064};
+// Writing a bit back to BUTTON_STATUS_REG clears it
+constexpr uint8_t CLEAR_BUTTON_FLAGS{m5::unit::thermal2::button_was_pressed | m5::unit::thermal2::button_was_released |
+                                     m5::unit::thermal2::button_was_clicked | m5::unit::thermal2::button_was_hold};
+// If the host was reset in the middle of a read, the unit returns the rest of that data first
+// and recovers after about 0.5 s, so the detection is retried for up to about 1 s
+constexpr uint_fast8_t DETECT_RETRY{10};
+constexpr uint32_t DETECT_RETRY_INTERVAL_MS{100};
+
+// read_data() reads the 16 bytes of temp[] and the 768 bytes of raw[] in one go
+using ThermalData = m5::unit::thermal2::Data;
+static_assert(offsetof(ThermalData, raw) == offsetof(ThermalData, temp) + sizeof(ThermalData::temp),
+              "raw[] must follow temp[] directly");
 
 #if defined(ARDUINO)
 #if defined(I2C_BUFFER_LENGTH)
@@ -26,7 +40,7 @@ constexpr uint32_t read_buffer_length{I2C_BUFFER_LENGTH};
 constexpr uint32_t read_buffer_length{32};
 #endif
 #else
-//! @TODO for M5HAL
+// The read buffer length on non-Arduino frameworks is not known, so 32 bytes is assumed
 constexpr uint32_t read_buffer_length{32};
 #endif
 
@@ -74,18 +88,32 @@ bool UnitThermal2::begin()
         }
     }
 
-    // Detect
+    // Detect (see DETECT_RETRY)
     uint16_t id{};
     uint16_t ver{};
-    if (!read_register16BE(DEVICE_ID_REG, id) || !readFirmwareVersion(ver) || (id != DEVICE_ID) || ver == 0) {
+    bool detected{};
+    for (uint_fast8_t retry = 0; retry < DETECT_RETRY; ++retry) {
+        id = ver = 0;
+        if (read_register16BE(DEVICE_ID_REG, id) && readFirmwareVersion(ver) && id == DEVICE_ID && ver != 0) {
+            detected = true;
+            break;
+        }
+        M5_LIB_LOGW("Detect retry %u (%04X,%04X)", retry, id, ver);
+        if (retry + 1 < DETECT_RETRY) {
+            m5::utility::delay(DETECT_RETRY_INTERVAL_MS);
+        }
+    }
+    if (!detected) {
         M5_LIB_LOGE("Cannot detect %s %04X,%04X", deviceName(), id, ver);
         return false;
     }
 
     _button_interval = _cfg.button_interval;
 
-    return writeRegister8(BUTTON_STATUS_REG, 1) && writeFunctionControl(_cfg.function_control) && writeBuzzer(0, 0) &&
-           writeLED(0, 0, 0) && writeTemperatureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
+    // Clear the latched button flags (was pressed / released / clicked / hold) left from before begin
+    return writeRegister8(BUTTON_STATUS_REG, CLEAR_BUTTON_FLAGS) && writeFunctionControl(_cfg.function_control) &&
+           writeBuzzer(0, 0) && writeLED(0, 0, 0) &&
+           writeTemperatureMonitorSize(_cfg.monitor_width, _cfg.monitor_height) &&
            (_cfg.start_periodic ? startPeriodicMeasurement(_cfg.rate) : true);
 }
 
@@ -96,10 +124,18 @@ void UnitThermal2::update(const bool force)
 
     // Data
     if (inPeriodic()) {
-        if (force || !_latest || at >= _latest + _interval) {
+        if (force || !_latest || m5::utility::hasElapsed(_latest, _interval, at)) {
             Data d{};
             uint8_t ds[2]{};
             _updated = read_data_status(ds) && ds[0] && read_data(d);
+            // Zero median and average (-64 C, out of the -40 to 300 C range) is not a measurement. The unit returns
+            // zeros for a read past the end of its registers, which can follow a host reset during a read. Drop it and
+            // request the next frame (best effort)
+            if (_updated && d.median_temperature == 0 && d.average_temperature == 0) {
+                M5_LIB_LOGW("Dropped an all zero frame");
+                request_data();
+                _updated = false;
+            }
             if (_updated) {
                 _latest   = m5::utility::millis();
                 d.subpage = ds[1];
@@ -109,7 +145,7 @@ void UnitThermal2::update(const bool force)
     }
 
     // Button
-    if (force || !_latest_button || at >= _latest_button + _button_interval) {
+    if (force || !_latest_button || m5::utility::hasElapsed(_latest_button, _button_interval, at)) {
         if (readButtonStatus(_button)) {
             _latest_button = at;
             if (wasReleased()) {
@@ -143,8 +179,11 @@ bool UnitThermal2::start_periodic_measurement()
 
 bool UnitThermal2::stop_periodic_measurement()
 {
-    _periodic = false;
-    return write_function_control_bit(enabled_function_auto_refresh, false);
+    if (write_function_control_bit(enabled_function_auto_refresh, false)) {
+        _periodic = false;
+        return true;
+    }
+    return false;
 }
 
 bool UnitThermal2::measureSingleshot(thermal2::Data& page0, thermal2::Data& page1)
@@ -162,25 +201,35 @@ bool UnitThermal2::measureSingleshot(thermal2::Data& page0, thermal2::Data& page
     page0.subpage = 0;
     page1.subpage = 1;
 
-    if (request_data()) {
-        auto timeout_at = m5::utility::millis() + 2500 * 2;
-        uint8_t ds[2]{};
-        uint8_t done{};
-        m5::utility::delay(interval_table[m5::stl::to_underlying(rate)]);
-        do {
-            if (read_data_status(ds) && ds[0]) {
-                if (read_data(ds[1] ? page1 : page0)) {
-                    if (!done) {
-                        request_data();
-                        m5::utility::delay(interval_table[m5::stl::to_underlying(rate)]);
+    if (!request_data()) {
+        return false;
+    }
+    const auto start_at = m5::utility::millis();
+    const uint32_t wait{interval_table[m5::stl::to_underlying(rate)]};
+    // Long enough for a repeated subpage even at the slowest rate
+    const uint32_t timeout{std::max<uint32_t>(5000, wait * 4)};
+    uint8_t received{};  // bit0: subpage 0, bit1: subpage 1
+    uint8_t ds[2]{};
+    m5::utility::delay(wait);
+    do {
+        if (read_data_status(ds) && ds[0]) {
+            const uint8_t sp = ds[1] ? 1 : 0;
+            if (read_data(sp ? page1 : page0)) {
+                received |= (1U << sp);
+                if (received != 0x03) {
+                    if (!request_data()) {
+                        return false;
                     }
-                    ++done;
+                    m5::utility::delay(wait);
+                    continue;
                 }
             }
-        } while (done < 2 && m5::utility::millis() <= timeout_at);
-        return (done == 2);
-    }
-    return false;
+        }
+        if (received != 0x03) {
+            m5::utility::delay(1);
+        }
+    } while (received != 0x03 && !m5::utility::hasElapsed(start_at, timeout));
+    return received == 0x03;
 }
 
 bool UnitThermal2::readFunctionControl(uint8_t& value)
@@ -195,15 +244,21 @@ bool UnitThermal2::writeFunctionControl(const uint8_t value, const bool verify)
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
-    if (writeRegister8(FUNCTION_CONTROL_REG, value & 0x07)) {
-        auto timeout_at = m5::utility::millis() + 100;
+    return write_function_control(value, verify);
+}
+
+bool UnitThermal2::write_function_control(const uint8_t value, const bool verify)
+{
+    const uint8_t v = value & 0x07;
+    if (writeRegister8(FUNCTION_CONTROL_REG, v)) {
+        const auto start_at = m5::utility::millis();
         do {
             uint8_t fc{};
-            if (!verify || (readFunctionControl(fc) && (fc == (value & 0x07)))) {
+            if (!verify || (readFunctionControl(fc) && fc == v)) {
                 return true;
             }
             m5::utility::delay(1);
-        } while (m5::utility::millis() <= timeout_at);
+        } while (!m5::utility::hasElapsed(start_at, 100));
     }
     return false;
 }
@@ -222,8 +277,8 @@ bool UnitThermal2::write_function_control_bit(const uint8_t bit, const bool enab
 {
     uint8_t fc{};
     if (readFunctionControl(fc)) {
-        fc = (fc & ~bit) | (enabled ? bit : 0);
-        return writeRegister8(FUNCTION_CONTROL_REG, fc & 0x07);
+        // Not writeFunctionControl(), which refuses while periodic measurement is running
+        return write_function_control(static_cast<uint8_t>((fc & ~bit) | (enabled ? bit : 0)), true);
     }
     return false;
 }
@@ -347,7 +402,7 @@ bool UnitThermal2::readAlarmBuzzer(const bool highlow, uint16_t& freq, uint8_t& 
     const uint8_t reg = LOW_ALARM_BUZZER_FREQ_REG + 0x10 * highlow;
     uint8_t v[3]{};
     if (read_register(reg, v, 3)) {
-        freq     = v[0] | (v[1] << 8);
+        freq     = m5::types::little_uint16_t{v[0], v[1]}.get();
         interval = v[2];
         return true;
     }
@@ -375,7 +430,7 @@ bool UnitThermal2::readBuzzer(uint16_t& freq, uint8_t& duty)
 
     uint8_t v[3]{};
     if (read_register(BUZZER_FREQ_REG, v, 3)) {
-        freq = v[0] | (v[1] << 8);
+        freq = m5::types::little_uint16_t{v[0], v[1]}.get();
         duty = v[2];
         return true;
     }
@@ -389,7 +444,7 @@ bool UnitThermal2::writeBuzzer(const uint16_t freq, const uint8_t duty, const bo
     v[1] = freq >> 8;
     v[2] = duty;
     if (writeRegister(BUZZER_FREQ_REG, v, 3)) {
-        auto timeout_at = m5::utility::millis() + 100;
+        const auto start_at = m5::utility::millis();
         do {
             uint16_t f{};
             uint8_t d{};
@@ -397,7 +452,7 @@ bool UnitThermal2::writeBuzzer(const uint16_t freq, const uint8_t duty, const bo
                 return true;
             }
             m5::utility::delay(1);
-        } while (m5::utility::millis() <= timeout_at);
+        } while (!m5::utility::hasElapsed(start_at, 100));
     }
     return false;
 }
@@ -422,14 +477,14 @@ bool UnitThermal2::writeLED(const uint8_t r, const uint8_t g, const uint8_t b, c
 {
     uint8_t v[3]{r, g, b};
     if (writeRegister(LED_REG, v, 3)) {
-        auto timeout_at = m5::utility::millis() + 100;
+        const auto start_at = m5::utility::millis();
         do {
             uint8_t rv[3]{};
             if (!verify || (read_register(LED_REG, rv, 3) && rv[0] == r && rv[1] == g && rv[2] == b)) {
                 return true;
             }
             m5::utility::delay(1);
-        } while (m5::utility::millis() <= timeout_at);
+        } while (!m5::utility::hasElapsed(start_at, 100));
     }
     return false;
 }

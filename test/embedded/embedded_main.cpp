@@ -10,7 +10,7 @@
 #include <M5Unified.h>
 #include <esp_system.h>
 
-#pragma message "Embedded setup/loop"
+#pragma message("Embedded setup/loop")
 
 #if __has_include(<esp_idf_version.h>)
 #include <esp_idf_version.h>
@@ -30,8 +30,6 @@ void test()
 
 void setup()
 {
-    delay(1500);
-
     M5.begin();
 
     M5_LOGI("CPP %ld", __cplusplus);

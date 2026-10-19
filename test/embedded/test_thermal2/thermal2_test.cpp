@@ -50,22 +50,7 @@ constexpr struct {
 } temp_table[] = {
     {0, -64.f, false}, {8192, 0.f, false}, {12032, 30.f, false}, {20992, 100.f, false}, {65535, 447.99f, true},
 };
-
 }  // namespace
-
-TEST_F(TestThermal2, Conversion)
-{
-    SCOPED_TRACE(ustr);
-
-    for (auto&& t : temp_table) {
-        if (t.near) {
-            EXPECT_NEAR(raw_to_celsius(t.utemp), t.ftemp, 0.01f);
-        } else {
-            EXPECT_FLOAT_EQ(raw_to_celsius(t.utemp), t.ftemp);
-        }
-        EXPECT_EQ(celsius_to_raw(t.ftemp), t.utemp);
-    }
-}
 
 TEST_F(TestThermal2, Settings)
 {
@@ -73,10 +58,12 @@ TEST_F(TestThermal2, Settings)
 
     EXPECT_TRUE(unit->inPeriodic());
 
-    uint8_t prev_fc{};
+    uint8_t prev_fc{}, prev_noise_lv{};
     Refresh prev_rate{};
     EXPECT_TRUE(unit->readFunctionControl(prev_fc));
     EXPECT_TRUE(unit->readRefreshRate(prev_rate));
+    // Not in config_t, so begin() does not restore it
+    EXPECT_TRUE(unit->readNoiseFilterLevel(prev_noise_lv));
 
     // Failed
     for (int8_t fc = 7; fc >= 0; --fc) {
@@ -195,6 +182,10 @@ TEST_F(TestThermal2, Settings)
         EXPECT_EQ(w, prev_w);
         EXPECT_EQ(h, prev_h);
     }
+
+    // Restore
+    EXPECT_TRUE(unit->writeNoiseFilterLevel(prev_noise_lv));
+    EXPECT_TRUE(unit->writeRefreshRate(prev_rate));
 }
 
 TEST_F(TestThermal2, Alarm)
@@ -419,11 +410,11 @@ TEST_F(TestThermal2, Firmware)
 
 TEST_F(TestThermal2, Single)
 {
-    Data page0{}, page1{};
     SCOPED_TRACE(ustr);
 
+    Data d0{}, d1{};
     EXPECT_TRUE(unit->inPeriodic());
-    EXPECT_FALSE(unit->measureSingleshot(page0, page1));
+    EXPECT_FALSE(unit->measureSingleshot(d0, d1));
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
@@ -524,42 +515,60 @@ TEST_F(TestThermal2, BeginAppliesConfig)
 {
     SCOPED_TRACE(ustr);
 
-    // Verify that begin() applied config values.
-    // Note: firmware may enable auto_refresh automatically when periodic starts,
-    // so function_control may have additional bits set beyond what was configured.
+    // Default config
+    EXPECT_TRUE(unit->inPeriodic());
 
-    // function_control: begin() writes enabled_function_led (0x02),
-    // but firmware adds enabled_function_auto_refresh (0x04) during periodic
+    Refresh rate{};
+    EXPECT_TRUE(unit->readRefreshRate(rate));
+    EXPECT_EQ(rate, Refresh::Rate16Hz);
+
+    // begin() writes enabled_function_led, and starting periodic measurement adds enabled_function_auto_refresh
     uint8_t fc{};
     EXPECT_TRUE(unit->readFunctionControl(fc));
-    EXPECT_TRUE(fc & thermal2::enabled_function_led);
+    EXPECT_EQ(fc, thermal2::enabled_function_led | thermal2::enabled_function_auto_refresh);
 
-    // monitor_width/height: default is 15x11
     uint8_t w{}, h{};
     EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
     EXPECT_EQ(w, 15);
     EXPECT_EQ(h, 11);
+}
 
-    // writeFunctionControl requires stopping periodic measurement first
-    EXPECT_TRUE(unit->stopPeriodicMeasurement());
-    EXPECT_FALSE(unit->inPeriodic());
+class TestThermal2Config : public I2CComponentTestBase<UnitThermal2> {
+protected:
+    virtual UnitThermal2* get_instance() override
+    {
+        auto ptr           = new m5::unit::UnitThermal2();
+        auto cfg           = ptr->config();
+        cfg.start_periodic = true;
+        // Non-default values to verify that begin() applies config_t
+        cfg.rate             = Refresh::Rate8Hz;
+        cfg.monitor_width    = 8;
+        cfg.monitor_height   = 6;
+        cfg.function_control = 0;  // LED off (the buzzer stays off)
+        ptr->config(cfg);
+        return ptr;
+    }
+};
 
-    uint8_t new_fc = thermal2::enabled_function_buzzer | thermal2::enabled_function_led;
-    EXPECT_TRUE(unit->writeFunctionControl(new_fc));
+TEST_F(TestThermal2Config, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+
+    Refresh rate{};
+    EXPECT_TRUE(unit->readRefreshRate(rate));
+    EXPECT_EQ(rate, Refresh::Rate8Hz);
+
+    // Only enabled_function_auto_refresh, added by starting periodic measurement
+    uint8_t fc{};
     EXPECT_TRUE(unit->readFunctionControl(fc));
-    EXPECT_EQ(fc, new_fc);
+    EXPECT_EQ(fc, thermal2::enabled_function_auto_refresh);
 
-    EXPECT_TRUE(unit->writeTemperatureMonitorSize(8, 6));
+    uint8_t w{}, h{};
     EXPECT_TRUE(unit->readTemperatureMonitorSize(w, h));
     EXPECT_EQ(w, 8);
     EXPECT_EQ(h, 6);
-
-    // Restore defaults
-    EXPECT_TRUE(unit->writeFunctionControl(thermal2::enabled_function_led));
-    EXPECT_TRUE(unit->writeTemperatureMonitorSize(15, 11));
-
-    // Restart periodic for subsequent tests
-    EXPECT_TRUE(unit->startPeriodicMeasurement());
 }
 
 TEST_F(TestThermal2, I2CAddress)

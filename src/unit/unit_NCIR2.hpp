@@ -10,48 +10,13 @@
 #ifndef M5_UNIT_THERMO_UNIT_NCIR2_HPP
 #define M5_UNIT_THERMO_UNIT_NCIR2_HPP
 
+#include "unit_NCIR2_data.hpp"
 #include <M5UnitComponent.hpp>
 #include <m5_utility/container/circular_buffer.hpp>
 #include <limits>  // NaN
-#include <array>
 
 namespace m5 {
 namespace unit {
-
-/*!
-  @namespace ncir2
-  @brief For UnitNCIR2
- */
-namespace ncir2 {
-/*!
-  @struct Data
-  @brief Measurement data group
-  @note Valid to the second decimal place
- */
-struct Data {
-    std::array<uint8_t, 2> raw{0x00, 0x80};  // Raw [0]:low byte [1]:high byte
-    //! @brief Raw int16
-    inline int16_t value() const
-    {
-        return (raw[1] << 8 | raw[0]);
-    }
-    //! @brief Temperature(Celsius)
-    inline float temperature() const
-    {
-        return value() * 0.01f;
-    }
-    //! @brief Celsius
-    inline float celsius() const
-    {
-        return temperature();
-    }
-    //! @brief Fahrenheit
-    inline float fahrenheit() const
-    {
-        return celsius() * 9.0f / 5.0f + 32.f;
-    }
-};
-}  // namespace ncir2
 
 /*!
   @class m5::unit::UnitNCIR2
@@ -78,7 +43,7 @@ public:
         : Component(addr), _data{new m5::container::CircularBuffer<ncir2::Data>(1)}
     {
         auto ccfg  = component_config();
-        ccfg.clock = 100 * 1000U;
+        ccfg.clock = 400 * 1000U;
         component_config(ccfg);
     }
     virtual ~UnitNCIR2()
@@ -95,7 +60,7 @@ public:
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    //! @brief Sets the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -141,7 +106,10 @@ public:
     {
         return PeriodicMeasurementAdapter<UnitNCIR2, ncir2::Data>::startPeriodicMeasurement(interval);
     }
-    //! @brief Start periodic measurement in the current settings
+    /*!
+      @brief Start periodic measurement in the current settings
+      @return True if successful
+    */
     inline bool startPeriodicMeasurement()
     {
         return PeriodicMeasurementAdapter<UnitNCIR2, ncir2::Data>::startPeriodicMeasurement();
@@ -149,6 +117,8 @@ public:
     /*!
       @brief Stop periodic measurement
       @return True if successful
+      @note This only stops the periodic reading on the host side. The unit firmware keeps measuring,
+      so the temperature alarm (LED / buzzer) stays active
     */
     inline bool stopPeriodicMeasurement()
     {
@@ -163,6 +133,8 @@ public:
       @param[out] d Measured data
       @return True if successful
       @note Valid to the second decimal place
+      @note Reads the latest value that the unit firmware measures continuously.
+      The temperature alarm (LED / buzzer) stays active while periodic measurement is stopped
       @warning During periodic detection runs, an error is returned
     */
     bool measureSingleshot(ncir2::Data& d);
@@ -186,12 +158,14 @@ public:
       @brief Write the emissivity
       @param raw Raw emissivity
       @return True if successful
+      @note Reconnect (power-cycle) the unit after writing the emissivity for it to take effect
     */
     bool writeEmissivity(const uint16_t raw);
     /*!
       @brief Write the emissivity
-      @param e Emissivity
+      @param e Emissivity (0.1 - 1.0)
       @return True if successful
+      @note Reconnect (power-cycle) the unit after writing the emissivity for it to take effect
     */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
     inline bool writeEmissivity(const T e)
@@ -267,7 +241,7 @@ public:
     /*!
       @brief Read the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] interval Interval(ms) [1 - 5000]
       @param[out] rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
@@ -276,16 +250,16 @@ public:
     /*!
       @brief Read the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] interval Interval(ms) [1 - 5000]
-      @param[out] duty Duty
+      @param[out] duty Duty (0.0 - 1.0)
       @return True if successful
      */
     bool readAlarmBuzzer(const bool highlow, uint16_t& freq, uint16_t& interval, float& duty);
     /*!
       @brief Write the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param interval Interval(ms) [1 - 5000]
       @param rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
@@ -294,9 +268,9 @@ public:
     /*!
       @brief Write the alarm buzzer settings
       @param highlow Target False:low True:high
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param interval Interval(ms) [1 - 5000]
-      @param duty Duty
+      @param duty Duty (0.0 - 1.0)
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
@@ -310,30 +284,30 @@ public:
     ///@{
     /*!
       @brief Read the buzzer settings
-      @param[out] freq Frequency
+      @param[out] freq Frequency (Hz)
       @param[out] rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
      */
     bool readBuzzer(uint16_t& freq, uint8_t& rawDuty);
     /*!
       @brief Read the buzzer settings
-      @param[out] freq Frequency
-      @param[out] duty Duty
+      @param[out] freq Frequency (Hz)
+      @param[out] duty Duty (0.0 - 1.0)
       @return True if successful
      */
     bool readBuzzer(uint16_t& freq, float& duty);
 
     /*!
       @brief Write the buzzer settings
-      @param freq Frequency
+      @param freq Frequency (Hz)
       @param rawDuty Duty (0:0.0f 255:1.0f)
       @return True if successful
      */
     bool writeBuzzer(const uint16_t freq, const uint8_t rawDuty);
     /*!
       @brief Write the buzzer settings
-      @param freq Frequency
-      @param duty Duty
+      @param freq Frequency (Hz)
+      @param duty Duty (0.0 - 1.0)
       @return True if successful
      */
     template <typename T, typename std::enable_if<std::is_floating_point<T>::value, std::nullptr_t>::type = nullptr>
@@ -448,14 +422,12 @@ public:
      */
     bool readFirmwareVersion(uint8_t& ver);
 
-    ///@warning Handling warning
     ///@name I2C Address
     ///@{
     /*!
       @brief Change device I2C address
       @param i2c_address I2C address
       @return True if successful
-
     */
     bool changeI2CAddress(const uint8_t i2c_address);
     /*!

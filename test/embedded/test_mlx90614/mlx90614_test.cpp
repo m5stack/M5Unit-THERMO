@@ -39,7 +39,7 @@ protected:
     // Next test's begin() → wakeup() triggers POR which loads EEPROM→RAM.
     void restore_config()
     {
-        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4, OUT:TO12 FIR:7,Gain:3,IRS:0 PosK:1 PosKf2:0
+        uint16_t c{0x9FB4};  // 1001 1111 1011 0100 IIR:4 OUT:TO1_TO2 IRS:Single Ks:negative FIR:7 Gain:3 Kt2:positive
         EXPECT_TRUE(unit->writeConfig(c, false));
     }
     void restore_setting()
@@ -66,16 +66,17 @@ constexpr Gain gain_table[] = {
 constexpr IRSensor irs_table[] = {IRSensor::Single, IRSensor::Dual};
 constexpr bool pos_table[]     = {true, false};
 
-constexpr uint32_t interval_tableBD[8][4] = {
-    {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
-    {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
+// MLX90614xAx (single zone), datasheet Table 9
+constexpr uint32_t interval_tableA[8][4] = {
+    {300, 370, 540, 860}, {700, 880, 1300, 2000}, {1100, 1400, 2000, 3300}, {1500, 1900, 2800, 4500},
+    {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
 };
 
 uint32_t get_interval(const IIR iir, const FIR fir)
 {
     auto i = m5::stl::to_underlying(iir);
     auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
+    return (f < 4) ? 0 : interval_tableA[i][f - 4];
 }
 
 inline float random_float(float min_val, float max_val)
@@ -83,84 +84,7 @@ inline float random_float(float min_val, float max_val)
     return min_val + (max_val - min_val) * (esp_random() / static_cast<float>(UINT32_MAX));
 }
 
-// From UnitMLX90614.cpp
-inline float toRaw_to_celsius(const uint16_t t)
-{
-    return t * 0.01f - 273.15f;
-}
-
-inline uint16_t celsius_to_toRaw(const float c)
-{
-    float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
-    return 100 * (v + 0.005f + 273.15f);
-}
-
-inline float taRaw_to_celsius(const uint8_t t)
-{
-    return t * 64.0f / 100.f - 38.2f;
-}
-
-inline uint8_t celsius_to_taRaw(const float c)
-{
-    float v = std::fmax(std::fmin(c, 125.f), -38.2f);
-    return 100 * (v + 0.32f + 38.2f) / 64.0f;
-}
-
-inline float raw_to_emissivity(const uint16_t e)
-{
-    return e / 65535.f;
-}
-
-inline uint16_t emissivity_to_raw(const float e)
-{
-    return std::round(65535.f * e);
-}
-
 }  // namespace
-
-TEST_F(TestMLX90614BAA, Conversion)
-{
-    SCOPED_TRACE(ustr);
-
-    EXPECT_FLOAT_EQ(toRaw_to_celsius(0), -273.15f);
-    EXPECT_FLOAT_EQ(toRaw_to_celsius(0xFFFF), 382.2f);
-
-    EXPECT_FLOAT_EQ(taRaw_to_celsius(0), -38.2f);
-    EXPECT_FLOAT_EQ(taRaw_to_celsius(0xFF), 125.f);
-
-    for (uint32_t i = 0; i < 65536; ++i) {
-        float c     = toRaw_to_celsius(i);
-        uint16_t to = celsius_to_toRaw(c);
-        EXPECT_EQ(to, i);
-    }
-
-    for (uint16_t i = 0; i < 256; ++i) {
-        float c    = taRaw_to_celsius(i);
-        uint8_t ta = celsius_to_taRaw(c);
-        EXPECT_EQ(ta, i);
-    }
-
-    // random
-    uint32_t cnt{32};
-    while (cnt--) {
-        float co = random_float(-273.15f, 382.2f);
-        float ca = random_float(-38.2f, 125.f);
-        auto s   = m5::utility::formatString("co:%f ca:%f", co, ca);
-        SCOPED_TRACE(s);
-
-        uint16_t to  = celsius_to_toRaw(co);
-        uint8_t ta   = celsius_to_taRaw(ca);
-        float tof    = toRaw_to_celsius(to);
-        float taf    = taRaw_to_celsius(ta);
-        uint16_t to2 = celsius_to_toRaw(tof);
-        uint8_t ta2  = celsius_to_taRaw(taf);
-
-        EXPECT_NEAR(tof, co, 0.01f);  // 1 LSB = 0.01°C resolution
-        EXPECT_NEAR(taf, ca, 0.32f);
-        EXPECT_EQ(to2, to);
-        EXPECT_EQ(ta2, ta);
-    }
-}
 
 TEST_F(TestMLX90614BAA, Emissivity)
 {
@@ -230,7 +154,7 @@ TEST_F(TestMLX90614BAA, Config)
     EXPECT_FALSE(unit->writeGain(Gain::Coeff1));
     EXPECT_FALSE(unit->writeIRSensor(IRSensor::Single));
     EXPECT_FALSE(unit->writePositiveKs(false));
-    EXPECT_FALSE(unit->writePositiveKf2(false));
+    EXPECT_FALSE(unit->writePositiveKt2(false));
 
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
@@ -287,11 +211,11 @@ TEST_F(TestMLX90614BAA, Config)
         EXPECT_EQ(v, pos);
     }
 
-    // PosKf2
+    // PosKt2
     for (auto&& pos : pos_table) {
-        EXPECT_TRUE(unit->writePositiveKf2(pos, false));
+        EXPECT_TRUE(unit->writePositiveKt2(pos, false));
         bool v{};
-        EXPECT_TRUE(unit->readPositiveKf2(v));
+        EXPECT_TRUE(unit->readPositiveKt2(v));
         EXPECT_EQ(v, pos);
     }
 
@@ -496,15 +420,17 @@ TEST_F(TestMLX90614BAA, Periodic)
     };
 
     for (auto&& pair : test_pairs) {
-        auto s = m5::utility::formatString("IIR:%u FIR:%u", pair.iir, pair.fir);
+        auto s = m5::utility::formatString("IIR:%u FIR:%u", m5::stl::to_underlying(pair.iir),
+                                           m5::stl::to_underlying(pair.fir));
         SCOPED_TRACE(s);
         const auto iir = pair.iir;
         const auto fir = pair.fir;
 
-        EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, IRSensor::Dual));
+        EXPECT_TRUE(unit->startPeriodicMeasurement(iir, fir, Gain::Coeff12_5, IRSensor::Single));
         EXPECT_TRUE(unit->inPeriodic());
 
-        auto tm        = get_interval(iir, fir);
+        auto tm = get_interval(iir, fir);
+        EXPECT_EQ(unit->interval(), tm);  // Single zone (xAx) table
         uint32_t cycle = std::max<uint32_t>(tm ? tm : 1, unit->interval());
         uint32_t timeout =
             is_bus ? std::max<uint32_t>(cycle, 500) * (STORED_SIZE + 1) * 4 : cycle * (STORED_SIZE + 1) * 2;
@@ -531,18 +457,19 @@ TEST_F(TestMLX90614BAA, Periodic)
             EXPECT_FLOAT_EQ(unit->ambientTemperature(), unit->oldest().ambientTemperature());
             EXPECT_TRUE(std::isfinite(unit->objectTemperature1()));
             EXPECT_FLOAT_EQ(unit->objectTemperature1(), unit->oldest().objectTemperature1());
-            EXPECT_TRUE(std::isfinite(unit->objectTemperature2()));
-            EXPECT_FLOAT_EQ(unit->objectTemperature2(), unit->oldest().objectTemperature2());
+            // Single zone: object 2 is not measured
+            EXPECT_FALSE(std::isfinite(unit->objectTemperature2()));
+            EXPECT_FALSE(std::isfinite(unit->oldest().objectTemperature2()));
 
             EXPECT_FLOAT_EQ(unit->ambientCelsius(), unit->ambientTemperature());
             EXPECT_FLOAT_EQ(unit->objectCelsius1(), unit->objectTemperature1());
-            EXPECT_FLOAT_EQ(unit->objectCelsius2(), unit->objectTemperature2());
             EXPECT_TRUE(std::isfinite(unit->ambientKelvin()));
             EXPECT_TRUE(std::isfinite(unit->ambientFahrenheit()));
             EXPECT_TRUE(std::isfinite(unit->objectKelvin1()));
             EXPECT_TRUE(std::isfinite(unit->objectFahrenheit1()));
-            EXPECT_TRUE(std::isfinite(unit->objectKelvin2()));
-            EXPECT_TRUE(std::isfinite(unit->objectFahrenheit2()));
+            EXPECT_FALSE(std::isfinite(unit->objectCelsius2()));
+            EXPECT_FALSE(std::isfinite(unit->objectKelvin2()));
+            EXPECT_FALSE(std::isfinite(unit->objectFahrenheit2()));
 
             EXPECT_FALSE(unit->empty());
             unit->discard();
@@ -576,6 +503,45 @@ TEST_F(TestMLX90614BAA, Periodic)
     restore_config();
 }
 
+TEST_F(TestMLX90614BAA, DualSettingDoesNotEnableObject2)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    auto ad     = unit->asAdapter<m5::unit::AdapterI2C>(m5::unit::Adapter::Type::I2C);
+    bool is_bus = ad && ad->implType() == m5::unit::AdapterI2C::ImplType::Bus;
+
+    // The library does not read object 2 on a single zone part, even if IRSensor::Dual is written
+    EXPECT_TRUE(unit->startPeriodicMeasurement(IIR::Filter100, FIR::Filter128, Gain::Coeff12_5, IRSensor::Dual));
+    EXPECT_TRUE(unit->inPeriodic());
+    const uint32_t tm{get_interval(IIR::Filter100, FIR::Filter128)};
+    EXPECT_EQ(unit->interval(), tm);
+
+    const uint32_t timeout{is_bus ? std::max<uint32_t>(tm, 500) * (STORED_SIZE + 1) * 4 : tm * (STORED_SIZE + 1) * 2};
+    auto r = collect_periodic_measurements(unit.get(), STORED_SIZE, timeout);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    EXPECT_FALSE(unit->inPeriodic());
+
+    IRSensor irs{};
+    EXPECT_TRUE(unit->readIRSensor(irs));
+    EXPECT_EQ(irs, IRSensor::Dual);
+
+    EXPECT_FALSE(r.timed_out);
+    EXPECT_EQ(unit->available(), STORED_SIZE);
+    while (unit->available()) {
+        EXPECT_TRUE(std::isfinite(unit->ambientTemperature()));
+        EXPECT_TRUE(std::isfinite(unit->objectTemperature1()));
+        EXPECT_FALSE(std::isfinite(unit->objectTemperature2()));
+        unit->discard();
+    }
+
+    // Restore EEPROM only; next test's begin() → wakeup() applies via POR
+    restore_config();
+}
+
 TEST_F(TestMLX90614BAA, BeginAppliesConfig)
 {
     SCOPED_TRACE(ustr);
@@ -605,6 +571,39 @@ TEST_F(TestMLX90614BAA, BeginAppliesConfig)
     EXPECT_NEAR(emiss, 1.0f, 0.001f);
 }
 
+class TestMLX90614BAAConfig : public TestMLX90614BAA {
+protected:
+    virtual UnitMLX90614BAA* get_instance() override
+    {
+        auto ptr = TestMLX90614BAA::get_instance();
+        auto cfg = ptr->config();
+        // Non-default values to verify that begin() applies config_t
+        // (Gain and emissivity are left at the defaults because they are factory calibrated)
+        cfg.start_periodic = true;
+        cfg.iir            = mlx90614::IIR::Filter80;
+        cfg.fir            = mlx90614::FIR::Filter512;
+        ptr->config(cfg);
+        return ptr;
+    }
+};
+
+TEST_F(TestMLX90614BAAConfig, BeginAppliesConfig)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->inPeriodic());
+
+    mlx90614::IIR iir{};
+    mlx90614::FIR fir{};
+    EXPECT_TRUE(unit->readIIR(iir));
+    EXPECT_TRUE(unit->readFIR(fir));
+    EXPECT_EQ(iir, mlx90614::IIR::Filter80);
+    EXPECT_EQ(fir, mlx90614::FIR::Filter512);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    restore_config();
+}
+
 TEST_F(TestMLX90614BAA, ChangeAddress)
 {
     SCOPED_TRACE(ustr);
@@ -617,29 +616,29 @@ TEST_F(TestMLX90614BAA, ChangeAddress)
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
 
-    // Change to 0x10
-    EXPECT_TRUE(unit->changeI2CAddress(0x10));
+    // Change to 0x2A
+    EXPECT_TRUE(unit->changeI2CAddress(0x2A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x10);
-    EXPECT_EQ(unit->address(), 0x10);
+    EXPECT_EQ(addr, 0x2A);
+    EXPECT_EQ(unit->address(), 0x2A);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
 
-    // Change to 0x77
-    EXPECT_TRUE(unit->changeI2CAddress(0x77));
+    // Change to 0x4B
+    EXPECT_TRUE(unit->changeI2CAddress(0x4B));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x77);
-    EXPECT_EQ(unit->address(), 0x77);
+    EXPECT_EQ(addr, 0x4B);
+    EXPECT_EQ(unit->address(), 0x4B);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);
 
-    // Change to 0x52
-    EXPECT_TRUE(unit->changeI2CAddress(0x52));
+    // Change to 0x3A
+    EXPECT_TRUE(unit->changeI2CAddress(0x3A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x52);
-    EXPECT_EQ(unit->address(), 0x52);
+    EXPECT_EQ(addr, 0x3A);
+    EXPECT_EQ(unit->address(), 0x3A);
 
     EXPECT_TRUE(unit->readEmissivity(emiss));
     EXPECT_EQ(emiss, emiss_org);

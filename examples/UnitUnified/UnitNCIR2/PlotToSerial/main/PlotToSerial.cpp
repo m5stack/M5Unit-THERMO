@@ -10,7 +10,7 @@
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedTHERMO.h>
 #include <M5Utility.h>
-#include <M5HAL.hpp>
+#include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
 
 using namespace m5::unit::ncir2;
 
@@ -26,7 +26,7 @@ constexpr float max_temp{50.0f};  // Upper bound (Celsius): LED turns Red
 
 void ring_buzzer(const uint16_t freq, const uint8_t duty, const uint32_t count = 1, const uint32_t interval = 50)
 {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; ++i) {
         unit.writeBuzzer(freq, duty);
         unit.writeBuzzerControl(true);
         m5::utility::delay(interval);
@@ -58,6 +58,17 @@ uint32_t HSV_to_RGB(const float h, const float s, const float v)
            static_cast<uint8_t>((b + m) * 255);
 }
 
+void draw_values(const float temp, const float chip)
+{
+    lcd.startWrite();
+    lcd.fillRect(8, 8, 8 * 10, 16 * 2, TFT_BLACK);
+    lcd.setCursor(8, 8 + 16 * 0);
+    lcd.printf("T:%.2f", temp);
+    lcd.setCursor(8, 8 + 16 * 1);
+    lcd.printf("C:%.2f", chip);
+    lcd.endWrite();
+}
+
 }  // namespace
 
 void setup()
@@ -69,48 +80,12 @@ void setup()
         lcd.setRotation(1);
     }
 
-    auto board = M5.getBoard();
-
-    // NessoN1: Arduino Wire (I2C_NUM_0) cannot be used for GROVE port.
-    //   Wire is used by M5Unified In_I2C for internal devices (IOExpander etc.).
-    //   Wire1 exists but is reserved for HatPort — cannot be used for GROVE.
-    //   Reconfiguring Wire to GROVE pins breaks In_I2C, causing ESP_ERR_INVALID_STATE in M5.update().
-    //   Solution: Use SoftwareI2C via M5HAL (bit-banging) for the GROVE port.
-    // NanoC6: Wire.begin() on GROVE pins conflicts with m5::I2C_Class registered by Ex_I2C.setPort()
-    //   on the same I2C_NUM_0, causing sporadic NACK errors.
-    //   Solution: Use M5.Ex_I2C (m5::I2C_Class) directly instead of Arduino Wire.
-    bool unit_ready{};
-    if (board == m5::board_t::board_ArduinoNessoN1) {
-        // NessoN1: GROVE is on port_b (GPIO 5/4), not port_a (which maps to Wire pins 8/10)
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_b_out);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_b_in);
-        M5_LOGI("getPin(M5HAL): SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        m5::hal::bus::I2CBusConfig i2c_cfg;
-        i2c_cfg.pin_sda = m5::hal::gpio::getPin(pin_num_sda);
-        i2c_cfg.pin_scl = m5::hal::gpio::getPin(pin_num_scl);
-        auto i2c_bus    = m5::hal::bus::i2c::getBus(i2c_cfg);
-        M5_LOGI("Bus:%d", i2c_bus.has_value());
-        unit_ready = Units.add(unit, i2c_bus ? i2c_bus.value() : nullptr) && Units.begin();
-    } else if (board == m5::board_t::board_M5NanoC6) {
-        // NanoC6: Use M5.Ex_I2C (m5::I2C_Class, not Arduino Wire)
-        M5_LOGI("Using M5.Ex_I2C");
-        unit_ready = Units.add(unit, M5.Ex_I2C) && Units.begin();
-    } else {
-        auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
-        auto pin_num_scl = M5.getPin(m5::pin_name_t::port_a_scl);
-        M5_LOGI("getPin: SDA:%u SCL:%u", pin_num_sda, pin_num_scl);
-        Wire.end();
-        Wire.begin(pin_num_sda, pin_num_scl, 100 * 1000U);
-        unit_ready = Units.add(unit, Wire) && Units.begin();
-    }
-    if (!unit_ready) {
+    // Board-aware connection: NessoN1 -> SoftwareI2C on GROVE, NanoC6/NanoH2 -> M5.Ex_I2C, others -> Wire
+    if (!m5::unit::wiring::addI2C(Units, unit) || !Units.begin()) {
         M5_LOGE("Failed to begin");
-        lcd.fillScreen(TFT_RED);
-        while (true) {
-            m5::utility::delay(10000);
-        }
+        m5::unit::wiring::failStop();
     }
-    M5_LOGI("M5UnitUnified has been begun");
+    M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
 
     float e{};
@@ -120,16 +95,18 @@ void setup()
     unit.writeLED(0, 0, 0);
     unit.writeAlarmBuzzer(false, 0, 5000, 0);
     unit.writeAlarmBuzzer(true, 0, 5000, 0);
-    unit.writeConfig();
+    // Not saved to the unit's flash (writeConfig()), so the settings last until the unit is powered off
 
     ring_buzzer(4000, 204);
 
+    lcd.setFont(&fonts::AsciiFont8x16);
     lcd.fillScreen(TFT_DARKGREEN);
+    lcd.fillRect(8, 8, 8 * 10, 16 * 2, TFT_BLACK);
 }
 
 void loop()
 {
-    static float ptemp{}, temp{};
+    static float ptemp{}, temp{}, chip{};
 
     M5.update();
     Units.update();
@@ -139,7 +116,9 @@ void loop()
         temp = unit.temperature();
         Data ctemp{};
         unit.readChipTemperature(ctemp);
-        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, ctemp.temperature());
+        chip = ctemp.temperature();
+        M5.Log.printf(">Temp:%.2f\n>Chip:%.2f\n", temp, chip);
+        draw_values(temp, chip);
     }
 
     // Button
@@ -162,9 +141,11 @@ void loop()
             unit.stopPeriodicMeasurement();
 
             Data d{};
-            unit.measureSingleshot(d);
-            temp = d.temperature();
-            M5.Log.printf("Single:%.2f\n", temp);
+            if (unit.measureSingleshot(d)) {
+                temp = d.temperature();
+                M5.Log.printf("Single:%.2f\n", temp);
+                draw_values(temp, chip);
+            }
         } else {
             ring_buzzer(2000, 204);
 
@@ -188,3 +169,36 @@ void loop()
         }
     }
 }
+
+#if !defined(ARDUINO)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_timer.h>
+
+#if CONFIG_FREERTOS_UNICORE
+// Single-core SoCs: run loop() back-to-back, but every ~2 s yield a 5 ms slice so the IDLE task
+// runs and feeds the task watchdog (default 5 s).
+static inline void feedIdleTaskPeriodically(void)
+{
+    constexpr uint32_t FEED_INTERVAL_MS{2000};
+    constexpr TickType_t FEED_SLEEP_TICKS{pdMS_TO_TICKS(5)};
+    static uint32_t s_last_feed_ms{};
+    const uint32_t now_ms{static_cast<uint32_t>(esp_timer_get_time() / 1000)};
+    if (now_ms - s_last_feed_ms >= FEED_INTERVAL_MS) {
+        s_last_feed_ms = now_ms;
+        vTaskDelay(FEED_SLEEP_TICKS);
+    }
+}
+#endif
+
+extern "C" void app_main(void)
+{
+    setup();
+    for (;;) {
+#if CONFIG_FREERTOS_UNICORE
+        feedIdleTaskPeriodically();
+#endif
+        loop();
+    }
+}
+#endif

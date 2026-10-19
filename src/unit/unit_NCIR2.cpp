@@ -10,6 +10,7 @@
 #include "unit_NCIR2.hpp"
 #include <M5Utility.hpp>
 #include <array>
+#include <cmath>
 
 using namespace m5::utility::mmh3;
 using namespace m5::unit::types;
@@ -79,7 +80,7 @@ void UnitNCIR2::update(const bool force)
     elapsed_time_t at{m5::utility::millis()};
 
     if (inPeriodic()) {
-        if (force || !_latest || at >= _latest + _interval) {
+        if (force || !_latest || m5::utility::hasElapsed(_latest, _interval, at)) {
             Data d{};
             _updated = read_temperature(TEMPERATURE_REG, d.raw.data());
             if (_updated) {
@@ -89,7 +90,7 @@ void UnitNCIR2::update(const bool force)
         }
     }
 
-    if (force || !_latest_button || at >= _latest_button + _button_interval) {
+    if (force || !_latest_button || m5::utility::hasElapsed(_latest_button, _button_interval, at)) {
         _prev_button = _button;
         if (readButtonStatus(_button)) {
             _latest_button = at;
@@ -230,7 +231,7 @@ bool UnitNCIR2::readAlarmBuzzer(const bool highlow, uint16_t& freq, uint16_t& in
 {
     freq = interval = rawDuty = 0;
 
-    // Reg 0x40 can write continuously, but not read continuously... (due to Firmware)
+    // The firmware accepts a burst write from 0x40 but not a burst read, so each field is read separately
     uint8_t reg = ALARM_BUZZER_LOW_FREQ_REG + 5 * highlow;
     return readRegister16LE(reg, freq, 0) && readRegister16LE(static_cast<uint8_t>(reg + 2), interval, 0) &&
            readRegister8(static_cast<uint8_t>(reg + 4), rawDuty, 0);
@@ -277,7 +278,7 @@ bool UnitNCIR2::write_alarm_buzzer(const bool highlow, const uint16_t freq, cons
 bool UnitNCIR2::readBuzzer(uint16_t& freq, uint8_t& rawDuty)
 {
     freq = rawDuty = 0;
-    // Reg 0x50 can write continuously, but not read continuously... (due to Firmware)
+    // The firmware accepts a burst write from 0x50 but not a burst read, so each field is read separately
     return readRegister16LE(BUZZER_FREQ_REG, freq, 0) && readRegister8(BUZZER_DUTY_REG, rawDuty, 0);
 }
 
@@ -314,7 +315,7 @@ bool UnitNCIR2::readBuzzerControl(bool& enabled)
 {
     enabled = false;
     uint8_t v{};
-    if (readRegister8((uint8_t)(BUZZER_REG + 3), v, 0)) {
+    if (readRegister8(BUZZER_CONTROL_REG, v, 0)) {
         enabled = v;
         return true;
     }
@@ -382,14 +383,14 @@ bool UnitNCIR2::changeI2CAddress(const uint8_t i2c_address)
     }
     if (writeRegister8(I2C_ADDRESS_REG, i2c_address) && changeAddress(i2c_address)) {
         // Wait wakeup
-        auto timeout_at = m5::utility::millis() + 1000;
+        const auto start_at = m5::utility::millis();
         do {
             uint8_t v{};
             if (readRegister8(I2C_ADDRESS_REG, v, 0) && v == i2c_address) {
                 return true;
             }
             m5::utility::delay(1);
-        } while (m5::utility::millis() <= timeout_at);
+        } while (!m5::utility::hasElapsed(start_at, 1000));
     }
     return false;
 }
@@ -404,8 +405,8 @@ bool UnitNCIR2::readI2CAddress(uint8_t& i2c_address)
 
 bool UnitNCIR2::read_temperature(const uint8_t reg, uint8_t v[2])
 {
-    v[0] = 0x80;
-    v[1] = 0x00;
+    v[0] = 0x00;
+    v[1] = 0x80;
     return readRegister(reg, v, 2, 0);
 }
 

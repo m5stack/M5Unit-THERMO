@@ -10,6 +10,7 @@
 #include "unit_MLX90614.hpp"
 #include <M5Utility.hpp>
 #include <array>
+#include <cmath>
 #include <driver/gpio.h>
 
 using namespace m5::utility::mmh3;
@@ -18,25 +19,6 @@ using namespace m5::unit::mlx90614;
 using namespace m5::unit::mlx90614::command;
 
 namespace {
-
-struct Flag {
-    // EEPROM access still in progress if true
-    inline bool EEBusy() const
-    {
-        return value & (1U << 7);
-    }
-    // EEPROM double error has occurred if true
-    inline bool EEDead() const
-    {
-        return value & (1U << 5);
-    }
-    // POR initialization routine has completed (Low active)
-    inline bool initialized() const
-    {
-        return value & (1U << 4);
-    }
-    uint16_t value{};
-};
 
 struct PWMCtrl {
     inline explicit PWMCtrl(const uint16_t v = 0) : value{v}
@@ -71,119 +53,44 @@ struct PWMCtrl {
     inline float period() const
     {
         // ms
-        return 1.024f * ((mode() == Mode::Single) ? 1.f : 2.f) * (((value >> 9) & 0x7F) ? ((value >> 9) & 0x7F) : 128);
+        const uint16_t p{period_raw()};
+        return 1.024f * ((mode() == Mode::Single) ? 1.f : 2.f) * (p ? p : 128);
     }
     uint16_t value{};
 };
 
-struct Config {
-    inline explicit Config(const uint16_t v = 0) : value{v}
-    {
-    }
-    inline IIR iir() const
-    {
-        return static_cast<IIR>(value & 0x07);
-    }
-    inline Output output() const
-    {
-        return static_cast<Output>((value >> 4) & 0x03);
-    }
-    inline FIR fir() const
-    {
-        return static_cast<FIR>((value >> 8) & 0x07);
-    }
-    inline Gain gain() const
-    {
-        uint8_t g = (value >> 11) & 0x07;
-        return static_cast<Gain>(g > 6 ? 6 : g);  // [7] duplicate of Coeff100
-    }
-    inline IRSensor irSensor() const
-    {
-        return static_cast<IRSensor>((value >> 6) & 0x01);
-    }
-    inline bool positiveKs() const
-    {
-        return !(value & (1U << 7));  // bit7: 0=positive, 1=negative
-    }
-    inline bool positiveKf2() const
-    {
-        return !(value & (1U << 14));  // bit14: 0=positive, 1=negative
-    }
-    //
-    inline void iir(const IIR iir)
-    {
-        value = (value & ~0x07) | m5::stl::to_underlying(iir);
-    }
-    inline void output(const Output o)
-    {
-        value = (value & ~(0x03 << 4)) | (m5::stl::to_underlying(o) << 4);
-    }
-    inline void fir(const FIR fir)
-    {
-        value = (value & ~(0x07 << 8)) | (m5::stl::to_underlying(fir) << 8);
-    }
-    inline void gain(const Gain gain)
-    {
-        value = (value & ~(0x07 << 11)) | (m5::stl::to_underlying(gain) << 11);
-    }
-    inline void irSensor(const IRSensor irs)
-    {
-        value = (value & ~(1U << 6)) | (m5::stl::to_underlying(irs) << 6);
-    }
-    inline void positiveKs(const bool pos)
-    {
-        value = (value & ~(1U << 7)) | ((uint16_t)(!pos) << 7);  // bit7: 0=positive, 1=negative
-    }
-    inline void positiveKf2(const bool pos)
-    {
-        value = (value & ~(1U << 14)) | ((uint16_t)(!pos) << 14);  // bit14: 0=positive, 1=negative
-    }
-    uint16_t value{};
-};
-
-// [IIR][FIR]
+// [IIR][FIR] settling time (ms), datasheet Table 9
 // FIR 000...011 are NOT RECOMMENDED
-// For MLX90614A Series
+// For MLX90614xAx (single zone). The second letter of the option code (MLX90614ESF-xYx) is the number of
+// thermopiles: A single zone, B dual zone, C gradient compensated (xBx / xCx take longer)
 constexpr uint32_t interval_tableA[8][4] = {
     {300, 370, 540, 860}, {700, 880, 1300, 2000}, {1100, 1400, 2000, 3300}, {1500, 1900, 2800, 4500},
     {40, 50, 60, 100},    {120, 160, 220, 350},   {240, 300, 430, 700},     {260, 340, 480, 780},
 };
-// For MLX90614B,D Series
-constexpr uint32_t interval_tableBD[8][4] = {
-    {470, 600, 840, 1330}, {1100, 1400, 2000, 3200}, {1800, 2200, 3200, 5000}, {2400, 3000, 4300, 7000},
-    {60, 70, 100, 140},    {200, 240, 340, 540},     {380, 480, 670, 1100},    {420, 530, 750, 1200},
-};
 
-inline float toRaw_to_celsius(const uint16_t t)
+// The ESP-IDF drivers keep the controller attached to SDA/SCL across end(), so the pins are detached from it
+// (releasePins) for the GPIO manipulation. The other backends hand the pins back on end() and take them again on
+// begin()
+bool uses_pin_release(const m5::unit::AdapterI2C& ad)
 {
-    return t * 0.01f - 273.15f;
+#if defined(ESP_PLATFORM) && __has_include(<driver/i2c_master.h>)
+    return ad.implType() == m5::unit::AdapterI2C::ImplType::ESPIDFMasterBus;
+#elif defined(ESP_PLATFORM)
+    return ad.implType() == m5::unit::AdapterI2C::ImplType::ESPIDFLegacyBus;
+#else
+    (void)ad;
+    return false;
+#endif
 }
 
-inline uint16_t celsius_to_toRaw(const float c)
+bool release_bus(m5::unit::AdapterI2C& ad)
 {
-    float v = std::fmax(std::fmin(c, 382.2f), -273.15f);
-    return static_cast<uint16_t>(100 * (v + 0.005f + 273.15f));
+    return uses_pin_release(ad) ? ad.releasePins() : ad.end();
 }
 
-inline float taRaw_to_celsius(const uint8_t t)
+bool restore_bus(m5::unit::AdapterI2C& ad)
 {
-    return t * 64.0f / 100.f - 38.2f;
-}
-
-inline uint8_t celsius_to_taRaw(const float c)
-{
-    float v = std::fmax(std::fmin(c, 125.f), -38.2f);
-    return static_cast<uint8_t>(100 * (v + 0.32f + 38.2f) / 64.0f);
-}
-
-inline float raw_to_emissivity(const uint16_t e)
-{
-    return e / 65535.f;
-}
-
-inline uint16_t emissivity_to_raw(const float e)
-{
-    return static_cast<uint16_t>(std::round(65535.f * e));
+    return uses_pin_release(ad) ? ad.restorePins() : ad.begin();
 }
 
 }  // namespace
@@ -228,9 +135,9 @@ bool UnitMLX90614::begin()
     pc.value = _eeprom.pwmCtrl;
     M5_LIB_LOGV("Mode:%u Enabled:%u Pin:%u Thermal:%u Rep:%u Period:%X/%f", pc.mode(), pc.enabled(), pc.pin(),
                 pc.thermalRelayMode(), pc.repetition(), pc.period_raw(), pc.period());
-    Config c{_eeprom.config};
-    M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosK:%u PosKf2:%u", c.iir(), c.output(), c.fir(), c.gain(),
-                c.irSensor(), c.positiveKs(), c.positiveKf2());
+    ConfigRegister c{_eeprom.config};
+    M5_LIB_LOGV("IIR:%u OUT:%u FIR:%u Gain:%u IRS:%u PosKs:%u PosKt2:%u", c.iir(), c.output(), c.fir(), c.gain(),
+                c.irSensor(), c.positiveKs(), c.positiveKt2());
 
     return _cfg.start_periodic ? writeEmissivity(_cfg.emissivity, false) &&
                                      startPeriodicMeasurement(_cfg.iir, _cfg.fir, _cfg.gain, _cfg.irs)
@@ -242,9 +149,9 @@ void UnitMLX90614::update(const bool force)
     _updated = false;
     if (inPeriodic()) {
         elapsed_time_t at{m5::utility::millis()};
-        if (force || !_latest || at >= _latest + _interval) {
+        if (force || !_latest || m5::utility::hasElapsed(_latest, _interval, at)) {
             Data d{};
-            _updated = read_measurement(d, _eeprom.config);
+            _updated = read_measurement(d);
             if (_updated) {
                 _latest = at;
                 _data->push_back(d);
@@ -256,7 +163,7 @@ void UnitMLX90614::update(const bool force)
 bool UnitMLX90614::start_periodic_measurement(const mlx90614::IIR iir, const mlx90614::FIR fir,
                                               const mlx90614::Gain gain, const mlx90614::IRSensor irs)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.iir(iir);
         c.fir(fir);
@@ -273,7 +180,7 @@ bool UnitMLX90614::start_periodic_measurement()
         return false;
     }
 
-    Config c(_eeprom.config);
+    ConfigRegister c(_eeprom.config);
     _interval = get_interval(c.iir(), c.fir());
     _periodic = true;
     _latest   = 0;
@@ -310,7 +217,7 @@ bool UnitMLX90614::writeConfig(const uint16_t v, const bool apply)
 
 bool UnitMLX90614::readOutput(mlx90614::Output& o)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         o = c.output();
         return true;
@@ -320,7 +227,7 @@ bool UnitMLX90614::readOutput(mlx90614::Output& o)
 
 bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.output(o);
         return writeConfig(c.value, apply);
@@ -330,7 +237,7 @@ bool UnitMLX90614::writeOutput(const mlx90614::Output o, const bool apply)
 
 bool UnitMLX90614::readIIR(mlx90614::IIR& iir)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         iir = c.iir();
         return true;
@@ -340,7 +247,7 @@ bool UnitMLX90614::readIIR(mlx90614::IIR& iir)
 
 bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.iir(iir);
         return writeConfig(c.value, apply);
@@ -350,7 +257,7 @@ bool UnitMLX90614::writeIIR(const mlx90614::IIR iir, const bool apply)
 
 bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         fir = c.fir();
         return true;
@@ -360,13 +267,12 @@ bool UnitMLX90614::readFIR(mlx90614::FIR& fir)
 
 bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 {
-    // WARNING
-    // datasheet says...
+    // Datasheet: FIR settings 0-3 (Filter8 to Filter64) are not recommended
     if (m5::stl::to_underlying(fir) < 4) {
-        M5_LIB_LOGW("Settings below FIR::Filter64 are not recommended");
+        M5_LIB_LOGW("FIR::Filter64 or below is not recommended");
     }
 
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.fir(fir);
         return writeConfig(c.value, apply);
@@ -376,7 +282,7 @@ bool UnitMLX90614::writeFIR(const mlx90614::FIR fir, const bool apply)
 
 bool UnitMLX90614::readGain(mlx90614::Gain& gain)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         gain = c.gain();
         return true;
@@ -386,7 +292,7 @@ bool UnitMLX90614::readGain(mlx90614::Gain& gain)
 
 bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.gain(gain);
         return writeConfig(c.value, apply);
@@ -396,7 +302,7 @@ bool UnitMLX90614::writeGain(const mlx90614::Gain gain, const bool apply)
 
 bool UnitMLX90614::readIRSensor(mlx90614::IRSensor& irs)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         irs = c.irSensor();
         return true;
@@ -406,7 +312,7 @@ bool UnitMLX90614::readIRSensor(mlx90614::IRSensor& irs)
 
 bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.irSensor(irs);
         return writeConfig(c.value, apply);
@@ -416,7 +322,7 @@ bool UnitMLX90614::writeIRSensor(const mlx90614::IRSensor irs, const bool apply)
 
 bool UnitMLX90614::readPositiveKs(bool& pos)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         pos = c.positiveKs();
         return true;
@@ -426,7 +332,7 @@ bool UnitMLX90614::readPositiveKs(bool& pos)
 
 bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
         c.positiveKs(pos);
         return writeConfig(c.value, apply);
@@ -434,21 +340,21 @@ bool UnitMLX90614::writePositiveKs(const bool pos, const bool apply)
     return false;
 }
 
-bool UnitMLX90614::readPositiveKf2(bool& pos)
+bool UnitMLX90614::readPositiveKt2(bool& pos)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
-        pos = c.positiveKf2();
+        pos = c.positiveKt2();
         return true;
     }
     return false;
 }
 
-bool UnitMLX90614::writePositiveKf2(const bool pos, const bool apply)
+bool UnitMLX90614::writePositiveKt2(const bool pos, const bool apply)
 {
-    Config c{};
+    ConfigRegister c{};
     if (readConfig(c.value)) {
-        c.positiveKf2(pos);
+        c.positiveKt2(pos);
         return writeConfig(c.value, apply);
     }
     return false;
@@ -621,11 +527,17 @@ bool UnitMLX90614::sleep()
         return false;
     }
 
+    if (_bus_released) {
+        M5_LIB_LOGE("Already sleeping");
+        return false;
+    }
+
     // Slave W, reg, PEC
     uint8_t buf[3]{(uint8_t)(address() << 1), COMMAND_ENTER_SLEEP};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
     buf[2] = crc8.update(buf, 2);
-    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && ad->end() /* Keep peripheral settings */) {
+    if (writeRegister(COMMAND_ENTER_SLEEP, buf + 2, 1) && release_bus(*ad)) {
+        _bus_released = true;
         /*
           datasheet says:
           As a result, this pin needs to be forced low in sleep mode and the pull-up on the SCL line needs to be
@@ -652,7 +564,19 @@ bool UnitMLX90614::wakeup()
         M5_LIB_LOGE("SCL or SDA pin cannot be detected %d,%d", scl, sda);
         return false;
     }
-    ad->end();  // Release I2C bus before GPIO manipulation (safe to call even if not begun)
+    // Release I2C bus before GPIO manipulation (already released if sleep() holds SCL low)
+    if (!_bus_released) {
+        // Via a hub (PaHub etc.), route the parent channels to this unit first.
+        // The hub is an analog switch, so the GPIO wakeup request passes through it
+        if (!selectChannel(channel())) {
+            M5_LIB_LOGE("Failed to select the channel");
+            return false;
+        }
+        if (!release_bus(*ad)) {
+            M5_LIB_LOGE("Failed to release the bus");
+            return false;
+        }
+    }
     // Wakeup request (SDA low) 33ms min
     // SCL pin high and then PWM/SDA pin low for at least tDDQ > 33ms
     // GPIO_MODE_INPUT_OUTPUT_OD is required (not OUTPUT_OD alone): the input buffer
@@ -674,9 +598,11 @@ bool UnitMLX90614::wakeup()
     gpio_set_direction((gpio_num_t)sda, GPIO_MODE_INPUT_OUTPUT_OD);
     gpio_set_level((gpio_num_t)sda, 1);
 
-    if (!ad->begin()) {  // restart Wire (no-op for BusImpl)
+    if (!restore_bus(*ad)) {  // restart Wire (no-op for BusImpl) or reattach the pins to the ESP-IDF driver
+        M5_LIB_LOGE("Failed to restore the bus");
         return false;
     }
+    _bus_released = false;
     // Verify device is responsive after wakeup (retry for SoftwareI2C NO_ACK)
     uint16_t dummy{};
     for (uint_fast8_t retry = 0; retry < 3; ++retry) {
@@ -702,6 +628,10 @@ bool UnitMLX90614::read_eeprom(mlx90614::EEPROM& e)
 
 bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool stopbit)
 {
+    // The bus is released while sleeping (Arduino Wire would block forever on its lock after end())
+    if (_bus_released) {
+        return false;
+    }
     // Slave W, reg, Slave R (for CRC), Low, High, PEC( Packet error code)
     uint8_t rbuf[6]{(uint8_t)(address() << 1), reg, (uint8_t)((address() << 1) | 0x01)};
     m5::utility::CRC8 crc8(0x00, 0x07, false, false, 0x00);  // CRC8-SMBus
@@ -710,7 +640,7 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
     if (readRegister(reg, rbuf + 3, 3, 0, stopbit)) {
         uint8_t crc = crc8.update(rbuf, 5);
         if (crc == rbuf[5]) {
-            v = ((uint16_t)rbuf[4] << 8) | rbuf[3];
+            v = m5::types::little_uint16_t{rbuf[3], rbuf[4]}.get();
             return true;
         }
         // M5_LIB_LOGE("CRC Error %02X/%02X", crc, rbuf[5]);
@@ -722,6 +652,10 @@ bool UnitMLX90614::read_register16(const uint8_t reg, uint16_t& v, const bool st
 
 bool UnitMLX90614::write_register16(const uint8_t reg, const uint16_t val)
 {
+    // The bus is released while sleeping (see read_register16)
+    if (_bus_released) {
+        return false;
+    }
     // Slave W, reg, Low, High, PEC
     uint8_t buf[5]{
         (uint8_t)(address() << 1),
@@ -769,7 +703,7 @@ bool UnitMLX90614::write_eeprom(const uint8_t reg, const uint16_t val, const boo
     return false;
 }
 
-bool UnitMLX90614::read_measurement(mlx90614::Data& d, const uint16_t cfg)
+bool UnitMLX90614::read_measurement(mlx90614::Data& d)
 {
     std::fill(d.raw.begin(), d.raw.end(), 0x8000 /* invalid value */);
     return read_register16(READ_TAMBIENT, d.raw[0]) && read_register16(READ_TOBJECT_1, d.raw[1]) &&
@@ -780,20 +714,13 @@ uint32_t UnitMLX90614::get_interval(const mlx90614::IIR iir, const mlx90614::FIR
 {
     auto i = m5::stl::to_underlying(iir);
     auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableA[i][f - 4];  // A series as default
+    return (f < 4) ? 0 : interval_tableA[i][f - 4];
 }
 
 // class UnitMLX90614BAA
 const char UnitMLX90614BAA::name[] = "UnitMLX90614BAA";
 const types::uid_t UnitMLX90614BAA::uid{"UnitMLX90614BAA"_mmh3};
 const types::attr_t UnitMLX90614BAA::attr{attribute::AccessI2C};
-
-uint32_t UnitMLX90614BAA::get_interval(const mlx90614::IIR iir, const mlx90614::FIR fir)
-{
-    auto i = m5::stl::to_underlying(iir);
-    auto f = m5::stl::to_underlying(fir);
-    return (f < 4) ? 0 : interval_tableBD[i][f - 4];
-}
 
 }  // namespace unit
 }  // namespace m5
